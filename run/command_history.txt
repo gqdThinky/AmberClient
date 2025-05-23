@@ -1,3 +1,4 @@
 /gamemode survival
 /spawnpoint Player636
 /tp Player438 ~ ~100 ~
+/gamemode creative

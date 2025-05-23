@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "com.amberclient.mixin",
+	"package": "com.amberclient.mixins",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+
 	],
 	"injectors": {
 		"defaultRequire": 1

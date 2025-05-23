@@ -1,8 +1,9 @@
 package com.amberclient.modules;
 
 import com.amberclient.modules.hacks.NoFall;
-import net.minecraft.client.MinecraftClient;
+import com.amberclient.modules.hacks.Xray;
 
+import net.minecraft.client.MinecraftClient;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class ModuleManager {
     private ModuleManager() {
         // Register modules
         registerModule(new NoFall());
+        registerModule(new Xray());
     }
 
     public static ModuleManager getInstance() {
