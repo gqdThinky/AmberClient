@@ -2,3 +2,6 @@
 /spawnpoint Player636
 /tp Player438 ~ ~100 ~
 /gamemode creative
+/give Player32 minecraft:cooked_beef 64
+/spawnpoint Player57
+/gamerule keepInventory true

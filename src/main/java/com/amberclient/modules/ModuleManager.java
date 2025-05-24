@@ -1,7 +1,8 @@
 package com.amberclient.modules;
 
+import com.amberclient.modules.hacks.Fullbright;
 import com.amberclient.modules.hacks.NoFall;
-import com.amberclient.modules.hacks.Xray;
+import com.amberclient.modules.hacks.xray.Xray;
 
 import net.minecraft.client.MinecraftClient;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class ModuleManager {
         // Register modules
         registerModule(new NoFall());
         registerModule(new Xray());
+        registerModule(new Fullbright());
     }
 
     public static ModuleManager getInstance() {

@@ -1,8 +1,9 @@
 package com.amberclient;
 
-import com.amberclient.gui.HudRenderer;
-import com.amberclient.gui.TabGUI;
+import com.amberclient.screens.HudRenderer;
+import com.amberclient.screens.ClickGUI;
 import com.amberclient.modules.ModuleManager;
+import com.amberclient.modules.hacks.xray.BlockPlaceListener;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -26,6 +27,8 @@ public class AmberClient implements ModInitializer {
 		// Register HUD renderer
 		HudRenderCallback.EVENT.register(new HudRenderer());
 
+		BlockPlaceListener.init();
+
 		LOGGER.info("Amber Client started!");
 	}
 
@@ -36,10 +39,10 @@ public class AmberClient implements ModInitializer {
 
 		// Toggle TabGUI on key press (not hold)
 		if (keyPressed && !lastKeyPressed) {
-			if (client.currentScreen instanceof TabGUI) {
+			if (client.currentScreen instanceof ClickGUI) {
 				client.setScreen(null);
 			} else {
-				client.setScreen(new TabGUI());
+				client.setScreen(new ClickGUI());
 			}
 		}
 
