@@ -9,7 +9,6 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.block.BlockState;
-import net.minecraft.fluid.LavaFluid;
 import com.amberclient.modules.hacks.xray.BasicColor;
 import com.amberclient.modules.hacks.xray.RenderOutlines;
 import com.amberclient.modules.hacks.xray.BlockStore;
@@ -26,13 +25,13 @@ public class ScanTask implements Runnable {
     private final boolean fullScan;
     private final ChunkPos singleChunk;
 
-    // Constructeur pour scan complet
+    // Constructor for full scan
     public ScanTask() {
         this.fullScan = true;
         this.singleChunk = null;
     }
 
-    // Constructeur pour scan d'un seul chunk
+    // Constructor for single chunk scan
     public ScanTask(ChunkPos chunkPos) {
         this.fullScan = false;
         this.singleChunk = chunkPos;
@@ -70,7 +69,7 @@ public class ScanTask implements Runnable {
         ClientPlayerEntity clientPlayer = (ClientPlayerEntity) player;
         if (!SettingsStore.getInstance().get().isActive()) return;
         if (renderQueue.stream().anyMatch(e -> e.pos().equals(blockPos))) {
-            runTask(true); // Scan complet si un bloc est cassé
+            runTask(true); // Full scan if a block is broken
         }
     }
 
@@ -98,7 +97,7 @@ public class ScanTask implements Runnable {
 
     private Set<BlockPosWithColor> collectBlocks() {
         Set<BlockSearchEntry> blocks = BlockStore.getInstance().getCache().get();
-        if (blocks.isEmpty() && !SettingsStore.getInstance().get().isShowLava()) {
+        if (blocks.isEmpty()) {
             return new HashSet<>();
         }
 
@@ -118,7 +117,7 @@ public class ScanTask implements Runnable {
         for (int i = cX - range; i <= cX + range; i++) {
             for (int j = cZ - range; j <= cZ + range; j++) {
                 if (!world.isChunkLoaded(i, j)) {
-                    continue; // Ignorer les chunks non chargés
+                    continue; // Skip unloaded chunks
                 }
                 int chunkStartX = i << 4;
                 int chunkStartZ = j << 4;
@@ -142,7 +141,7 @@ public class ScanTask implements Runnable {
 
     private Set<BlockPosWithColor> collectBlocksForSingleChunk() {
         Set<BlockSearchEntry> blocks = BlockStore.getInstance().getCache().get();
-        if (blocks.isEmpty() && !SettingsStore.getInstance().get().isShowLava()) {
+        if (blocks.isEmpty()) {
             return new HashSet<>();
         }
 
@@ -178,10 +177,6 @@ public class ScanTask implements Runnable {
         BlockState state = world.getBlockState(pos);
         if (state.isAir()) {
             return null;
-        }
-
-        if (SettingsStore.getInstance().get().isShowLava() && state.getFluidState().getFluid() instanceof LavaFluid) {
-            return new BasicColor(210, 10, 10);
         }
 
         BlockState defaultState = state.getBlock().getDefaultState();

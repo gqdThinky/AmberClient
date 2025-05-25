@@ -5,3 +5,4 @@
 /give Player32 minecraft:cooked_beef 64
 /spawnpoint Player57
 /gamerule keepInventory true
+/kill

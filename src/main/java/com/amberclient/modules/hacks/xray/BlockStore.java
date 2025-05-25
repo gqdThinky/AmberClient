@@ -1,8 +1,6 @@
 package com.amberclient.modules.hacks.xray;
 
 import net.minecraft.block.Blocks;
-import com.amberclient.modules.hacks.xray.BasicColor;
-import com.amberclient.modules.hacks.xray.BlockSearchEntry;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

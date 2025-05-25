@@ -46,7 +46,7 @@ public class ClickGUI extends Screen {
     private static final long CLICK_FEEDBACK_DURATION = 300;
 
     public ClickGUI() {
-        super(Text.literal("Amber Client - par gqdThinky"));
+        super(Text.literal("Amber Client - by @gqdThinky"));
         lastTime = System.currentTimeMillis();
 
         // Initialize categories from ModuleManager
@@ -231,10 +231,10 @@ public class ClickGUI extends Screen {
             context.drawTextWithShadow(this.textRenderer, module.getName(), moduleX + 10, moduleY + 7, TEXT_COLOR);
             context.drawTextWithShadow(this.textRenderer, module.getDescription(), moduleX + 10, moduleY + 20, new Color(180, 180, 180).getRGB());
 
-            int toggleX = Math.round(moduleX + moduleWidth - 20);
+            int toggleX = Math.round(moduleX + moduleWidth - 24); // Increased toggle button size
             int toggleY = Math.round(moduleY + 5);
-            int toggleWidth = 15;
-            int toggleHeight = 15;
+            int toggleWidth = 18; // Increased toggle button size
+            int toggleHeight = 18; // Increased toggle button size
 
             // Check for hover
             boolean isHovered = mouseX >= toggleX && mouseX <= toggleX + toggleWidth &&
@@ -245,24 +245,24 @@ public class ClickGUI extends Screen {
 
             // Determine toggle button color
             int toggleColor;
-            if (isClicked || isHovered) {
+            if (isClicked) {
+                toggleColor = ACCENT_HOVER_COLOR;
+            } else if (isHovered) {
                 toggleColor = ACCENT_HOVER_COLOR;
             } else {
-                toggleColor = module.isEnabled() ? ACCENT_COLOR : new Color(60, 60, 65).getRGB();
+                toggleColor = new Color(245, 235, 216).getRGB();
             }
 
-            // Draw outline for click feedback
-            if (isClicked) {
-                context.fill(toggleX - 1, toggleY - 1, toggleX + toggleWidth + 1, toggleY, OUTLINE_COLOR); // Top
-                context.fill(toggleX - 1, toggleY + toggleHeight, toggleX + toggleWidth + 1, toggleY + toggleHeight + 1, OUTLINE_COLOR); // Bottom
-                context.fill(toggleX - 1, toggleY, toggleX, toggleY + toggleHeight, OUTLINE_COLOR); // Left
-                context.fill(toggleX + toggleWidth, toggleY, toggleX + toggleWidth + 1, toggleY + toggleHeight, OUTLINE_COLOR); // Right
-            }
+            // Draw outline for click feedback and hover effect
+            context.fill(toggleX - 1, toggleY - 1, toggleX + toggleWidth + 1, toggleY, OUTLINE_COLOR); // Top
+            context.fill(toggleX - 1, toggleY + toggleHeight, toggleX + toggleWidth + 1, toggleY + toggleHeight + 1, OUTLINE_COLOR); // Bottom
+            context.fill(toggleX - 1, toggleY, toggleX, toggleY + toggleHeight, OUTLINE_COLOR); // Left
+            context.fill(toggleX + toggleWidth, toggleY, toggleX + toggleWidth + 1, toggleY + toggleHeight, OUTLINE_COLOR); // Right
 
             context.fill(toggleX, toggleY, toggleX + toggleWidth, toggleY + toggleHeight, toggleColor);
 
             if (module.isEnabled()) {
-                context.drawTextWithShadow(this.textRenderer, "✓", toggleX + 3, toggleY + 3, Color.WHITE.getRGB());
+                context.drawTextWithShadow(this.textRenderer, "✓", toggleX + 7, toggleY + 5, Color.WHITE.getRGB()); // Adjusted checkmark position
             }
         }
 
@@ -281,6 +281,8 @@ public class ClickGUI extends Screen {
 
         context.disableScissor();
     }
+
+
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -501,32 +503,27 @@ public class ClickGUI extends Screen {
 
     private static class ModuleWrapper {
         private final Module module;
-
         public ModuleWrapper(Module module) {
             this.module = module;
         }
-
         public String getName() {
             return module.getName();
         }
-
         public String getDescription() {
             return module.getDescription();
         }
-
         public boolean isEnabled() {
             return module.isEnabled();
         }
-
         public void toggle() {
             module.toggle();
         }
-
         public Module getWrappedModule() {
             return module;
         }
     }
 
+    // Prevents ClickGUI from being blurred
     @Override
     public void renderBackground(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderInGameBackground(context);

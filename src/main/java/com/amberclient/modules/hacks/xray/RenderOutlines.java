@@ -1,16 +1,15 @@
 package com.amberclient.modules.hacks.xray;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.gl.GlUsage;
 import net.minecraft.client.render.*;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.BufferAllocator;
-import net.minecraft.client.gl.ShaderProgramKey;
-import net.minecraft.client.gl.ShaderProgram;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import org.apache.logging.log4j.LogManager;
 import org.joml.Matrix4f;
@@ -28,27 +27,21 @@ public class RenderOutlines {
             return;
         }
 
-        VertexConsumerProvider consumers = context.consumers();
-        if (consumers instanceof VertexConsumerProvider.Immediate immediate) {
-            renderWithVertexConsumer(context, immediate);
-        } else {
-            // Fallback if no consumers available or if not Immediate
-            renderFallback(context);
-        }
+        renderFallback(context);
     }
 
     private static void renderWithVertexConsumer(WorldRenderContext context, VertexConsumerProvider.Immediate immediate) {
-        // Render settings
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+
         RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableCull();
-        RenderSystem.lineWidth(3.5f);
+        RenderSystem.lineWidth(4.0f);
 
-        VertexConsumer vertexConsumer = immediate.getBuffer(RenderLayer.getLines());
+        VertexConsumer vertexConsumer = immediate.getBuffer(RenderLayer.getTranslucent());
 
-        // Calculate camera offset for relative rendering
         Vec3d cameraPos = context.camera().getPos();
         MatrixStack matrixStack = context.matrixStack();
 
@@ -65,7 +58,7 @@ public class RenderOutlines {
             final float red = blockProps.color().red() / 255f;
             final float green = blockProps.color().green() / 255f;
             final float blue = blockProps.color().blue() / 255f;
-            final float alpha = 0.8f;
+            final float alpha = 1.0f;
 
             renderLineBoxWithConsumer(vertexConsumer, matrixStack,
                     x, y, z, x + size, y + size, z + size,
@@ -73,9 +66,10 @@ public class RenderOutlines {
         }
 
         matrixStack.pop();
+
         immediate.draw();
 
-        // Restore rendered state
+        RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
         RenderSystem.enableCull();
@@ -83,46 +77,86 @@ public class RenderOutlines {
     }
 
     private static void renderFallback(WorldRenderContext context) {
-        // Rebuild buffer if needed
-        if (vertexBuffer == null || requestedRefresh.get()) {
-            rebuildVertexBuffer(context);
-        }
+        if (!SettingsStore.getInstance().get().isActive()) return;
 
-        if (vertexCount == 0) return;
-
-        // Render settings
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableCull();
-        RenderSystem.lineWidth(2.0f);
+        RenderSystem.lineWidth(4.0f);
 
-        // Use the position_color shader
-        ShaderProgramKey shaderKey = new ShaderProgramKey(
-                Identifier.of("minecraft", "position_color"),
-                VertexFormats.POSITION_COLOR,
-                null
-        );
-        RenderSystem.setShader(shaderKey);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
 
-        // Calculating matrices with camera offset
+        RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
+
         Vec3d cameraPos = context.camera().getPos();
         MatrixStack matrixStack = context.matrixStack();
 
         matrixStack.push();
         matrixStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
-        Matrix4f matrix = matrixStack.peek().getPositionMatrix();
+        for (BlockPosWithColor blockProps : ScanTask.renderQueue) {
+            if (blockProps == null) continue;
 
-        // Draw the vertex buffer
-        vertexBuffer.bind();
-        vertexBuffer.draw(matrix, context.projectionMatrix(), RenderSystem.getShader());
-        VertexBuffer.unbind();
+            final float size = 1.0f;
+            final float x = blockProps.pos().getX();
+            final float y = blockProps.pos().getY();
+            final float z = blockProps.pos().getZ();
+            final float red = blockProps.color().red() / 255f;
+            final float green = blockProps.color().green() / 255f;
+            final float blue = blockProps.color().blue() / 255f;
+            final float alpha = 1.0f;
+
+            Matrix4f matrix = matrixStack.peek().getPositionMatrix();
+
+            // Bottom face
+            bufferBuilder.vertex(matrix, x, y, z).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x + size, y, z).color(red, green, blue, alpha);
+
+            bufferBuilder.vertex(matrix, x + size, y, z).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x + size, y, z + size).color(red, green, blue, alpha);
+
+            bufferBuilder.vertex(matrix, x + size, y, z + size).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x, y, z + size).color(red, green, blue, alpha);
+
+            bufferBuilder.vertex(matrix, x, y, z + size).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x, y, z).color(red, green, blue, alpha);
+
+            // Top face
+            bufferBuilder.vertex(matrix, x, y + size, z).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x + size, y + size, z).color(red, green, blue, alpha);
+
+            bufferBuilder.vertex(matrix, x + size, y + size, z).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x + size, y + size, z + size).color(red, green, blue, alpha);
+
+            bufferBuilder.vertex(matrix, x + size, y + size, z + size).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x, y + size, z + size).color(red, green, blue, alpha);
+
+            bufferBuilder.vertex(matrix, x, y + size, z + size).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x, y + size, z).color(red, green, blue, alpha);
+
+            // Vertical edges
+            bufferBuilder.vertex(matrix, x, y, z).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x, y + size, z).color(red, green, blue, alpha);
+
+            bufferBuilder.vertex(matrix, x + size, y, z).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x + size, y + size, z).color(red, green, blue, alpha);
+
+            bufferBuilder.vertex(matrix, x + size, y, z + size).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x + size, y + size, z + size).color(red, green, blue, alpha);
+
+            bufferBuilder.vertex(matrix, x, y, z + size).color(red, green, blue, alpha);
+            bufferBuilder.vertex(matrix, x, y + size, z + size).color(red, green, blue, alpha);
+        }
 
         matrixStack.pop();
 
-        // Restore rendered state
+        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+
+        RenderSystem.depthMask(true);
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
         RenderSystem.enableCull();
@@ -175,44 +209,43 @@ public class RenderOutlines {
 
         Matrix4f matrix = matrixStack.peek().getPositionMatrix();
 
-        // Bottom face (y1) - 4 lignes
-        consumer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x2, y1, z1).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x2, y1, z1).color(red, green, blue, alpha);
 
-        consumer.vertex(matrix, x2, y1, z1).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x2, y1, z2).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x2, y1, z1).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x2, y1, z2).color(red, green, blue, alpha);
 
-        consumer.vertex(matrix, x2, y1, z2).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x1, y1, z2).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x2, y1, z2).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x1, y1, z2).color(red, green, blue, alpha);
 
-        consumer.vertex(matrix, x1, y1, z2).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x1, y1, z2).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha);
 
-        // Top face (y2) - 4 lignes
-        consumer.vertex(matrix, x1, y2, z1).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x2, y2, z1).color(red, green, blue, alpha).normal(0, 0, 1);
+        // Top face (y2) - 4 lines
+        consumer.vertex(matrix, x1, y2, z1).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x2, y2, z1).color(red, green, blue, alpha);
 
-        consumer.vertex(matrix, x2, y2, z1).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x2, y2, z1).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha);
 
-        consumer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x1, y2, z2).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x1, y2, z2).color(red, green, blue, alpha);
 
-        consumer.vertex(matrix, x1, y2, z2).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x1, y2, z1).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x1, y2, z2).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x1, y2, z1).color(red, green, blue, alpha);
 
-        // Vertical edges - 4 lignes
-        consumer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x1, y2, z1).color(red, green, blue, alpha).normal(0, 0, 1);
+        // Vertical edges - 4 lines
+        consumer.vertex(matrix, x1, y1, z1).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x1, y2, z1).color(red, green, blue, alpha);
 
-        consumer.vertex(matrix, x2, y1, z1).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x2, y2, z1).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x2, y1, z1).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x2, y2, z1).color(red, green, blue, alpha);
 
-        consumer.vertex(matrix, x2, y1, z2).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x2, y1, z2).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x2, y2, z2).color(red, green, blue, alpha);
 
-        consumer.vertex(matrix, x1, y1, z2).color(red, green, blue, alpha).normal(0, 0, 1);
-        consumer.vertex(matrix, x1, y2, z2).color(red, green, blue, alpha).normal(0, 0, 1);
+        consumer.vertex(matrix, x1, y1, z2).color(red, green, blue, alpha);
+        consumer.vertex(matrix, x1, y2, z2).color(red, green, blue, alpha);
     }
 
     private static void renderLineBox(BufferBuilder buffer, MatrixStack matrixStack,

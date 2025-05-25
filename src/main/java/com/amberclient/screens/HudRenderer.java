@@ -27,7 +27,7 @@ public class HudRenderer implements HudRenderCallback {
         List<Module> enabledModules = ModuleManager.getInstance().getModules()
                 .stream()
                 .filter(Module::isEnabled)
-                .collect(Collectors.toList());
+                .toList();
 
         if (enabledModules.isEmpty()) {
             return;
@@ -44,8 +44,8 @@ public class HudRenderer implements HudRenderCallback {
                 .orElse(100) + padding * 2;
         int height = enabledModules.size() * moduleHeight + padding * 2 - spacing;
 
-        // Position in top-right corner
-        int x = client.getWindow().getScaledWidth() - width - 5;
+        // Position in top-left corner
+        int x = 5;
         int y = 5;
 
         // Draw background

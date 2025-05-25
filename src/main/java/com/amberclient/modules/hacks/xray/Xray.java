@@ -2,7 +2,6 @@ package com.amberclient.modules.hacks.xray;
 
 import com.amberclient.modules.Module;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -15,12 +14,11 @@ public class Xray extends Module {
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     private ChunkPos lastPlayerChunk;
 
+
     public Xray() {
         super("X-Ray", "Shows the outlines of the selected ores in the chunk", "Render");
         // Register events
-        WorldRenderEvents.LAST.register(RenderOutlines::render);
-        //PlayerBlockBreakEvents.AFTER.register(ScanTask::blockBroken);
-
+        WorldRenderEvents.AFTER_TRANSLUCENT.register(RenderOutlines::render);
         LOGGER.info("XRay module initialized");
     }
 
@@ -30,7 +28,7 @@ public class Xray extends Module {
         // Perform a full scan of the area on activation
         ScanTask.runTask(true);
         MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("Xray activated").formatted(Formatting.RED), true);
+                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated").formatted(Formatting.RED), true);
     }
 
     @Override
@@ -38,11 +36,12 @@ public class Xray extends Module {
         SettingsStore.getInstance().get().setActive(false);
         ScanTask.renderQueue.clear();
         MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("Xray deactivated").formatted(Formatting.RED), true);
+                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated").formatted(Formatting.RED), true);
     }
 
     @Override
     public void onTick() {
+
         if (SettingsStore.getInstance().get().isActive()) {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player == null) return;
@@ -50,7 +49,7 @@ public class Xray extends Module {
             ChunkPos currentChunk = client.player.getChunkPos();
 
             // Check if the player has changed chunk
-            if (lastPlayerChunk == null || !currentChunk.equals(lastPlayerChunk)) {
+            if (!currentChunk.equals(lastPlayerChunk)) {
                 ScanTask.runTaskForSingleChunk(currentChunk);
                 lastPlayerChunk = currentChunk;
             }
