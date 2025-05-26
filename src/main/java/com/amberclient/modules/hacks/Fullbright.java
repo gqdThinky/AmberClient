@@ -4,28 +4,45 @@ import com.amberclient.modules.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 public class Fullbright extends Module {
-    public static final String MOD_ID = "amberclient-fullbright";
-    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private double originalGamma;
+    private boolean wasEnabled = false;
 
     public Fullbright() {
-        super("Fullbright", "Allows you to see in the dark", "Render");
-
-        LOGGER.info("Fullbright module initialized");
+        super("Fullbright", "Increases brightness to maximum level", "Render");
     }
 
     @Override
-    public void onEnable() {
-        MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated").formatted(Formatting.RED), true);
+    protected void onEnable() {
+        if (mc.options != null) {
+            // Sauvegarder la valeur gamma originale
+            originalGamma = mc.options.getGamma().getValue();
+
+            // Définir le gamma au maximum (16.0 comme dans gamma-utils)
+            mc.options.getGamma().setValue(16.0);
+
+            wasEnabled = true;
+        }
+
+        if (mc.player != null) {
+            mc.player.sendMessage(
+                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated").formatted(Formatting.RED), true);
+        }
     }
 
     @Override
-    public void onDisable() {
-        MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated").formatted(Formatting.RED), true);
+    protected void onDisable() {
+        if (mc.options != null && wasEnabled) {
+            // Restaurer la valeur gamma originale
+            mc.options.getGamma().setValue(originalGamma);
+            wasEnabled = false;
+        }
+
+        if (mc.player != null) {
+            mc.player.sendMessage(
+                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated").formatted(Formatting.RED), true);
+        }
     }
 }

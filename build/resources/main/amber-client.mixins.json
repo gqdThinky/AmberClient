@@ -1,10 +1,13 @@
 {
 	"required": true,
-	"package": "com.amberclient.mixins",
+	"minVersion": "0.8",
+	"package": "com.amberclient.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 
 	],
+	"client": [],
+	"server": [],
 	"injectors": {
 		"defaultRequire": 1
 	}

@@ -6,3 +6,4 @@
 /spawnpoint Player57
 /gamerule keepInventory true
 /kill
+/effect clear Player943

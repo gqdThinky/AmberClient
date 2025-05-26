@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AmberClient implements ModInitializer {
-	public static final String MOD_ID = "amber-client";
+	public static final String MOD_ID = "amberclient";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private static boolean lastKeyPressed = false;
