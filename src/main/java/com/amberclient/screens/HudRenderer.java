@@ -22,10 +22,21 @@ public class HudRenderer implements HudRenderCallback {
             return;
         }
 
-        // Get enabled modules
+        // Check if ActiveMods module is enabled
+        Module hudModule = ModuleManager.getInstance().getModules()
+                .stream()
+                .filter(module -> module.getName().equals("Active mods") && module.isEnabled())
+                .findFirst()
+                .orElse(null);
+        if (hudModule == null) {
+            return;
+        }
+
+        // Get enabled modules, excluding ActiveMods
         List<Module> enabledModules = ModuleManager.getInstance().getModules()
                 .stream()
                 .filter(Module::isEnabled)
+                .filter(module -> !module.getName().equals("Active mods"))
                 .toList();
 
         if (enabledModules.isEmpty()) {

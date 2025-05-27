@@ -18,7 +18,6 @@ public class NoFall extends Module {
 
     @Override
     protected void onEnable() {
-        //mc.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivé"), false);
         MinecraftClient.getInstance().player.sendMessage(
                 Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated").formatted(Formatting.RED), true);
     }
@@ -35,5 +34,13 @@ public class NoFall extends Module {
         if (player == null || player.isSpectator() || player.isCreative()) return;
 
         player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, false));
+    }
+
+    public int getTickCounter() {
+        return tickCounter;
+    }
+
+    public void setTickCounter(int tickCounter) {
+        this.tickCounter = tickCounter;
     }
 }

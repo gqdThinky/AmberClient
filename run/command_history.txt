@@ -7,3 +7,5 @@
 /gamerule keepInventory true
 /kill
 /effect clear Player943
+/gamemode survival
+/gamemode creative

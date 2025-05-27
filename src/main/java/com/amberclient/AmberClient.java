@@ -26,6 +26,7 @@ public class AmberClient implements ModInitializer {
 		// Register HUD renderer
 		HudRenderCallback.EVENT.register(new HudRenderer());
 
+		//mc.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivé"), false);
 		LOGGER.info("Amber Client started!");
 	}
 

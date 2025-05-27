@@ -6,7 +6,7 @@ public abstract class Module {
     private final String name;
     private final String description;
     private final String category;
-    private boolean enabled;
+    protected boolean enabled;
 
     public Module(String name, String description, String category) {
         this.name = name;
