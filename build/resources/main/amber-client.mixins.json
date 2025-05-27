@@ -4,7 +4,10 @@
 	"package": "com.amberclient.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"DoubleSliderCallbacksMixin"
+		"DoubleSliderCallbacksMixin",
+		"GameRendererMixin",
+		"EntityHitboxMixin",
+		"MinecraftClientAttackMixin"
 	],
 	"client": [],
 	"server": [],

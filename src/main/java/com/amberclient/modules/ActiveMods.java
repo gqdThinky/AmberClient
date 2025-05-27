@@ -16,7 +16,7 @@ public class ActiveMods extends Module implements ConfigurableModule {
 
     public ActiveMods() {
         super("Active mods", "Toggles display of active modules", "Miscellaneous");
-        this.enabled = true;
+        this.enabled = true; // enabled by default
 
         // Initialize settings
         this.enableRGB = new ModuleSetting("Enable RGB", "Use animated RGB text color", true);

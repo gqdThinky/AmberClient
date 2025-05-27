@@ -2,6 +2,7 @@ package com.amberclient.utils;
 
 import com.amberclient.modules.ActiveMods;
 import com.amberclient.modules.Fullbright;
+import com.amberclient.modules.Hitbox;
 import com.amberclient.modules.NoFall;
 import com.amberclient.modules.xray.Xray;
 
@@ -19,6 +20,7 @@ public class ModuleManager {
         registerModule(new Xray());
         registerModule(new Fullbright());
         registerModule(new ActiveMods());
+        registerModule(new Hitbox());
     }
 
     public static ModuleManager getInstance() {

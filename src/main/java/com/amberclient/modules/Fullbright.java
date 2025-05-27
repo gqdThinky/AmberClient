@@ -7,7 +7,7 @@ import net.minecraft.text.Text;
 public class Fullbright extends Module {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private double originalGamma = 1.0D;
-    public static double customGamma = 10.0D;
+    public static double fullbrightGamma = 10.0D;
 
     public Fullbright() {
         super("Fullbright", "Maximizes brightness", "Render");
@@ -17,7 +17,7 @@ public class Fullbright extends Module {
     protected void onEnable() {
         if (mc.options != null) {
             originalGamma = mc.options.getGamma().getValue();
-            mc.options.getGamma().setValue(customGamma);
+            mc.options.getGamma().setValue(fullbrightGamma);
         }
         if (mc.player != null) {
             mc.player.sendMessage(

@@ -9,3 +9,6 @@
 /effect clear Player943
 /gamemode survival
 /gamemode creative
+/kill @e[type=item]
+/give Player800 minecraft:barrier
+/kill @e[type=bat]

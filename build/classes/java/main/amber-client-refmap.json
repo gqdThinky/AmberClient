@@ -2,12 +2,30 @@
   "mappings": {
     "com/amberclient/mixin/DoubleSliderCallbacksMixin": {
       "validate(Ljava/lang/Double;)Ljava/util/Optional;": "Lnet/minecraft/class_7172$class_7177;method_41770(Ljava/lang/Double;)Ljava/util/Optional;"
+    },
+    "com/amberclient/mixin/EntityHitboxMixin": {
+      "getBoundingBox": "Lnet/minecraft/class_1297;method_5829()Lnet/minecraft/class_238;"
+    },
+    "com/amberclient/mixin/GameRendererMixin": {
+      "updateCrosshairTarget": "Lnet/minecraft/class_757;method_3190(F)V"
+    },
+    "com/amberclient/mixin/MinecraftClientAttackMixin": {
+      "doAttack": "Lnet/minecraft/class_310;method_1536()Z"
     }
   },
   "data": {
     "named:intermediary": {
       "com/amberclient/mixin/DoubleSliderCallbacksMixin": {
         "validate(Ljava/lang/Double;)Ljava/util/Optional;": "Lnet/minecraft/class_7172$class_7177;method_41770(Ljava/lang/Double;)Ljava/util/Optional;"
+      },
+      "com/amberclient/mixin/EntityHitboxMixin": {
+        "getBoundingBox": "Lnet/minecraft/class_1297;method_5829()Lnet/minecraft/class_238;"
+      },
+      "com/amberclient/mixin/GameRendererMixin": {
+        "updateCrosshairTarget": "Lnet/minecraft/class_757;method_3190(F)V"
+      },
+      "com/amberclient/mixin/MinecraftClientAttackMixin": {
+        "doAttack": "Lnet/minecraft/class_310;method_1536()Z"
       }
     }
   }
