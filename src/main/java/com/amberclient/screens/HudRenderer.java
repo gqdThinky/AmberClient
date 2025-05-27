@@ -1,5 +1,6 @@
 package com.amberclient.screens;
 
+import com.amberclient.modules.ActiveMods;
 import com.amberclient.utils.Module;
 import com.amberclient.utils.ModuleManager;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -64,13 +65,23 @@ public class HudRenderer implements HudRenderCallback {
         // Draw accent border (top edge)
         context.fill(x, y, x + width, y + 1, ACCENT_COLOR);
 
+        // Calculate text color based on ActiveMods' enableRGB setting
+        int textColorRGB;
+        if (hudModule instanceof ActiveMods activeMods && activeMods.isRGBEnabled()) {
+            long time = System.currentTimeMillis();
+            float hue = (time % 5000) / 5000.0f; // Cycle every 5 seconds
+            textColorRGB = Color.HSBtoRGB(hue, 1.0f, 1.0f);
+        } else {
+            textColorRGB = TEXT_COLOR;
+        }
+
         // Draw module names
         for (int i = 0; i < enabledModules.size(); i++) {
             Module module = enabledModules.get(i);
             String name = module.getName();
             int textX = x + padding;
             int textY = y + padding + i * moduleHeight;
-            context.drawTextWithShadow(client.textRenderer, name, textX, textY, TEXT_COLOR);
+            context.drawTextWithShadow(client.textRenderer, name, textX, textY, textColorRGB);
         }
     }
 }

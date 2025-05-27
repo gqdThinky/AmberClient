@@ -4,7 +4,6 @@ import com.amberclient.utils.Module;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.ChunkPos;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +27,7 @@ public class Xray extends Module {
         // Perform a full scan of the area on activation
         ScanTask.runTask(true);
         MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated").formatted(Formatting.RED), true);
+                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class Xray extends Module {
         SettingsStore.getInstance().get().setActive(false);
         ScanTask.renderQueue.clear();
         MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated").formatted(Formatting.RED), true);
+                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
     }
 
     @Override

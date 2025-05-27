@@ -3,7 +3,6 @@ package com.amberclient.modules;
 import com.amberclient.utils.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 public class Fullbright extends Module {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
@@ -22,7 +21,7 @@ public class Fullbright extends Module {
         }
         if (mc.player != null) {
             mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cenabled").formatted(Formatting.RED), true);
+                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cenabled"), true);
         }
     }
 
@@ -33,7 +32,7 @@ public class Fullbright extends Module {
         }
         if (mc.player != null) {
             mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdisabled").formatted(Formatting.RED), true);
+                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdisabled"), true);
         }
     }
 }
