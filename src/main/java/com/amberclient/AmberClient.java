@@ -2,7 +2,7 @@ package com.amberclient;
 
 import com.amberclient.screens.HudRenderer;
 import com.amberclient.screens.ClickGUI;
-import com.amberclient.modules.ModuleManager;
+import com.amberclient.utils.ModuleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;

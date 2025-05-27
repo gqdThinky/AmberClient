@@ -1,0 +1,14 @@
+{
+  "mappings": {
+    "com/amberclient/mixin/DoubleSliderCallbacksMixin": {
+      "validate(Ljava/lang/Double;)Ljava/util/Optional;": "Lnet/minecraft/class_7172$class_7177;method_41770(Ljava/lang/Double;)Ljava/util/Optional;"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "com/amberclient/mixin/DoubleSliderCallbacksMixin": {
+        "validate(Ljava/lang/Double;)Ljava/util/Optional;": "Lnet/minecraft/class_7172$class_7177;method_41770(Ljava/lang/Double;)Ljava/util/Optional;"
+      }
+    }
+  }
+}

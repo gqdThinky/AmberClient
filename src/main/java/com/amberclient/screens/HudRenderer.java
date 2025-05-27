@@ -1,7 +1,7 @@
 package com.amberclient.screens;
 
-import com.amberclient.modules.Module;
-import com.amberclient.modules.ModuleManager;
+import com.amberclient.utils.Module;
+import com.amberclient.utils.ModuleManager;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -9,7 +9,6 @@ import net.minecraft.client.render.RenderTickCounter;
 
 import java.awt.Color;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class HudRenderer implements HudRenderCallback {
     private static final int BACKGROUND_COLOR = new Color(20, 20, 25, 200).getRGB();

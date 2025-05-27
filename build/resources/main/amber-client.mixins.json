@@ -4,7 +4,7 @@
 	"package": "com.amberclient.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-
+		"DoubleSliderCallbacksMixin"
 	],
 	"client": [],
 	"server": [],

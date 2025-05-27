@@ -1,7 +1,7 @@
 package com.amberclient.screens;
 
-import com.amberclient.modules.Module;
-import com.amberclient.modules.ModuleManager;
+import com.amberclient.utils.Module;
+import com.amberclient.utils.ModuleManager;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.DrawContext;
