@@ -54,9 +54,6 @@ public class ActiveMods extends Module implements ConfigurableModule {
     }
 
     public void renderHUD(DrawContext context) {
-        int x = 10;
-        int y = 10;
-
         // Color calculation
         int textColorRGB;
         if (isRGBEnabled()) {

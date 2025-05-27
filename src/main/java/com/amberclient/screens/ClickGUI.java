@@ -5,6 +5,7 @@ import com.amberclient.utils.ModuleManager;
 import com.amberclient.utils.ConfigurableModule;
 import com.amberclient.utils.ModuleSetting;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
@@ -56,6 +57,13 @@ public class ClickGUI extends Screen {
     private float configDragStartOffset;
     private static final int CONFIG_PANEL_OFFSET_X = -350;
 
+    // Configuration panel dragging
+    private boolean isConfigPanelDragging = false;
+    private int configPanelDragStartX;
+    private int configPanelDragStartY;
+    private int configPanelOffsetX = CONFIG_PANEL_OFFSET_X;
+    private int configPanelOffsetY = 0;
+
     public ClickGUI() {
         super(Text.literal("Amber Client - by @gqdThinky"));
         lastTime = System.currentTimeMillis();
@@ -86,7 +94,7 @@ public class ClickGUI extends Screen {
         super.init();
         this.addDrawableChild(ButtonWidget.builder(Text.literal("×"), button -> this.close())
                 .dimensions(this.width - 25, 5, 20, 20)
-                .tooltip(net.minecraft.client.gui.tooltip.Tooltip.of(Text.literal("Close")))
+                .tooltip(Tooltip.of(Text.literal("Close")))
                 .build());
     }
 
@@ -296,21 +304,21 @@ public class ClickGUI extends Screen {
         int logoSize = 32;
         int panelY = headerY + logoSize + 25;
 
-        int configPanelX = centerX + (this.width - panelWidth) / 2 + CONFIG_PANEL_OFFSET_X;
-        int configPanelY = panelY;
+        int configPanelX = centerX + (this.width - panelWidth) / 2 + configPanelOffsetX;
+        int configPanelY = panelY + configPanelOffsetY;
         int configPanelWidth = panelWidth;
         int configPanelHeight = panelHeight;
 
         // Animation: slide from right
         int maxOffset = this.width;
-        int currentOffset = (int)(maxOffset * (1.0f - configPanelAnimation));
+        int currentOffset = (int) (maxOffset * (1.0f - configPanelAnimation));
         configPanelX -= currentOffset;
 
         int panelColorWithAlpha = new Color(
                 (PANEL_COLOR >> 16) & 0xFF,
                 (PANEL_COLOR >> 8) & 0xFF,
                 PANEL_COLOR & 0xFF,
-                (int)(255 * configPanelAnimation)
+                (int) (255 * configPanelAnimation)
         ).getRGB();
 
         context.fill(configPanelX, configPanelY, configPanelX + configPanelWidth, configPanelY + configPanelHeight, panelColorWithAlpha);
@@ -330,7 +338,7 @@ public class ClickGUI extends Screen {
         context.drawTextWithShadow(this.textRenderer, "×", closeButtonX + 7, closeButtonY + 5, Color.WHITE.getRGB());
 
         // Settings list
-        List<ModuleSetting> settings = ((ConfigurableModule)configModule.getWrappedModule()).getSettings();
+        List<ModuleSetting> settings = ((ConfigurableModule) configModule.getWrappedModule()).getSettings();
         int settingsAreaTop = configPanelY + 40;
         int settingsAreaHeight = configPanelHeight - 50;
         int settingsAreaBottom = settingsAreaTop + settingsAreaHeight;
@@ -346,7 +354,7 @@ public class ClickGUI extends Screen {
 
         for (int i = 0; i < settings.size(); i++) {
             ModuleSetting setting = settings.get(i);
-            int settingY = settingsAreaTop + i * (settingHeight + spacing) - (int)configScrollOffset;
+            int settingY = settingsAreaTop + i * (settingHeight + spacing) - (int) configScrollOffset;
 
             if (settingY + settingHeight < settingsAreaTop || settingY > settingsAreaBottom) {
                 continue;
@@ -395,8 +403,8 @@ public class ClickGUI extends Screen {
             int scrollbarWidth = 5;
             context.fill(scrollbarX, settingsAreaTop, scrollbarX + scrollbarWidth, settingsAreaBottom, new Color(50, 50, 55).getRGB());
             float scrollRatio = (float) settingsAreaHeight / contentHeight;
-            int thumbHeight = Math.max(20, (int)(settingsAreaHeight * scrollRatio));
-            int thumbY = settingsAreaTop + (int)((settingsAreaHeight - thumbHeight) * (configScrollOffset / maxScroll));
+            int thumbHeight = Math.max(20, (int) (settingsAreaHeight * scrollRatio));
+            int thumbY = settingsAreaTop + (int) ((settingsAreaHeight - thumbHeight) * (configScrollOffset / maxScroll));
             context.fill(scrollbarX, thumbY, scrollbarX + scrollbarWidth, thumbY + thumbHeight, ACCENT_COLOR);
         }
 
@@ -405,15 +413,11 @@ public class ClickGUI extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
-            return true;
-        }
-
         if (animationProgress < 1.0f) {
             return false;
         }
 
-        // Handle config panel clicks
+        // Gérer les clics sur le panneau de configuration en premier
         if (configModule != null && configPanelAnimation > 0.0f) {
             int panelWidth = Math.min(this.width - 40, 300);
             int panelHeight = Math.min(this.height - 100, 400);
@@ -422,77 +426,87 @@ public class ClickGUI extends Screen {
             int logoSize = 32;
             int panelY = headerY + logoSize + 25;
 
-            int configPanelX = centerX + (this.width - panelWidth) / 2 + CONFIG_PANEL_OFFSET_X;
+            int configPanelX = centerX + (this.width - panelWidth) / 2 + configPanelOffsetX;
             int maxOffset = this.width;
             int currentOffset = (int)(maxOffset * (1.0f - configPanelAnimation));
             configPanelX -= currentOffset;
-            int configPanelY = panelY;
+            int configPanelY = panelY + configPanelOffsetY;
 
-            // Close button
-            int closeButtonX = configPanelX + panelWidth - 25;
-            int closeButtonY = configPanelY + 5;
-            if (mouseX >= closeButtonX && mouseX <= closeButtonX + 20 &&
-                    mouseY >= closeButtonY && mouseY <= closeButtonY + 20) {
-                configModule = null;
-                configScrollOffset = 0.0f;
-                return true;
-            }
-
-            // Settings clicks
-            List<ModuleSetting> settings = ((ConfigurableModule)configModule.getWrappedModule()).getSettings();
-            int settingsAreaTop = configPanelY + 40;
-            int settingsAreaHeight = panelHeight - 50;
-            int settingHeight = 40;
-            int spacing = 5;
-            int settingWidth = panelWidth - 20;
-
-            for (int i = 0; i < settings.size(); i++) {
-                ModuleSetting setting = settings.get(i);
-                int settingY = settingsAreaTop + i * (settingHeight + spacing) - (int)configScrollOffset;
-                int settingX = configPanelX + 10;
-
-                // Vérifier si le setting est visible
-                if (settingY + settingHeight < settingsAreaTop || settingY > settingsAreaTop + settingsAreaHeight) {
-                    continue;
-                }
-
-                if (setting.getType() == ModuleSetting.SettingType.BOOLEAN) {
-                    int toggleX = settingX + settingWidth - 60;
-                    int toggleY = settingY + 10;
-                    int toggleWidth = 40;
-                    int toggleHeight = 20;
-
-                    if (mouseX >= toggleX && mouseX <= toggleX + toggleWidth &&
-                            mouseY >= toggleY && mouseY <= toggleY + toggleHeight) {
-                        setting.setBooleanValue(!setting.getBooleanValue());
-                        ((ConfigurableModule)configModule.getWrappedModule()).onSettingChanged(setting);
-                        return true;
-                    }
-                }
-            }
-
-            // Scrollbar
-            int scrollbarX = configPanelX + panelWidth - 15;
-            int scrollbarWidth = 5;
-            if (mouseX >= scrollbarX && mouseX <= scrollbarX + scrollbarWidth &&
-                    mouseY >= settingsAreaTop && mouseY <= settingsAreaTop + settingsAreaHeight) {
-                isConfigDragging = true;
-                configDragStartY = (int) mouseY;
-                configDragStartOffset = configScrollOffset;
-                return true;
-            }
-
-            // No action for clicks inside the panel; only close on close button
             if (mouseX >= configPanelX && mouseX <= configPanelX + panelWidth &&
                     mouseY >= configPanelY && mouseY <= configPanelY + panelHeight) {
+                // Bouton de fermeture
+                int closeButtonX = configPanelX + panelWidth - 25;
+                int closeButtonY = configPanelY + 5;
+                if (mouseX >= closeButtonX && mouseX <= closeButtonX + 20 &&
+                        mouseY >= closeButtonY && mouseY <= closeButtonY + 20) {
+                    configModule = null;
+                    configScrollOffset = 0.0f;
+                    return true;
+                }
+
+                // Dragging du header
+                if (mouseX >= configPanelX && mouseX <= configPanelX + panelWidth &&
+                        mouseY >= configPanelY && mouseY <= configPanelY + 30) {
+                    isConfigPanelDragging = true;
+                    configPanelDragStartX = (int) mouseX;
+                    configPanelDragStartY = (int) mouseY;
+                    return true;
+                }
+
+                // Clics sur les paramètres
+                List<ModuleSetting> settings = ((ConfigurableModule)configModule.getWrappedModule()).getSettings();
+                int settingsAreaTop = configPanelY + 40;
+                int settingsAreaHeight = panelHeight - 50;
+                int settingHeight = 40;
+                int spacing = 5;
+                int settingWidth = panelWidth - 20;
+
+                for (int i = 0; i < settings.size(); i++) {
+                    ModuleSetting setting = settings.get(i);
+                    int settingY = settingsAreaTop + i * (settingHeight + spacing) - (int)configScrollOffset;
+                    int settingX = configPanelX + 10;
+
+                    if (settingY + settingHeight < settingsAreaTop || settingY > settingsAreaTop + settingsAreaHeight) {
+                        continue;
+                    }
+
+                    if (setting.getType() == ModuleSetting.SettingType.BOOLEAN) {
+                        int toggleX = settingX + settingWidth - 60;
+                        int toggleY = settingY + 10;
+                        int toggleWidth = 40;
+                        int toggleHeight = 20;
+
+                        if (mouseX >= toggleX && mouseX <= toggleX + toggleWidth &&
+                                mouseY >= toggleY && mouseY <= toggleY + toggleHeight) {
+                            setting.setBooleanValue(!setting.getBooleanValue());
+                            ((ConfigurableModule)configModule.getWrappedModule()).onSettingChanged(setting);
+                            return true;
+                        }
+                    }
+                }
+
+                // Scrollbar
+                int scrollbarX = configPanelX + panelWidth - 15;
+                int scrollbarWidth = 5;
+                if (mouseX >= scrollbarX && mouseX <= scrollbarX + scrollbarWidth &&
+                        mouseY >= settingsAreaTop && mouseY <= settingsAreaTop + settingsAreaHeight) {
+                    isConfigDragging = true;
+                    configDragStartY = (int) mouseY;
+                    configDragStartOffset = configScrollOffset;
+                    return true;
+                }
+
+                // Consommer l'événement si le clic est dans le panneau
                 return true;
             }
-
-            // Clicks outside the panel are ignored
-            return false;
         }
 
-        // Existing panel click logic
+        // Gérer les widgets (comme le bouton de fermeture principal)
+        if (super.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
+
+        // Gérer les clics sur le panneau principal
         int panelWidth = Math.min(this.width - 40, 800);
         int panelHeight = Math.min(this.height - 100, 400);
         int centerX = this.width / 2;
@@ -553,15 +567,14 @@ public class ClickGUI extends Screen {
 
                 int moduleX = moduleAreaX;
 
-                // Right-click or config icon click
                 if (module.getWrappedModule() instanceof ConfigurableModule) {
-                    if (button == 1 && // Right-click
+                    if (button == 1 && // Clic droit
                             mouseX >= moduleX && mouseX <= moduleX + moduleWidth &&
                             mouseY >= moduleY && mouseY <= moduleY + moduleHeight) {
                         openConfigPanel(module);
                         return true;
                     }
-                    if (button == 0) { // Left-click on config icon
+                    if (button == 0) { // Clic gauche sur l'icône de config
                         int configX = moduleX + moduleWidth - 50;
                         int configY = moduleY + 7;
                         int configSize = 10;
@@ -613,12 +626,31 @@ public class ClickGUI extends Screen {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         isDragging = false;
         isConfigDragging = false;
+        isConfigPanelDragging = false;
         clickedModules.clear();
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (isConfigPanelDragging && configModule != null) {
+            int deltaX = (int) mouseX - configPanelDragStartX;
+            int deltaY = (int) mouseY - configPanelDragStartY;
+
+            configPanelOffsetX += deltaX;
+            configPanelOffsetY += deltaY;
+
+            // Limit to prevent panel from going off-screen
+            int panelWidth = Math.min(this.width - 40, 300);
+            int panelHeight = Math.min(this.height - 100, 400);
+            configPanelOffsetX = MathHelper.clamp(configPanelOffsetX, -this.width + 50, this.width - 50);
+            configPanelOffsetY = MathHelper.clamp(configPanelOffsetY, -panelHeight + 30, this.height - 30);
+
+            configPanelDragStartX = (int) mouseX;
+            configPanelDragStartY = (int) mouseY;
+            return true;
+        }
+
         if (isConfigDragging && configModule != null) {
             int panelHeight = Math.min(this.height - 100, 400);
             int headerY = 15;
@@ -672,7 +704,7 @@ public class ClickGUI extends Screen {
             int headerY = 15;
             int logoSize = 32;
             int panelY = headerY + logoSize + 25;
-            int configPanelX = centerX + (this.width - panelWidth) / 2 - (int)(this.width * (1.0f - configPanelAnimation));
+            int configPanelX = centerX + (this.width - panelWidth) / 2 + configPanelOffsetX;
             int settingsAreaTop = panelY + 40;
             int settingsAreaHeight = panelHeight - 50;
 
@@ -738,6 +770,8 @@ public class ClickGUI extends Screen {
             configModule = module;
             configPanelAnimation = 0.0f;
             configScrollOffset = 0.0f;
+            configPanelOffsetX = CONFIG_PANEL_OFFSET_X;
+            configPanelOffsetY = 0;
         }
     }
 
