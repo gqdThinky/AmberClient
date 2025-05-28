@@ -7,7 +7,8 @@
 		"DoubleSliderCallbacksMixin",
 		"GameRendererMixin",
 		"EntityHitboxMixin",
-		"MinecraftClientAttackMixin"
+		"MinecraftClientAttackMixin",
+		"WorldRendererMixin"
 	],
 	"client": [],
 	"server": [],

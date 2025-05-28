@@ -17,6 +17,7 @@ public class ModuleSetting {
 
     private Number minValue;
     private Number maxValue;
+    private Number stepValue; // New field for step size
 
     // Constructor for Boolean
     public ModuleSetting(String name, String description, boolean defaultValue) {
@@ -36,6 +37,7 @@ public class ModuleSetting {
         this.defaultValue = defaultValue;
         this.minValue = minValue;
         this.maxValue = maxValue;
+        this.stepValue = 1; // Default step for integers
     }
 
     // Constructor for Integer without limits
@@ -43,8 +45,8 @@ public class ModuleSetting {
         this(name, description, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
-    // Constructor for Double with limits
-    public ModuleSetting(String name, String description, double defaultValue, double minValue, double maxValue) {
+    // Constructor for Double with limits and step
+    public ModuleSetting(String name, String description, double defaultValue, double minValue, double maxValue, double step) {
         this.name = name;
         this.description = description;
         this.type = SettingType.DOUBLE;
@@ -52,11 +54,17 @@ public class ModuleSetting {
         this.defaultValue = defaultValue;
         this.minValue = minValue;
         this.maxValue = maxValue;
+        this.stepValue = step;
+    }
+
+    // Constructor for Double with limits (default step)
+    public ModuleSetting(String name, String description, double defaultValue, double minValue, double maxValue) {
+        this(name, description, defaultValue, minValue, maxValue, 0.1); // Default step for doubles
     }
 
     // Constructor for Double without limits
     public ModuleSetting(String name, String description, double defaultValue) {
-        this(name, description, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE);
+        this(name, description, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE, 0.1);
     }
 
     // Constructor for String
@@ -87,6 +95,11 @@ public class ModuleSetting {
 
     public Object getDefaultValue() {
         return defaultValue;
+    }
+
+    // New getter for step value
+    public Number getStepValue() {
+        return stepValue;
     }
 
     // Type-specific getters

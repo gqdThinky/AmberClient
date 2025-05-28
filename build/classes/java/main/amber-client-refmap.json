@@ -11,6 +11,9 @@
     },
     "com/amberclient/mixin/MinecraftClientAttackMixin": {
       "doAttack": "Lnet/minecraft/class_310;method_1536()Z"
+    },
+    "com/amberclient/mixin/WorldRendererMixin": {
+      "render": "Lnet/minecraft/class_761;method_22710(Lnet/minecraft/class_9922;Lnet/minecraft/class_9779;ZLnet/minecraft/class_4184;Lnet/minecraft/class_757;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"
     }
   },
   "data": {
@@ -26,6 +29,9 @@
       },
       "com/amberclient/mixin/MinecraftClientAttackMixin": {
         "doAttack": "Lnet/minecraft/class_310;method_1536()Z"
+      },
+      "com/amberclient/mixin/WorldRendererMixin": {
+        "render": "Lnet/minecraft/class_761;method_22710(Lnet/minecraft/class_9922;Lnet/minecraft/class_9779;ZLnet/minecraft/class_4184;Lnet/minecraft/class_757;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"
       }
     }
   }

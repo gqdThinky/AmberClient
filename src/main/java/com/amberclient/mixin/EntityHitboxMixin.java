@@ -14,34 +14,28 @@ public class EntityHitboxMixin {
 
     @Inject(method = "getBoundingBox", at = @At("RETURN"), cancellable = true)
     private void onGetBoundingBoxForTargeting(CallbackInfoReturnable<Box> cir) {
-        if (!Hitbox.isHitboxModuleEnabled) {
-            return;
-        }
-
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client == null || client.world == null) {
-            return;
-        }
+        if (!Hitbox.isHitboxModuleEnabled || (MinecraftClient.getInstance() == null || MinecraftClient.getInstance().world == null)) return;
 
         Entity entity = (Entity)(Object)this;
-        if (entity == client.player || (client.player != null && entity.getUuid().equals(client.player.getUuid()))) {
-            return;
-        }
+        if (entity == MinecraftClient.getInstance().player || (MinecraftClient.getInstance().player != null && entity.getUuid().equals(MinecraftClient.getInstance().player.getUuid()))) return;
 
-        // Appliquer l'expansion pour le ciblage/attaque OU pour le rendu des hitboxes en mode debug (F3+B)
-        if (Hitbox.isCalculatingTarget() || client.getEntityRenderDispatcher().shouldRenderHitboxes()) {
+        if (Hitbox.isCalculatingTarget()) {
             Box originalBox = cir.getReturnValue();
             if (originalBox != null) {
-                double expandX = 0.25;
-                double expandY = 0.6;
-                double expandZ = 0.25;
+                double expandX = Hitbox.getInstance().getExpandX();
+                double expandYUp = Hitbox.getInstance().getExpandYUp();
+                double expandZ = 0.0; // No front/back expansion
 
-                Box expandedBox = originalBox.expand(expandX, expandY, expandZ);
+                Box expandedBox = new Box(
+                        originalBox.minX - expandX,
+                        originalBox.minY,
+                        originalBox.minZ,
+                        originalBox.maxX + expandX,
+                        originalBox.maxY + expandYUp,
+                        originalBox.maxZ
+                );
                 cir.setReturnValue(expandedBox);
             }
         }
     }
 }
-
-// corriger la taille et l'emplacement de la nouvelle hitbox
-// ajouter une hitbox dans le f3+b en orange qui affiche la nouvelle (en conservant celle de base de minecraft qui est blanche)

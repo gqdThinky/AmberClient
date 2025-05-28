@@ -64,6 +64,10 @@ public class ClickGUI extends Screen {
     private int configPanelOffsetX = CONFIG_PANEL_OFFSET_X;
     private int configPanelOffsetY = 0;
 
+    // Slider dragging for DOUBLE settings
+    private ModuleSetting draggedSetting = null;
+    private double sliderStartValue;
+
     public ClickGUI() {
         super(Text.literal("Amber Client - by @gqdThinky"));
         lastTime = System.currentTimeMillis();
@@ -75,7 +79,7 @@ public class ClickGUI extends Screen {
         Map<String, List<Module>> categoryMap = new HashMap<>();
         for (Module module : modules) {
             String categoryName = module.getCategory();
-            categoryMap.computeIfAbsent(categoryName, k -> new ArrayList<>()). add(module);
+            categoryMap.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(module);
         }
         for (Map.Entry<String, List<Module>> entry : categoryMap.entrySet()) {
             String categoryName = entry.getKey();
@@ -164,7 +168,6 @@ public class ClickGUI extends Screen {
                 "Amber Client v1.0 • MC 1.21.4";
         context.drawTextWithShadow(this.textRenderer, statusText, scaledX + 10, statusBarY + 6, TEXT_COLOR);
 
-        // Render configuration panel
         if (configPanelAnimation > 0.0f && configModule != null) {
             renderConfigPanel(context, mouseX, mouseY);
         }
@@ -376,7 +379,7 @@ public class ClickGUI extends Screen {
                 boolean toggleHovered = mouseX >= toggleX && mouseX <= toggleX + toggleWidth &&
                         mouseY >= toggleY && mouseY <= toggleY + toggleHeight;
 
-                // Background du toggle
+                // Toggle background
                 int toggleBgColor = toggleHovered ?
                         (isOn ? new Color(255, 190, 50).getRGB() : new Color(120, 120, 120).getRGB()) :
                         (isOn ? ACCENT_COLOR : new Color(100, 100, 100).getRGB());
@@ -395,6 +398,32 @@ public class ClickGUI extends Screen {
                 int textX = toggleX + (toggleWidth - textWidth) / 2;
                 int textY = toggleY + (toggleHeight - 8) / 2;
                 context.drawTextWithShadow(this.textRenderer, toggleText, textX, textY, Color.WHITE.getRGB());
+            } else if (setting.getType() == ModuleSetting.SettingType.DOUBLE && setting.hasRange()) {
+                int sliderX = settingX + settingWidth - 100;
+                int sliderY = settingY + 10;
+                int sliderWidth = 80;
+                int sliderHeight = 10;
+
+                double min = setting.getMinValue().doubleValue();
+                double max = setting.getMaxValue().doubleValue();
+                double value = setting.getDoubleValue();
+                double range = max - min;
+                double normalizedValue = (value - min) / range;
+                int filledWidth = (int) (sliderWidth * normalizedValue);
+
+                // Slider background
+                context.fill(sliderX, sliderY, sliderX + sliderWidth, sliderY + sliderHeight, new Color(100, 100, 100).getRGB());
+                // Filled portion
+                context.fill(sliderX, sliderY, sliderX + filledWidth, sliderY + sliderHeight, ACCENT_COLOR);
+                // Border
+                context.fill(sliderX - 1, sliderY - 1, sliderX + sliderWidth + 1, sliderY, OUTLINE_COLOR);
+                context.fill(sliderX - 1, sliderY + sliderHeight, sliderX + sliderWidth + 1, sliderY + sliderHeight + 1, OUTLINE_COLOR);
+                context.fill(sliderX - 1, sliderY, sliderX, sliderY + sliderHeight, OUTLINE_COLOR);
+                context.fill(sliderX + sliderWidth, sliderY, sliderX + sliderWidth + 1, sliderY + sliderHeight, OUTLINE_COLOR);
+
+                // Display current value
+                String valueText = String.format("%.2f", value);
+                context.drawTextWithShadow(this.textRenderer, valueText, sliderX + sliderWidth + 5, sliderY + 1, TEXT_COLOR);
             }
         }
 
@@ -417,7 +446,7 @@ public class ClickGUI extends Screen {
             return false;
         }
 
-        // Gérer les clics sur le panneau de configuration en premier
+        // Handle clicks on the configuration panel first
         if (configModule != null && configPanelAnimation > 0.0f) {
             int panelWidth = Math.min(this.width - 40, 300);
             int panelHeight = Math.min(this.height - 100, 400);
@@ -434,17 +463,18 @@ public class ClickGUI extends Screen {
 
             if (mouseX >= configPanelX && mouseX <= configPanelX + panelWidth &&
                     mouseY >= configPanelY && mouseY <= configPanelY + panelHeight) {
-                // Bouton de fermeture
+                // Close button
                 int closeButtonX = configPanelX + panelWidth - 25;
                 int closeButtonY = configPanelY + 5;
                 if (mouseX >= closeButtonX && mouseX <= closeButtonX + 20 &&
                         mouseY >= closeButtonY && mouseY <= closeButtonY + 20) {
                     configModule = null;
                     configScrollOffset = 0.0f;
+                    draggedSetting = null;
                     return true;
                 }
 
-                // Dragging du header
+                // Dragging the header
                 if (mouseX >= configPanelX && mouseX <= configPanelX + panelWidth &&
                         mouseY >= configPanelY && mouseY <= configPanelY + 30) {
                     isConfigPanelDragging = true;
@@ -453,7 +483,7 @@ public class ClickGUI extends Screen {
                     return true;
                 }
 
-                // Clics sur les paramètres
+                // Clicks on settings
                 List<ModuleSetting> settings = ((ConfigurableModule)configModule.getWrappedModule()).getSettings();
                 int settingsAreaTop = configPanelY + 40;
                 int settingsAreaHeight = panelHeight - 50;
@@ -482,6 +512,28 @@ public class ClickGUI extends Screen {
                             ((ConfigurableModule)configModule.getWrappedModule()).onSettingChanged(setting);
                             return true;
                         }
+                    } else if (setting.getType() == ModuleSetting.SettingType.DOUBLE && setting.hasRange()) {
+                        int sliderX = settingX + settingWidth - 100;
+                        int sliderY = settingY + 10;
+                        int sliderWidth = 80;
+                        int sliderHeight = 10;
+
+                        if (mouseX >= sliderX && mouseX <= sliderX + sliderWidth &&
+                                mouseY >= sliderY && mouseY <= sliderY + sliderHeight) {
+                            draggedSetting = setting;
+                            sliderStartValue = setting.getDoubleValue();
+
+                            double min = setting.getMinValue().doubleValue();
+                            double max = setting.getMaxValue().doubleValue();
+                            double range = max - min;
+                            double normalizedValue = ((mouseX - sliderX) / sliderWidth) * range + min;
+                            double step = setting.getStepValue().doubleValue();
+                            normalizedValue = Math.round(normalizedValue / step) * step;
+                            normalizedValue = MathHelper.clamp(normalizedValue, min, max);
+                            setting.setDoubleValue(normalizedValue);
+                            ((ConfigurableModule)configModule.getWrappedModule()).onSettingChanged(setting);
+                            return true;
+                        }
                     }
                 }
 
@@ -496,17 +548,17 @@ public class ClickGUI extends Screen {
                     return true;
                 }
 
-                // Consommer l'événement si le clic est dans le panneau
+                // Consume the event if the click is within the panel
                 return true;
             }
         }
 
-        // Gérer les widgets (comme le bouton de fermeture principal)
+        // Handle widgets (like the main close button)
         if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
 
-        // Gérer les clics sur le panneau principal
+        // Handle clicks on the main panel
         int panelWidth = Math.min(this.width - 40, 800);
         int panelHeight = Math.min(this.height - 100, 400);
         int centerX = this.width / 2;
@@ -568,13 +620,13 @@ public class ClickGUI extends Screen {
                 int moduleX = moduleAreaX;
 
                 if (module.getWrappedModule() instanceof ConfigurableModule) {
-                    if (button == 1 && // Clic droit
+                    if (button == 1 && // Right-click
                             mouseX >= moduleX && mouseX <= moduleX + moduleWidth &&
                             mouseY >= moduleY && mouseY <= moduleY + moduleHeight) {
                         openConfigPanel(module);
                         return true;
                     }
-                    if (button == 0) { // Clic gauche sur l'icône de config
+                    if (button == 0) { // Left-click on the config icon
                         int configX = moduleX + moduleWidth - 50;
                         int configY = moduleY + 7;
                         int configSize = 10;
@@ -627,6 +679,7 @@ public class ClickGUI extends Screen {
         isDragging = false;
         isConfigDragging = false;
         isConfigPanelDragging = false;
+        draggedSetting = null;
         clickedModules.clear();
         return super.mouseReleased(mouseX, mouseY, button);
     }
@@ -649,6 +702,44 @@ public class ClickGUI extends Screen {
             configPanelDragStartX = (int) mouseX;
             configPanelDragStartY = (int) mouseY;
             return true;
+        }
+
+        if (draggedSetting != null && draggedSetting.getType() == ModuleSetting.SettingType.DOUBLE) {
+            int panelWidth = Math.min(this.width - 40, 300);
+            int centerX = this.width / 2;
+            int headerY = 15;
+            int logoSize = 32;
+            int panelY = headerY + logoSize + 25;
+            int configPanelX = centerX + (this.width - panelWidth) / 2 + configPanelOffsetX;
+            int maxOffset = this.width;
+            int currentOffset = (int)(maxOffset * (1.0f - configPanelAnimation));
+            configPanelX -= currentOffset;
+            int settingsAreaTop = panelY + 40;
+            int settingWidth = panelWidth - 20;
+
+            List<ModuleSetting> settings = ((ConfigurableModule)configModule.getWrappedModule()).getSettings();
+            int settingHeight = 40;
+            int spacing = 5;
+            for (int i = 0; i < settings.size(); i++) {
+                ModuleSetting setting = settings.get(i);
+                if (setting != draggedSetting) continue;
+
+                int settingY = settingsAreaTop + i * (settingHeight + spacing) - (int)configScrollOffset;
+                int settingX = configPanelX + 10;
+                int sliderX = settingX + settingWidth - 100;
+                int sliderWidth = 80;
+
+                double min = setting.getMinValue().doubleValue();
+                double max = setting.getMaxValue().doubleValue();
+                double range = max - min;
+                double normalizedValue = ((mouseX - sliderX) / sliderWidth) * range + min;
+                double step = setting.getStepValue().doubleValue();
+                normalizedValue = Math.round(normalizedValue / step) * step;
+                normalizedValue = MathHelper.clamp(normalizedValue, min, max);
+                setting.setDoubleValue(normalizedValue);
+                ((ConfigurableModule)configModule.getWrappedModule()).onSettingChanged(setting);
+                return true;
+            }
         }
 
         if (isConfigDragging && configModule != null) {
@@ -750,6 +841,7 @@ public class ClickGUI extends Screen {
             if (configModule != null) {
                 configModule = null;
                 configScrollOffset = 0.0f;
+                draggedSetting = null;
                 return true;
             }
             this.close();
@@ -762,6 +854,7 @@ public class ClickGUI extends Screen {
     public void close() {
         configModule = null;
         configScrollOffset = 0.0f;
+        draggedSetting = null;
         super.close();
     }
 
