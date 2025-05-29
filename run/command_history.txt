@@ -12,3 +12,18 @@
 /kill @e[type=item]
 /give Player800 minecraft:barrier
 /kill @e[type=bat]
+/amber top
+/amber dummy
+/locate biome minecraft:plains
+/tp @s -42 68 -279
+/amber dummy
+/time set day
+/difficulty easy
+/amber dummy
+/amber kill-dummy
+/kill @e[type=minecraft:zombie]
+/amber dummy
+/kill @e[type=minecraft:zombie]
+/amber top
+/amber dummy
+/time set day
