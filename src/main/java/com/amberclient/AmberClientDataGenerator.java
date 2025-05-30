@@ -6,6 +6,5 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 public class AmberClientDataGenerator implements DataGeneratorEntrypoint {
 	@Override
 	public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
-
 	}
 }

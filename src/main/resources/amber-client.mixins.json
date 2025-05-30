@@ -1,18 +1,20 @@
 {
-	"required": true,
-	"minVersion": "0.8",
-	"package": "com.amberclient.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"DoubleSliderCallbacksMixin",
-		"GameRendererMixin",
-		"EntityHitboxMixin",
-		"MinecraftClientAttackMixin",
-		"WorldRendererMixin"
-	],
-	"client": [],
-	"server": [],
-	"injectors": {
-		"defaultRequire": 1
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.amberclient.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "DoubleSliderCallbacksMixin",
+    "EntityHitboxMixin",
+    "GameRendererMixin",
+    "MinecraftClientAttackMixin",
+    "WorldRendererMixin"
+  ],
+  "client": [
+    "ClientPlayNetworkHandlerMixin"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
 	}
 }

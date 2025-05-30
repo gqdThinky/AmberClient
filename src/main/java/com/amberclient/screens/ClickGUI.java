@@ -69,7 +69,7 @@ public class ClickGUI extends Screen {
     private double sliderStartValue;
 
     public ClickGUI() {
-        super(Text.literal("amber Client - by @gqdThinky"));
+        super(Text.literal("Amber Client - by @gqdThinky"));
         lastTime = System.currentTimeMillis();
         initializeCategories();
     }
@@ -165,7 +165,7 @@ public class ClickGUI extends Screen {
 
         String statusText = configModule != null ?
                 "Configuring: " + configModule.getName() :
-                "amber Client v1.0 • MC 1.21.4";
+                "Amber Client dev0.0.3 • MC 1.21.4";
         context.drawTextWithShadow(this.textRenderer, statusText, scaledX + 10, statusBarY + 6, TEXT_COLOR);
 
         if (configPanelAnimation > 0.0f && configModule != null) {

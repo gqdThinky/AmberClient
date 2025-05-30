@@ -1,14 +1,14 @@
 {
 	"schemaVersion": 1,
 	"id": "amber-client",
-	"version": "${version}",
+	"version": "0.0.3",
 	"name": "Amber Client",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
-		"Me!"
+		"gqdThinky"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
+		"homepage": "https://beacons.page/gqdThinky",
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",

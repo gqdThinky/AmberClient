@@ -27,3 +27,7 @@
 /amber top
 /amber dummy
 /time set day
+/kill @e[type=minecraft:zombie]
+/amber dummy
+/kill @e[type=minecraft:zombie]
+/amber dummy

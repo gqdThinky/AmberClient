@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class AmberClient implements ModInitializer {
 	public static final String MOD_ID = "amberclient";
+	public static final String MOD_VERSION = "dev0.0.3";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private static boolean lastKeyPressed = false;
@@ -28,7 +29,7 @@ public class AmberClient implements ModInitializer {
 		AmberCommand.register();
 
 		//mc.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivé"), false);
-		LOGGER.info("amber Client started!");
+		LOGGER.info("Amber Client started!");
 	}
 
 	private void onClientTick(MinecraftClient client) {

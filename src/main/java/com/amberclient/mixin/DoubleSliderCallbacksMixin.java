@@ -5,10 +5,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
 import java.util.Optional;
 
-// Bypasses validation for double slider options to allow unrestricted gamma values
+/*
+        Used in the Fullbright module
+        It bypasses validation for double slider options
+        to allow unrestricted gamma values
+ */
 @Mixin(SimpleOption.DoubleSliderCallbacks.class)
 public class DoubleSliderCallbacksMixin {
 
