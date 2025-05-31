@@ -31,3 +31,16 @@
 /amber dummy
 /kill @e[type=minecraft:zombie]
 /amber dummy
+/gamemode survival
+/gamemode creative
+/kill @e[type=minecraft:zombie}
+/kill @e[type=minecraft:zombie]
+/weather clear
+/amber dummy
+/time set day
+/kill @e[type=minecraft:zombie]
+/amber dummy
+/kill @e[type=minecraft:zombie]
+/amber dummy
+/time set day
+/amber dummy

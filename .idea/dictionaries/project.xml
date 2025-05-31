@@ -2,8 +2,11 @@
   <dictionary name="project">
     <words>
       <w>amberclient</w>
+      <w>cdisabled</w>
+      <w>cenabled</w>
       <w>fullbright</w>
       <w>ljava</w>
+      <w>safewalk</w>
     </words>
   </dictionary>
 </component>

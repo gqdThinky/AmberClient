@@ -12,7 +12,7 @@ public class DummyCommand {
             try {
                 source.getServer().getCommandManager().executeWithPrefix(
                         source,
-                        "summon zombie ~ ~ ~ {CustomName:'[{\"text\":\"Zombie Dummy \",\"color\":\"red\"},{\"text\":\"ll\",\"color\":\"dark_red\",\"obfuscated\":true}]',CustomNameVisible:1b,Health:9999,Glowing:1b,NoAI:1b,OnGround:1b,PersistenceRequired:1b,HandItems:[{id:bedrock},{}],HandDropChances:[0f,0f],ArmorItems:[{},{},{},{id:golden_helmet}],attributes:[{id:max_health,base:9999f}]}"
+                        "summon minecraft:zombie ~ ~ ~ {CustomName:'[\"\",{\"text\":\"Zombie Dummy \",\"color\":\"red\"},{\"text\":\"ll\",\"obfuscated\":true,\"color\":\"dark_red\"}]',CustomNameVisible:1,NoAI:1b,PersistenceRequired:1b,Glowing:1,Health:99999,Attributes:[{Name:\"generic.maxHealth\",Base:999}],HandItems:[{id:\"minecraft:red_mushroom\",Count:1},{}],ArmorItems:[{},{},{},{id:\"minecraft:diamond_helmet\",Count:1,tag:{Enchantments:[{id:unbreaking,lvl:3}]}}]}"
                 );
 
                 source.getPlayer().sendMessage(

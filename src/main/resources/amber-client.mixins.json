@@ -7,8 +7,9 @@
     "DoubleSliderCallbacksMixin",
     "EntityHitboxMixin",
     "GameRendererMixin",
-    "MinecraftClientAttackMixin",
-    "WorldRendererMixin"
+    "MinecraftClientMixin",
+    "WorldRendererMixin",
+    "ClientPlayerEntityMixin"
   ],
   "client": [
     "ClientPlayNetworkHandlerMixin"

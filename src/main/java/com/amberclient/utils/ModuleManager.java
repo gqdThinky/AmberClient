@@ -1,9 +1,6 @@
 package com.amberclient.utils;
 
-import com.amberclient.modules.ActiveMods;
-import com.amberclient.modules.Fullbright;
-import com.amberclient.modules.Hitbox;
-import com.amberclient.modules.NoFall;
+import com.amberclient.modules.*;
 import com.amberclient.modules.xray.Xray;
 
 import net.minecraft.client.MinecraftClient;
@@ -21,6 +18,9 @@ public class ModuleManager {
         registerModule(new Fullbright());
         registerModule(new ActiveMods());
         registerModule(new Hitbox());
+        registerModule(new AutoClicker());
+        registerModule(new FastPlace());
+        registerModule(new SafeWalk());
     }
 
     public static ModuleManager getInstance() {
