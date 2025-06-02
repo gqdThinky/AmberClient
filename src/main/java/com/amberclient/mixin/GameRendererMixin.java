@@ -1,6 +1,6 @@
 package com.amberclient.mixin;
 
-import com.amberclient.modules.Hitbox;
+import com.amberclient.modules.combat.Hitbox;
 import net.minecraft.client.render.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

@@ -1,7 +1,7 @@
 package com.amberclient.mixin;
 
-import com.amberclient.modules.FastPlace;
-import com.amberclient.modules.Hitbox;
+import com.amberclient.modules.player.FastPlace;
+import com.amberclient.modules.combat.Hitbox;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.EntityHitResult;

@@ -4,12 +4,13 @@
   "package": "com.amberclient.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "ClientPlayerEntityMixin",
     "DoubleSliderCallbacksMixin",
     "EntityHitboxMixin",
     "GameRendererMixin",
     "MinecraftClientMixin",
     "WorldRendererMixin",
-    "ClientPlayerEntityMixin"
+    "EntityMixin"
   ],
   "client": [
     "ClientPlayNetworkHandlerMixin"

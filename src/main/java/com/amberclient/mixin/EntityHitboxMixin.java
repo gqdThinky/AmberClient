@@ -1,6 +1,6 @@
 package com.amberclient.mixin;
 
-import com.amberclient.modules.Hitbox;
+import com.amberclient.modules.combat.Hitbox;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Box;

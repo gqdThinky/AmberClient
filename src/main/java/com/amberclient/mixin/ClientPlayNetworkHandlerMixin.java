@@ -1,6 +1,6 @@
 package com.amberclient.mixin;
 
-import com.amberclient.event.EventManager;
+import com.amberclient.events.EventManager;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

@@ -44,3 +44,4 @@
 /amber dummy
 /time set day
 /amber dummy
+/time set day

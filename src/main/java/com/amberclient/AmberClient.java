@@ -22,22 +22,17 @@ public class AmberClient implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		// Register client-side tick event
 		ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
-
 		HudRenderCallback.EVENT.register(new HudRenderer());
 		AmberCommand.register();
 
-		//mc.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivé"), false);
-		LOGGER.info("Amber Client started!");
+		LOGGER.info("Amber Client started! Version: " + MOD_VERSION);
 	}
 
 	private void onClientTick(MinecraftClient client) {
-		// Check if right shift key is pressed
 		long windowHandle = client.getWindow().getHandle();
 		boolean keyPressed = InputUtil.isKeyPressed(windowHandle, GLFW.GLFW_KEY_RIGHT_SHIFT);
 
-		// Toggle TabGUI on key press (not hold)
 		if (keyPressed && !lastKeyPressed) {
 			if (client.currentScreen instanceof ClickGUI) {
 				client.setScreen(null);
@@ -45,10 +40,8 @@ public class AmberClient implements ModInitializer {
 				client.setScreen(new ClickGUI());
 			}
 		}
-
 		lastKeyPressed = keyPressed;
 
-		// Call ModuleManager's tick
 		ModuleManager.getInstance().onTick();
 	}
 }

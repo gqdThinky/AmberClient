@@ -11,8 +11,10 @@ base {
 }
 
 repositories {
-	maven { url "https://maven.fabricmc.net/" }
-	maven { url "https://maven.architectury.dev/" }
+	maven { url = "https://maven.fabricmc.net/" }
+	maven { url = "https://maven.architectury.dev/" }
+	maven { url "https://maven.lenni0451.net/releases" }
+	mavenCentral()
 }
 
 fabricApi {
@@ -29,6 +31,8 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+	implementation "net.lenni0451:LambdaEvents:2.4.2"
 }
 
 processResources {
@@ -39,9 +43,7 @@ processResources {
 	}
 }
 
-tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
-}
+
 
 java {
 	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
@@ -49,8 +51,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 jar {

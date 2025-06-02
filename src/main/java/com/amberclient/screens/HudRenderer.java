@@ -1,6 +1,6 @@
 package com.amberclient.screens;
 
-import com.amberclient.modules.ActiveMods;
+import com.amberclient.modules.misc.ActiveMods;
 import com.amberclient.utils.Module;
 import com.amberclient.utils.ModuleManager;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;

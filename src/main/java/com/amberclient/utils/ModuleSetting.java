@@ -17,9 +17,9 @@ public class ModuleSetting {
 
     private Number minValue;
     private Number maxValue;
-    private Number stepValue; // New field for step size
+    private Number stepValue;
 
-    // Constructor for Boolean
+    // Constructors remain the same
     public ModuleSetting(String name, String description, boolean defaultValue) {
         this.name = name;
         this.description = description;
@@ -28,7 +28,6 @@ public class ModuleSetting {
         this.defaultValue = defaultValue;
     }
 
-    // Constructor for Integer with limits
     public ModuleSetting(String name, String description, int defaultValue, int minValue, int maxValue) {
         this.name = name;
         this.description = description;
@@ -37,15 +36,13 @@ public class ModuleSetting {
         this.defaultValue = defaultValue;
         this.minValue = minValue;
         this.maxValue = maxValue;
-        this.stepValue = 1; // Default step for integers
+        this.stepValue = 1;
     }
 
-    // Constructor for Integer without limits
     public ModuleSetting(String name, String description, int defaultValue) {
         this(name, description, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
-    // Constructor for Double with limits and step
     public ModuleSetting(String name, String description, double defaultValue, double minValue, double maxValue, double step) {
         this.name = name;
         this.description = description;
@@ -57,17 +54,14 @@ public class ModuleSetting {
         this.stepValue = step;
     }
 
-    // Constructor for Double with limits (default step)
     public ModuleSetting(String name, String description, double defaultValue, double minValue, double maxValue) {
-        this(name, description, defaultValue, minValue, maxValue, 0.1); // Default step for doubles
+        this(name, description, defaultValue, minValue, maxValue, 0.1);
     }
 
-    // Constructor for Double without limits
     public ModuleSetting(String name, String description, double defaultValue) {
         this(name, description, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE, 0.1);
     }
 
-    // Constructor for String
     public ModuleSetting(String name, String description, String defaultValue) {
         this.name = name;
         this.description = description;
@@ -76,7 +70,7 @@ public class ModuleSetting {
         this.defaultValue = defaultValue;
     }
 
-    // Getters
+    // Getters remain the same
     public String getName() {
         return name;
     }
@@ -97,12 +91,10 @@ public class ModuleSetting {
         return defaultValue;
     }
 
-    // New getter for step value
     public Number getStepValue() {
         return stepValue;
     }
 
-    // Type-specific getters
     public boolean getBooleanValue() {
         if (type == SettingType.BOOLEAN) {
             return (boolean) value;
@@ -131,7 +123,15 @@ public class ModuleSetting {
         throw new IllegalStateException("Setting is not a string");
     }
 
-    // Type-specific setters
+    // Add the isEnabled method
+    public boolean isEnabled() {
+        if (type == SettingType.BOOLEAN) {
+            return (boolean) value;
+        }
+        throw new IllegalStateException("Setting is not a boolean and cannot be checked as enabled/disabled");
+    }
+
+    // Setters remain the same
     public void setBooleanValue(boolean value) {
         if (type == SettingType.BOOLEAN) {
             this.value = value;
@@ -176,7 +176,6 @@ public class ModuleSetting {
         }
     }
 
-    // Generic setter
     public void setValue(Object value) {
         switch (type) {
             case BOOLEAN:
@@ -208,12 +207,10 @@ public class ModuleSetting {
         }
     }
 
-    // Reset to default value
     public void resetToDefault() {
         this.value = this.defaultValue;
     }
 
-    // Range getters for numeric types
     public Number getMinValue() {
         return minValue;
     }

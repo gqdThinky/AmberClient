@@ -1,7 +1,13 @@
 package com.amberclient.utils;
 
-import com.amberclient.modules.*;
-import com.amberclient.modules.xray.Xray;
+import com.amberclient.modules.combat.AutoClicker;
+import com.amberclient.modules.combat.Hitbox;
+import com.amberclient.modules.misc.ActiveMods;
+import com.amberclient.modules.movement.NoFall;
+import com.amberclient.modules.movement.SafeWalk;
+import com.amberclient.modules.player.FastPlace;
+import com.amberclient.modules.render.Fullbright;
+import com.amberclient.modules.render.xray.Xray;
 
 import net.minecraft.client.MinecraftClient;
 import java.util.ArrayList;
