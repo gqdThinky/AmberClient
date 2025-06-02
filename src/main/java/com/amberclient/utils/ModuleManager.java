@@ -5,6 +5,7 @@ import com.amberclient.modules.combat.Hitbox;
 import com.amberclient.modules.misc.ActiveMods;
 import com.amberclient.modules.movement.NoFall;
 import com.amberclient.modules.movement.SafeWalk;
+import com.amberclient.modules.player.FastBreak;
 import com.amberclient.modules.player.FastPlace;
 import com.amberclient.modules.render.Fullbright;
 import com.amberclient.modules.render.xray.Xray;
@@ -26,6 +27,7 @@ public class ModuleManager {
         registerModule(new Hitbox());
         registerModule(new AutoClicker());
         registerModule(new FastPlace());
+        registerModule(new FastBreak());
         registerModule(new SafeWalk());
     }
 

@@ -1,18 +1,19 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.amberclient.mixin",
+  "package": "com.amberclient.mixins",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "ClientPlayerEntityMixin",
     "DoubleSliderCallbacksMixin",
     "EntityHitboxMixin",
+    "EntityMixin",
     "GameRendererMixin",
     "MinecraftClientMixin",
-    "WorldRendererMixin",
-    "EntityMixin"
+    "WorldRendererMixin"
   ],
   "client": [
+    "ClientPlayerInteractionManagerMixin",
     "ClientPlayNetworkHandlerMixin"
   ],
   "server": [],

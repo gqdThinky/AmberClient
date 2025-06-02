@@ -1,10 +1,13 @@
 v1	named	intermediary
-FIELD	com/amberclient/mixin/EntityMixin	Lnet/minecraft/world/World;	world	field_6002
-FIELD	com/amberclient/mixin/MinecraftClientMixin	I	itemUseCooldown	field_1752
-METHOD	com/amberclient/mixin/EntityMixin	()Z	isOnGround	method_24828
-METHOD	com/amberclient/mixin/EntityMixin	()Z	isSneaking	method_5715
-METHOD	com/amberclient/mixin/EntityMixin	()D	getX	method_23317
-METHOD	com/amberclient/mixin/EntityMixin	()D	getY	method_23318
-METHOD	com/amberclient/mixin/EntityMixin	()D	getZ	method_23321
-METHOD	com/amberclient/mixin/EntityMixin	()Lnet/minecraft/util/math/Box;	getBoundingBox	method_5829
-METHOD	com/amberclient/mixin/EntityMixin	(Lnet/minecraft/util/math/Box;)V	setBoundingBox	method_5857
+FIELD	com/amberclient/mixins/ClientPlayerInteractionManagerMixin	I	blockBreakingCooldown	field_3716
+FIELD	com/amberclient/mixins/ClientPlayerInteractionManagerMixin	Lnet/minecraft/util/math/BlockPos;	currentBreakingPos	field_3714
+FIELD	com/amberclient/mixins/ClientPlayerInteractionManagerMixin	F	currentBreakingProgress	field_3715
+FIELD	com/amberclient/mixins/EntityMixin	Lnet/minecraft/world/World;	world	field_6002
+FIELD	com/amberclient/mixins/MinecraftClientMixin	I	itemUseCooldown	field_1752
+METHOD	com/amberclient/mixins/EntityMixin	()Z	isOnGround	method_24828
+METHOD	com/amberclient/mixins/EntityMixin	()Z	isSneaking	method_5715
+METHOD	com/amberclient/mixins/EntityMixin	()D	getX	method_23317
+METHOD	com/amberclient/mixins/EntityMixin	()D	getY	method_23318
+METHOD	com/amberclient/mixins/EntityMixin	()D	getZ	method_23321
+METHOD	com/amberclient/mixins/EntityMixin	()Lnet/minecraft/util/math/Box;	getBoundingBox	method_5829
+METHOD	com/amberclient/mixins/EntityMixin	(Lnet/minecraft/util/math/Box;)V	setBoundingBox	method_5857
