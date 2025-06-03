@@ -1,12 +1,15 @@
 package com.amberclient.utils;
 
-public class ModuleSetting {
+import java.util.Set;
 
+public class ModuleSetting {
     public enum SettingType {
         BOOLEAN,
         INTEGER,
         DOUBLE,
-        STRING
+        STRING,
+        ENUM,
+        SET
     }
 
     private final String name;
@@ -14,12 +17,11 @@ public class ModuleSetting {
     private final SettingType type;
     private Object value;
     private Object defaultValue;
-
     private Number minValue;
     private Number maxValue;
     private Number stepValue;
 
-    // Constructors remain the same
+    // Existing constructors
     public ModuleSetting(String name, String description, boolean defaultValue) {
         this.name = name;
         this.description = description;
@@ -70,7 +72,25 @@ public class ModuleSetting {
         this.defaultValue = defaultValue;
     }
 
-    // Getters remain the same
+    // New constructor for enums
+    public ModuleSetting(String name, String description, Enum<?> defaultValue) {
+        this.name = name;
+        this.description = description;
+        this.type = SettingType.ENUM;
+        this.value = defaultValue;
+        this.defaultValue = defaultValue;
+    }
+
+    // New constructor for sets
+    public ModuleSetting(String name, String description, Set<?> defaultValue) {
+        this.name = name;
+        this.description = description;
+        this.type = SettingType.SET;
+        this.value = defaultValue;
+        this.defaultValue = defaultValue;
+    }
+
+    // Existing getters
     public String getName() {
         return name;
     }
@@ -123,7 +143,24 @@ public class ModuleSetting {
         throw new IllegalStateException("Setting is not a string");
     }
 
-    // Add the isEnabled method
+    // New getter for enums
+    @SuppressWarnings("unchecked")
+    public <T extends Enum<T>> T getEnumValue() {
+        if (type == SettingType.ENUM) {
+            return (T) value;
+        }
+        throw new IllegalStateException("Setting is not an enum");
+    }
+
+    // New getter for sets
+    @SuppressWarnings("unchecked")
+    public <T> Set<T> getSetValue() {
+        if (type == SettingType.SET) {
+            return (Set<T>) value;
+        }
+        throw new IllegalStateException("Setting is not a set");
+    }
+
     public boolean isEnabled() {
         if (type == SettingType.BOOLEAN) {
             return (boolean) value;
@@ -131,7 +168,7 @@ public class ModuleSetting {
         throw new IllegalStateException("Setting is not a boolean and cannot be checked as enabled/disabled");
     }
 
-    // Setters remain the same
+    // Existing setters
     public void setBooleanValue(boolean value) {
         if (type == SettingType.BOOLEAN) {
             this.value = value;
@@ -176,6 +213,24 @@ public class ModuleSetting {
         }
     }
 
+    // New setter for enums
+    public void setEnumValue(Enum<?> value) {
+        if (type == SettingType.ENUM) {
+            this.value = value;
+        } else {
+            throw new IllegalStateException("Setting is not an enum");
+        }
+    }
+
+    // New setter for sets
+    public <T> void setSetValue(Set<T> value) {
+        if (type == SettingType.SET) {
+            this.value = value;
+        } else {
+            throw new IllegalStateException("Setting is not a set");
+        }
+    }
+
     public void setValue(Object value) {
         switch (type) {
             case BOOLEAN:
@@ -204,11 +259,28 @@ public class ModuleSetting {
                     setStringValue(value.toString());
                 }
                 break;
+            case ENUM:
+                if (value instanceof Enum<?>) {
+                    setEnumValue((Enum<?>) value);
+                }
+                break;
+            case SET:
+                if (value instanceof Set<?>) {
+                    setSetValue((Set<?>) value);
+                }
+                break;
         }
     }
 
     public void resetToDefault() {
         this.value = this.defaultValue;
+    }
+
+    public int getIntValue() {
+        if (type == SettingType.INTEGER) {
+            return (int) value;
+        }
+        throw new IllegalStateException("Setting is not an integer");
     }
 
     public Number getMinValue() {

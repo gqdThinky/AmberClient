@@ -2,6 +2,7 @@ package com.amberclient.utils;
 
 import com.amberclient.modules.combat.AutoClicker;
 import com.amberclient.modules.combat.Hitbox;
+import com.amberclient.modules.combat.KillAura;
 import com.amberclient.modules.misc.ActiveMods;
 import com.amberclient.modules.movement.NoFall;
 import com.amberclient.modules.movement.SafeWalk;
@@ -25,6 +26,7 @@ public class ModuleManager {
         registerModule(new Fullbright());
         registerModule(new ActiveMods());
         registerModule(new Hitbox());
+        registerModule(new KillAura());
         registerModule(new AutoClicker());
         registerModule(new FastPlace());
         registerModule(new FastBreak());
