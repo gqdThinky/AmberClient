@@ -10,7 +10,8 @@
     "client.EntityMixin",
     "client.GameRendererMixin",
     "client.MinecraftClientMixin",
-    "client.WorldRendererMixin"
+    "client.WorldRendererMixin",
+    "amberclient.EntityESPMixin"
   ],
   "client": [
     "client.ClientPlayerInteractionManagerMixin",

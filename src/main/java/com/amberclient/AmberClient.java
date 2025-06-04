@@ -1,5 +1,6 @@
 package com.amberclient;
 
+import com.amberclient.modules.render.EntityESP;
 import com.amberclient.screens.HudRenderer;
 import com.amberclient.screens.ClickGUI;
 import com.amberclient.commands.AmberCommand;
@@ -8,6 +9,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;

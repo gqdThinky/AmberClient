@@ -9,6 +9,7 @@ import com.amberclient.modules.movement.NoFall;
 import com.amberclient.modules.movement.SafeWalk;
 import com.amberclient.modules.player.FastBreak;
 import com.amberclient.modules.player.FastPlace;
+import com.amberclient.modules.render.EntityESP;
 import com.amberclient.modules.render.Fullbright;
 import com.amberclient.modules.render.xray.Xray;
 
@@ -33,6 +34,7 @@ public class ModuleManager {
         registerModule(new FastBreak());
         registerModule(new SafeWalk());
         registerModule(new Transparency());
+        registerModule(new EntityESP());
     }
 
     public static ModuleManager getInstance() {
@@ -41,6 +43,15 @@ public class ModuleManager {
 
     public List<Module> getModules() {
         return new ArrayList<>(modules);
+    }
+
+    public static Module getModule(Class<? extends Module> moduleClass) {
+        for (Module module : INSTANCE.modules) { // Changed to INSTANCE.modules
+            if (module.getClass() == moduleClass) {
+                return module;
+            }
+        }
+        return null;
     }
 
     public void toggleModule(Module module) {

@@ -1,4 +1,3 @@
-/tp Player438 ~ ~100 ~
 /gamemode creative
 /give Player32 minecraft:cooked_beef 64
 /spawnpoint Player57
@@ -48,3 +47,4 @@
 /tellraw @a {"text":"Bonjour !","font":"mymod:custom_font"}
 /tellraw @a {"text":"Bonjour !","font":"amberclient:custom_font"}
 /amber dummy
+/time set day
