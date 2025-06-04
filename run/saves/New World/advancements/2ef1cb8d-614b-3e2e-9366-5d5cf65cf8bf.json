@@ -7,7 +7,8 @@
   },
   "minecraft:adventure/adventuring_time": {
     "criteria": {
-      "minecraft:forest": "2025-05-27 21:18:58 +0200"
+      "minecraft:forest": "2025-05-27 21:18:58 +0200",
+      "minecraft:plains": "2025-06-04 14:51:34 +0200"
     },
     "done": false
   },

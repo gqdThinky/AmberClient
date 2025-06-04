@@ -1,5 +1,7 @@
 package com.amberclient.screens;
 
+import com.amberclient.AmberClient;
+import com.amberclient.modules.hud.Transparency;
 import com.amberclient.utils.module.Module;
 import com.amberclient.utils.module.ModuleManager;
 import com.amberclient.utils.module.ConfigurableModule;
@@ -21,8 +23,8 @@ import java.util.Map;
 
 public class ClickGUI extends Screen {
     // Theme colors
-    private static final int BACKGROUND_COLOR = new Color(20, 20, 25, 200).getRGB();
-    private static final int PANEL_COLOR = new Color(30, 30, 35, 255).getRGB();
+    private static final int BASE_BACKGROUND_COLOR = new Color(20, 20, 25, 200).getRGB();
+    private static final int BASE_PANEL_COLOR = new Color(30, 30, 35, 255).getRGB();
     private static final int ACCENT_COLOR = new Color(255, 165, 0).getRGB();
     private static final int ACCENT_HOVER_COLOR = new Color(255, 190, 50).getRGB();
     private static final int TEXT_COLOR = new Color(220, 220, 220).getRGB();
@@ -81,6 +83,8 @@ public class ClickGUI extends Screen {
             String categoryName = module.getCategory();
             categoryMap.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(module);
         }
+
+        // Create categories
         for (Map.Entry<String, List<Module>> entry : categoryMap.entrySet()) {
             String categoryName = entry.getKey();
             List<Module> categoryModules = entry.getValue();
@@ -90,7 +94,42 @@ public class ClickGUI extends Screen {
             }
             categories.add(new Category(categoryName, wrappedModules));
         }
-        categories.sort((c1, c2) -> c1.getName().compareToIgnoreCase(c2.getName()));
+
+        Category hudCategory = null;
+        for (Category category : categories) {
+            if (category.getName().equals("HUD")) {
+                hudCategory = category;
+                break;
+            }
+        }
+        if (hudCategory != null) {
+            categories.remove(hudCategory);
+            categories.add(hudCategory);
+        }
+
+        categories.sort((c1, c2) -> {
+            if (c1.getName().equals("HUD") || c2.getName().equals("HUD")) {
+                return 0;
+            }
+            return c1.getName().compareToIgnoreCase(c2.getName());
+        });
+    }
+
+    private Transparency getTransparencyModule() {
+        for (Module module : ModuleManager.getInstance().getModules()) {
+            if (module instanceof Transparency) {
+                return (Transparency) module;
+            }
+        }
+        return null;
+    }
+
+    private int applyTransparency(int baseColor, float transparency) {
+        int r = (baseColor >> 16) & 0xFF;
+        int g = (baseColor >> 8) & 0xFF;
+        int b = baseColor & 0xFF;
+        int a = (int) (((baseColor >> 24) & 0xFF) * transparency);
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     @Override
@@ -120,8 +159,15 @@ public class ClickGUI extends Screen {
             configPanelAnimation = MathHelper.clamp(configPanelAnimation, 0.0f, 1.0f);
         }
 
+        // Get transparency level from Transparency module
+        float transparency = 1.0f;
+        Transparency transparencyModule = getTransparencyModule();
+        if (transparencyModule != null && transparencyModule.isEnabled()) {
+            transparency = (float) transparencyModule.getTransparencyLevel();
+        }
+
         this.renderBackground(context, mouseX, mouseY, delta);
-        context.fill(0, 0, this.width, this.height, BACKGROUND_COLOR);
+        context.fill(0, 0, this.width, this.height, applyTransparency(BASE_BACKGROUND_COLOR, transparency));
 
         int logoSize = 32;
         int centerX = this.width / 2;
@@ -134,7 +180,7 @@ public class ClickGUI extends Screen {
         int panelY = headerY + logoSize + 25;
 
         float scale = 0.8f + 0.2f * animationProgress;
-        float alpha = animationProgress;
+        float alpha = animationProgress * transparency;
 
         int scaledWidth = (int)(panelWidth * scale);
         int scaledHeight = (int)(panelHeight * scale);
@@ -144,12 +190,7 @@ public class ClickGUI extends Screen {
         scaledX = Math.round(scaledX);
         scaledY = Math.round(scaledY);
 
-        int panelColorWithAlpha = new Color(
-                (PANEL_COLOR >> 16) & 0xFF,
-                (PANEL_COLOR >> 8) & 0xFF,
-                PANEL_COLOR & 0xFF,
-                (int)(((PANEL_COLOR >> 24) & 0xFF) * alpha)
-        ).getRGB();
+        int panelColorWithAlpha = applyTransparency(BASE_PANEL_COLOR, alpha);
 
         context.fill(scaledX, scaledY, scaledX + scaledWidth, scaledY + scaledHeight, panelColorWithAlpha);
 
@@ -161,11 +202,11 @@ public class ClickGUI extends Screen {
         renderModules(context, separatorX + 10, scaledY, scaledWidth - categoryWidth - 10, scaledHeight, mouseX, mouseY);
 
         int statusBarY = scaledY + scaledHeight + 5;
-        context.fill(scaledX, statusBarY, scaledX + scaledWidth, statusBarY + 20, PANEL_COLOR);
+        context.fill(scaledX, statusBarY, scaledX + scaledWidth, statusBarY + 20, applyTransparency(BASE_PANEL_COLOR, transparency));
 
         String statusText = configModule != null ?
                 "Configuring: " + configModule.getName() :
-                "Amber Client dev0.0.3 • MC 1.21.4";
+                "Amber Client " + getModVersion() + " • MC 1.21.4";
         context.drawTextWithShadow(this.textRenderer, statusText, scaledX + 10, statusBarY + 6, TEXT_COLOR);
 
         if (configPanelAnimation > 0.0f && configModule != null) {
@@ -176,6 +217,13 @@ public class ClickGUI extends Screen {
     }
 
     private void renderCategories(DrawContext context, int x, int y, int width, int height, int mouseX, int mouseY) {
+        // Get transparency level for categories
+        float transparency = 1.0f;
+        Transparency transparencyModule = getTransparencyModule();
+        if (transparencyModule != null && transparencyModule.isEnabled()) {
+            transparency = (float) transparencyModule.getTransparencyLevel();
+        }
+
         int categoryHeight = 40;
         int spacing = 5;
         int totalHeight = categories.size() * (categoryHeight + spacing) - spacing;
@@ -191,7 +239,7 @@ public class ClickGUI extends Screen {
                     mouseY >= categoryY && mouseY <= categoryY + categoryHeight;
 
             int bgColor = (selectedCategory == i) ? ACCENT_COLOR :
-                    (isHovered ? new Color(50, 50, 55, 220).getRGB() : PANEL_COLOR);
+                    (isHovered ? applyTransparency(new Color(50, 50, 55, 220).getRGB(), transparency) : applyTransparency(BASE_PANEL_COLOR, transparency));
 
             categoryX = Math.round(categoryX);
             categoryY = Math.round(categoryY);
@@ -210,6 +258,13 @@ public class ClickGUI extends Screen {
     private void renderModules(DrawContext context, int x, int y, int width, int height, int mouseX, int mouseY) {
         if (selectedCategory < 0 || selectedCategory >= categories.size()) {
             return;
+        }
+
+        // Get transparency level for modules
+        float transparency = 1.0f;
+        Transparency transparencyModule = getTransparencyModule();
+        if (transparencyModule != null && transparencyModule.isEnabled()) {
+            transparency = (float) transparencyModule.getTransparencyLevel();
         }
 
         Category category = categories.get(selectedCategory);
@@ -241,8 +296,8 @@ public class ClickGUI extends Screen {
             }
 
             int moduleBgColor = module.isEnabled() ?
-                    new Color(ACCENT_COLOR).darker().getRGB() :
-                    new Color(40, 40, 45, 220).getRGB();
+                    new Color(ACCENT_COLOR).darker().getRGB() : // Pas de transparence pour les modules activés
+                    applyTransparency(new Color(40, 40, 45, 220).getRGB(), transparency);
 
             int moduleX = Math.round(x);
             context.fill(moduleX, moduleY, moduleX + moduleWidth, moduleY + moduleHeight, moduleBgColor);
@@ -289,7 +344,7 @@ public class ClickGUI extends Screen {
         if (contentHeight > scrollAreaHeight) {
             int scrollbarX = Math.round(x + width - 20);
             int scrollbarWidth = 10;
-            context.fill(scrollbarX, scrollAreaTop, scrollbarX + scrollbarWidth, scrollAreaBottom, new Color(50, 50, 55).getRGB());
+            context.fill(scrollbarX, scrollAreaTop, scrollbarX + scrollbarWidth, scrollAreaBottom, applyTransparency(new Color(50, 50, 55).getRGB(), transparency));
             float scrollRatio = (float) scrollAreaHeight / contentHeight;
             int thumbHeight = Math.max(20, (int)(scrollAreaHeight * scrollRatio));
             int thumbY = Math.round(scrollAreaTop + (int)((scrollAreaHeight - thumbHeight) * (scrollOffset / maxScroll)));
@@ -317,12 +372,8 @@ public class ClickGUI extends Screen {
         int currentOffset = (int) (maxOffset * (1.0f - configPanelAnimation));
         configPanelX -= currentOffset;
 
-        int panelColorWithAlpha = new Color(
-                (PANEL_COLOR >> 16) & 0xFF,
-                (PANEL_COLOR >> 8) & 0xFF,
-                PANEL_COLOR & 0xFF,
-                (int) (255 * configPanelAnimation)
-        ).getRGB();
+        // Use base panel color without transparency
+        int panelColorWithAlpha = BASE_PANEL_COLOR;
 
         context.fill(configPanelX, configPanelY, configPanelX + configPanelWidth, configPanelY + configPanelHeight, panelColorWithAlpha);
 
@@ -538,7 +589,7 @@ public class ClickGUI extends Screen {
                 }
 
                 // Scrollbar
-                int scrollbarX = configPanelX + panelWidth - 15;
+                int scrollbarX = configPanelX + configPanelY - 15;
                 int scrollbarWidth = 5;
                 if (mouseX >= scrollbarX && mouseX <= scrollbarX + scrollbarWidth &&
                         mouseY >= settingsAreaTop && mouseY <= settingsAreaTop + settingsAreaHeight) {
@@ -743,7 +794,7 @@ public class ClickGUI extends Screen {
         }
 
         if (isConfigDragging && configModule != null) {
-            int panelHeight = Math.min(this.height - 100, 400);
+            int panelHeight = Math.min(this.width - 40, 400);
             int headerY = 15;
             int logoSize = 32;
             int panelY = headerY + logoSize + 25;
@@ -906,6 +957,10 @@ public class ClickGUI extends Screen {
         public Module getWrappedModule() {
             return module;
         }
+    }
+
+    private static String getModVersion(){
+        return AmberClient.MOD_VERSION;
     }
 
     @Override

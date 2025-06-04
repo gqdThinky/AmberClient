@@ -25,7 +25,9 @@
   },
   "minecraft:adventure/adventuring_time": {
     "criteria": {
-      "minecraft:forest": "2025-05-25 21:19:29 +0200"
+      "minecraft:forest": "2025-05-25 21:19:29 +0200",
+      "minecraft:sparse_jungle": "2025-06-04 16:08:10 +0200",
+      "minecraft:plains": "2025-06-04 16:07:52 +0200"
     },
     "done": false
   },

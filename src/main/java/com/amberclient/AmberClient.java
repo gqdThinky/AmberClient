@@ -6,16 +6,18 @@ import com.amberclient.commands.AmberCommand;
 import com.amberclient.utils.module.ModuleManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AmberClient implements ModInitializer {
 	public static final String MOD_ID = "amberclient";
-	public static final String MOD_VERSION = "dev0.0.3";
+	public static final String MOD_VERSION = "v0.5";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private static boolean lastKeyPressed = false;
@@ -23,7 +25,21 @@ public class AmberClient implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
-		HudRenderCallback.EVENT.register(new HudRenderer());
+
+		// Updated HUD registration using HudLayerRegistrationCallback
+		HudLayerRegistrationCallback.EVENT.register(layeredDrawer -> {
+			// Add your HUD layer after the experience level (after most main HUD elements)
+			layeredDrawer.attachLayerAfter(
+					IdentifiedLayer.EXPERIENCE_LEVEL,
+					Identifier.of(MOD_ID, "hud_overlay"),
+					(context, tickCounter) -> {
+						// Create and use your HudRenderer here
+						HudRenderer hudRenderer = new HudRenderer();
+						hudRenderer.onHudRender(context, tickCounter);
+					}
+			);
+		});
+
 		AmberCommand.register();
 
 		LOGGER.info("Amber Client started! Version: " + MOD_VERSION);

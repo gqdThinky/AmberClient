@@ -29,7 +29,7 @@ public class Hitbox extends Module implements ConfigurableModule {
     private final RotationFaker rotationFaker = new RotationFaker();
 
     public Hitbox() {
-        super("Hitbox", "Increases hitboxes' size", "Combat");
+        super("Hitbox", "(DETECTABLE) Increases hitboxes' size", "Combat");
         instance = this;
 
         expandX = new ModuleSetting("Expand X", "Horizontal hitbox expansion", 0.25, 0.0, 2.0, 0.05);

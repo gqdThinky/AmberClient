@@ -3,7 +3,6 @@ package com.amberclient.screens;
 import com.amberclient.modules.hud.ActiveMods;
 import com.amberclient.utils.module.Module;
 import com.amberclient.utils.module.ModuleManager;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
@@ -11,12 +10,11 @@ import net.minecraft.client.render.RenderTickCounter;
 import java.awt.Color;
 import java.util.List;
 
-public class HudRenderer implements HudRenderCallback {
+public class HudRenderer {
     private static final int BACKGROUND_COLOR = new Color(20, 20, 25, 200).getRGB();
     private static final int TEXT_COLOR = new Color(220, 220, 220).getRGB();
     private static final int ACCENT_COLOR = new Color(255, 165, 0).getRGB();
 
-    @Override
     public void onHudRender(DrawContext context, RenderTickCounter tickCounter) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client == null || client.player == null || client.options.hudHidden) {
@@ -33,11 +31,11 @@ public class HudRenderer implements HudRenderCallback {
             return;
         }
 
-        // Get enabled modules, excluding ActiveMods
+        // Get enabled modules, excluding ActiveMods and Transparency
         List<Module> enabledModules = ModuleManager.getInstance().getModules()
                 .stream()
                 .filter(Module::isEnabled)
-                .filter(module -> !module.getName().equals("Active mods"))
+                .filter(module -> !module.getName().equals("Active mods") && !module.getName().equals("Transparency"))
                 .toList();
 
         if (enabledModules.isEmpty()) {

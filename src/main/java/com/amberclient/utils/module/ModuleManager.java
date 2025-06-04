@@ -4,6 +4,7 @@ import com.amberclient.modules.combat.AutoClicker;
 import com.amberclient.modules.combat.Hitbox;
 import com.amberclient.modules.combat.KillAura;
 import com.amberclient.modules.hud.ActiveMods;
+import com.amberclient.modules.hud.Transparency;
 import com.amberclient.modules.movement.NoFall;
 import com.amberclient.modules.movement.SafeWalk;
 import com.amberclient.modules.player.FastBreak;
@@ -31,6 +32,7 @@ public class ModuleManager {
         registerModule(new FastPlace());
         registerModule(new FastBreak());
         registerModule(new SafeWalk());
+        registerModule(new Transparency());
     }
 
     public static ModuleManager getInstance() {
