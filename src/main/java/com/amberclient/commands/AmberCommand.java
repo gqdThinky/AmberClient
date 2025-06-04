@@ -1,7 +1,7 @@
 package com.amberclient.commands;
 
-import com.amberclient.commands.amber.DummyCommand;
-import com.amberclient.commands.amber.TopCommand;
+import com.amberclient.commands.impl.DummyCommand;
+import com.amberclient.commands.impl.TopCommand;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;

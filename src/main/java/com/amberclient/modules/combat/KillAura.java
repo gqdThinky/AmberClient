@@ -1,8 +1,8 @@
 package com.amberclient.modules.combat;
 
-import com.amberclient.utils.ConfigurableModule;
-import com.amberclient.utils.Module;
-import com.amberclient.utils.ModuleSetting;
+import com.amberclient.utils.module.ConfigurableModule;
+import com.amberclient.utils.module.Module;
+import com.amberclient.utils.module.ModuleSetting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
@@ -21,8 +21,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
-import static com.amberclient.utils.TickRate.getTickRate;
-import static com.amberclient.utils.TickRate.getTimeSinceLastTick;
+import static com.amberclient.utils.general.TickRate.getTickRate;
+import static com.amberclient.utils.general.TickRate.getTimeSinceLastTick;
 
 /*
     Thanks to https://github.com/enzzzh for the KillAura module base!
@@ -58,7 +58,7 @@ public class KillAura extends Module implements ConfigurableModule {
     public void onEnable() {
         MinecraftClient client = MinecraftClient.getInstance();
         client.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
-        LOGGER.info(getName() + " module activated");
+        LOGGER.info("{} module activated", getName());
     }
 
     @Override
@@ -66,7 +66,7 @@ public class KillAura extends Module implements ConfigurableModule {
         stopAttacking();
         MinecraftClient client = MinecraftClient.getInstance();
         client.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
-        LOGGER.info(getName() + " module disabled");
+        LOGGER.info("{} module disabled", getName());
     }
 
     private GameMode getGameMode(PlayerEntity player) {
@@ -137,7 +137,7 @@ public class KillAura extends Module implements ConfigurableModule {
                 delayToUse *= (20.0 / tps);
             }
         }
-        double randomDelay = delayToUse * (0.8 + Math.random() * 0.4); // ±20% variation
+        double randomDelay = delayToUse * (0.8 + Math.random() * 0.4);
 
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastClickTime >= randomDelay) {

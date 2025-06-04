@@ -1,6 +1,6 @@
 package com.amberclient.modules.render;
 
-import com.amberclient.utils.Module;
+import com.amberclient.utils.module.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 

@@ -1,6 +1,6 @@
 package com.amberclient.modules.render.xray;
 
-import com.amberclient.utils.Module;
+import com.amberclient.utils.module.Module;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;

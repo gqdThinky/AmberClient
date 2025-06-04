@@ -1,6 +1,6 @@
 package com.amberclient.modules.movement;
 
-import com.amberclient.utils.Module;
+import com.amberclient.utils.module.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;

@@ -1,8 +1,8 @@
 package com.amberclient.screens;
 
-import com.amberclient.modules.misc.ActiveMods;
-import com.amberclient.utils.Module;
-import com.amberclient.utils.ModuleManager;
+import com.amberclient.modules.hud.ActiveMods;
+import com.amberclient.utils.module.Module;
+import com.amberclient.utils.module.ModuleManager;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;

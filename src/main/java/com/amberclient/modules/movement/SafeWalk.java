@@ -1,8 +1,8 @@
 package com.amberclient.modules.movement;
 
-import com.amberclient.utils.ConfigurableModule;
-import com.amberclient.utils.Module;
-import com.amberclient.utils.ModuleSetting;
+import com.amberclient.utils.module.ConfigurableModule;
+import com.amberclient.utils.module.Module;
+import com.amberclient.utils.module.ModuleSetting;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
