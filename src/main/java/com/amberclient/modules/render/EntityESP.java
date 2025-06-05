@@ -17,22 +17,27 @@ public class EntityESP extends Module implements ConfigurableModule {
 
     private final ModuleSetting renderPlayersSetting;
     private final ModuleSetting renderMobsSetting;
+    private final ModuleSetting rangeSetting;
     private final List<ModuleSetting> settings;
 
-    // Configuration options
-    private float lineWidth = 2.0f;
-    private float[] playerColor = {1.0f, 0.0f, 0.0f, 1.0f}; // Red for players
-    private float[] mobColor = {0.0f, 1.0f, 0.0f, 1.0f};    // Green for mobs
+    private static EntityESP INSTANCE;
 
     public EntityESP() {
-        super("Entity ESP", "Affiche des contours autour des modèles d'entités", "Render");
+        super("Entity ESP", "Display outlines around entity models (players & mobs)", "Render");
+        INSTANCE = this;
 
-        renderPlayersSetting = new ModuleSetting("Render Players", "Affiche les contours pour les joueurs", true);
-        renderMobsSetting = new ModuleSetting("Render Mobs", "Affiche les contours pour les mobs", true);
+        renderPlayersSetting = new ModuleSetting("Render Players", "Displays outlines for players", true);
+        renderMobsSetting = new ModuleSetting("Render Mobs", "Displays outlines for mobs", true);
+        rangeSetting = new ModuleSetting("Render Range", "X (in chunks)", 4, 1, 8, 1);
 
         settings = new ArrayList<>();
         settings.add(renderPlayersSetting);
         settings.add(renderMobsSetting);
+        settings.add(rangeSetting);
+    }
+
+    public static EntityESP getInstance() {
+        return INSTANCE;
     }
 
     @Override
@@ -62,10 +67,11 @@ public class EntityESP extends Module implements ConfigurableModule {
 
     @Override
     public void onSettingChanged(ModuleSetting setting) {
-        // Réagir aux changements si nécessaire (optionnel)
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
     }
 
-    // Getters pour les paramètres
+    // Getters for settings
     public ModuleSetting getRenderPlayersSetting() {
         return renderPlayersSetting;
     }
@@ -73,12 +79,4 @@ public class EntityESP extends Module implements ConfigurableModule {
     public ModuleSetting getRenderMobsSetting() {
         return renderMobsSetting;
     }
-
-    // Getters et setters existants
-    public float getLineWidth() { return lineWidth; }
-    public void setLineWidth(float lineWidth) { this.lineWidth = lineWidth; }
-    public float[] getPlayerColor() { return playerColor; }
-    public void setPlayerColor(float[] playerColor) { this.playerColor = playerColor; }
-    public float[] getMobColor() { return mobColor; }
-    public void setMobColor(float[] mobColor) { this.mobColor = mobColor; }
 }

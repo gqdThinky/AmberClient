@@ -5,17 +5,18 @@
     },
     "done": true
   },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:forest": "2025-05-27 21:18:01 +0200",
+      "minecraft:plains": "2025-06-05 17:50:45 +0200"
+    },
+    "done": false
+  },
   "minecraft:adventure/root": {
     "criteria": {
       "killed_something": "2025-05-27 21:18:19 +0200"
     },
     "done": true
-  },
-  "minecraft:adventure/adventuring_time": {
-    "criteria": {
-      "minecraft:forest": "2025-05-27 21:18:01 +0200"
-    },
-    "done": false
   },
   "DataVersion": 4189
 }
