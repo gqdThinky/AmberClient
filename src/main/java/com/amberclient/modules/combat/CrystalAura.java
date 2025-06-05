@@ -1,7 +1,5 @@
 package AmberClient.src.main.java.com.amberclient.modules.combat;
 
-public class CrystalAura {package AmberClient.src.main.java.com.amberclient.modules.combat;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityEnderCrystal;
@@ -115,6 +113,4 @@ public class CrystalAura {
         );
         mc.thePlayer.swingItem();
     }
-}
-    
 }
