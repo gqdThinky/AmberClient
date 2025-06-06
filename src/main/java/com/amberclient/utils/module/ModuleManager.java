@@ -5,6 +5,7 @@ import com.amberclient.modules.combat.Hitbox;
 import com.amberclient.modules.combat.KillAura;
 import com.amberclient.modules.hud.ActiveMods;
 import com.amberclient.modules.hud.Transparency;
+import com.amberclient.modules.minigames.MurdererFinder;
 import com.amberclient.modules.movement.NoFall;
 import com.amberclient.modules.movement.SafeWalk;
 import com.amberclient.modules.player.FastBreak;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public class ModuleManager {
     private static final ModuleManager INSTANCE = new ModuleManager();
@@ -37,6 +37,7 @@ public class ModuleManager {
         registerModule(new Xray());
         registerModule(new EntityESP());
         registerModule(new Fullbright());
+        registerModule(new MurdererFinder());
     }
 
     public static ModuleManager getInstance() {

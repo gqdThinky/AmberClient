@@ -10,7 +10,10 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.client.option.KeyBinding;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,8 @@ public class AmberClient implements ModInitializer {
 
 	private static boolean lastKeyPressed = false;
 	private static boolean hudLayerRegistered = false; // Flag to prevent duplicate registration
+
+	public static final String FORMAT = Formatting.ITALIC.toString() + Formatting.DARK_GRAY;
 
 	@Override
 	public void onInitialize() {

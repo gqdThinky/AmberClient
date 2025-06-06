@@ -23,17 +23,18 @@
     },
     "done": true
   },
-  "minecraft:adventure/adventuring_time": {
-    "criteria": {
-      "minecraft:forest": "2025-05-25 14:43:35 +0200"
-    },
-    "done": false
-  },
   "minecraft:recipes/misc/diamond_from_blasting_deepslate_diamond_ore": {
     "criteria": {
       "has_deepslate_diamond_ore": "2025-05-25 14:43:34 +0200"
     },
     "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:forest": "2025-05-25 14:43:35 +0200",
+      "minecraft:plains": "2025-06-06 23:00:16 +0200"
+    },
+    "done": false
   },
   "DataVersion": 4189
 }
