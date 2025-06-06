@@ -1,4 +1,4 @@
-### Roadmap: https://trll.io/zjHLkcej3v/amber-client?pwd=6elZz0ohqntviRtw
+### Roadmap: [Check it on Trello](https://trello.com/b/DKUyIJQ7/amber-client)
 
 ---
 
