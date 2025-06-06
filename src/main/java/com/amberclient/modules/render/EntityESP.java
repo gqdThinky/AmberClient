@@ -18,6 +18,8 @@ public class EntityESP extends Module implements ConfigurableModule {
     private final ModuleSetting renderPlayersSetting;
     private final ModuleSetting renderMobsSetting;
     private final ModuleSetting rangeSetting;
+    private final ModuleSetting showNametagsSetting;
+    private final ModuleSetting showHealthSetting;
     private final List<ModuleSetting> settings;
 
     private static EntityESP INSTANCE;
@@ -29,11 +31,15 @@ public class EntityESP extends Module implements ConfigurableModule {
         renderPlayersSetting = new ModuleSetting("Render Players", "Displays outlines for players", true);
         renderMobsSetting = new ModuleSetting("Render Mobs", "Displays outlines for mobs", true);
         rangeSetting = new ModuleSetting("Render Range", "X (in chunks)", 4, 1, 8, 1);
+        showNametagsSetting = new ModuleSetting("Show Nametags", "Shows entity names above them", true);
+        showHealthSetting = new ModuleSetting("Show Health", "Shows entity health above them", true);
 
         settings = new ArrayList<>();
         settings.add(renderPlayersSetting);
         settings.add(renderMobsSetting);
         settings.add(rangeSetting);
+        settings.add(showNametagsSetting);
+        settings.add(showHealthSetting);
     }
 
     public static EntityESP getInstance() {
@@ -78,5 +84,13 @@ public class EntityESP extends Module implements ConfigurableModule {
 
     public ModuleSetting getRenderMobsSetting() {
         return renderMobsSetting;
+    }
+
+    public ModuleSetting getShowNametagsSetting() {
+        return showNametagsSetting;
+    }
+
+    public ModuleSetting getShowHealthSetting() {
+        return showHealthSetting;
     }
 }
