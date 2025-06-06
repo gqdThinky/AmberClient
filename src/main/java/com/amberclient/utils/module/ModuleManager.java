@@ -1,7 +1,18 @@
 package com.amberclient.utils.module;
 
+import com.amberclient.modules.combat.AutoClicker;
+import com.amberclient.modules.combat.Hitbox;
+import com.amberclient.modules.combat.KillAura;
+import com.amberclient.modules.hud.ActiveMods;
+import com.amberclient.modules.hud.Transparency;
+import com.amberclient.modules.movement.NoFall;
+import com.amberclient.modules.movement.SafeWalk;
+import com.amberclient.modules.player.FastBreak;
+import com.amberclient.modules.player.FastPlace;
+import com.amberclient.modules.render.EntityESP;
+import com.amberclient.modules.render.Fullbright;
+import com.amberclient.modules.render.xray.Xray;
 import net.minecraft.client.MinecraftClient;
-import org.reflections.Reflections;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,18 +25,18 @@ public class ModuleManager {
     private final List<Module> modules = new ArrayList<>();
 
     private ModuleManager() {
-        Reflections reflections = new Reflections("com.amberclient.modules");
-
-        // Find all Module subclasses
-        Set<Class<? extends Module>> moduleClasses = reflections.getSubTypesOf(Module.class);
-
-        for (Class<? extends Module> moduleClass : moduleClasses) {
-            try {
-                registerModule(moduleClass.getDeclaredConstructor().newInstance());
-            } catch (Exception e) {
-                System.err.println("Error during module instantiation " + moduleClass.getSimpleName() + ": " + e.getMessage());
-            }
-        }
+        registerModule(new AutoClicker());
+        registerModule(new Hitbox());
+        registerModule(new KillAura());
+        registerModule(new ActiveMods());
+        registerModule(new Transparency());
+        registerModule(new NoFall());
+        registerModule(new SafeWalk());
+        registerModule(new FastBreak());
+        registerModule(new FastPlace());
+        registerModule(new Xray());
+        registerModule(new EntityESP());
+        registerModule(new Fullbright());
     }
 
     public static ModuleManager getInstance() {
@@ -64,6 +75,8 @@ public class ModuleManager {
     }
 
     public void registerModule(Module module) {
-        modules.add(module);
+        if (module != null && !modules.contains(module)) {
+            modules.add(module);
+        }
     }
 }

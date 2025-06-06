@@ -1,9 +1,3 @@
-/spawnpoint Player57
-/gamerule keepInventory true
-/kill
-/effect clear Player943
-/gamemode survival
-/gamemode creative
 /kill @e[type=item]
 /give Player800 minecraft:barrier
 /kill @e[type=bat]
@@ -48,3 +42,9 @@
 /time set day
 /gamemode survival
 /gamemode creative
+/amber dataitem
+/amber dataitem 0
+/amber dataitem 1
+/amber dataitem 5
+/amber dataitem 1
+/amber dataitem 0

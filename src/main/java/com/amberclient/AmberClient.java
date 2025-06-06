@@ -1,6 +1,5 @@
 package com.amberclient;
 
-import com.amberclient.modules.render.EntityESP;
 import com.amberclient.screens.HudRenderer;
 import com.amberclient.screens.ClickGUI;
 import com.amberclient.commands.AmberCommand;
@@ -9,7 +8,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.IdentifiedLayer;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
@@ -23,24 +21,26 @@ public class AmberClient implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private static boolean lastKeyPressed = false;
+	private static boolean hudLayerRegistered = false; // Flag to prevent duplicate registration
 
 	@Override
 	public void onInitialize() {
 		ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
 
-		// Updated HUD registration using HudLayerRegistrationCallback
-		HudLayerRegistrationCallback.EVENT.register(layeredDrawer -> {
-			// Add your HUD layer after the experience level (after most main HUD elements)
-			layeredDrawer.attachLayerAfter(
-					IdentifiedLayer.EXPERIENCE_LEVEL,
-					Identifier.of(MOD_ID, "hud_overlay"),
-					(context, tickCounter) -> {
-						// Create and use your HudRenderer here
-						HudRenderer hudRenderer = new HudRenderer();
-						hudRenderer.onHudRender(context, tickCounter);
-					}
-			);
-		});
+		// Register HUD layer only if not already registered
+		if (!hudLayerRegistered) {
+			HudLayerRegistrationCallback.EVENT.register(layeredDrawer -> {
+				layeredDrawer.attachLayerAfter(
+						IdentifiedLayer.EXPERIENCE_LEVEL,
+						Identifier.of(MOD_ID, "hud_overlay"),
+						(context, tickCounter) -> {
+							HudRenderer hudRenderer = new HudRenderer();
+							hudRenderer.onHudRender(context, tickCounter);
+						}
+				);
+			});
+			hudLayerRegistered = true; // Mark as registered
+		}
 
 		AmberCommand.register();
 

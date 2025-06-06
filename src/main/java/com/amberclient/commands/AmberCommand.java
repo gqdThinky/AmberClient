@@ -1,7 +1,8 @@
 package com.amberclient.commands;
 
-import com.amberclient.commands.impl.DummyCommand;
-import com.amberclient.commands.impl.TopCommand;
+import com.amberclient.commands.impl.DummyCmd;
+import com.amberclient.commands.impl.TopCmd;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
@@ -23,14 +24,28 @@ public class AmberCommand {
                                         ServerCommandSource source = context.getSource();
                                         String action = StringArgumentType.getString(context, "action");
                                         if (action.equals("top")) {
-                                            return TopCommand.teleportToTop(source);
+                                            return TopCmd.teleportToTop(source);
                                         }
                                         else if (action.equals("dummy")) {
-                                            return DummyCommand.spawnDummy(source);
+                                            return DummyCmd.spawnDummy(source);
                                         }
-                                        source.sendError(Text.literal("Unknown action : " + action));
+                                        source.sendError(Text.literal("Unknown action: " + action));
                                         return 0;
-                                    }))
+                                    })
+                            )
+                            .then(CommandManager.literal("data-item")
+                                    .then(CommandManager.argument("slot", IntegerArgumentType.integer(0, 8))
+                                            .executes(context -> {
+                                                ServerCommandSource source = context.getSource();
+                                                int slot = IntegerArgumentType.getInteger(context, "slot");
+                                                // Exécute la commande /data get entity @p Inventory[slot]
+                                                source.getServer().getCommandManager().executeWithPrefix(
+                                                        source, "data get entity @p Inventory[" + slot + "]"
+                                                );
+                                                return 1;
+                                            })
+                                    )
+                            )
             );
         });
     }
