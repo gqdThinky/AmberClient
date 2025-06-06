@@ -2,7 +2,8 @@
   "mappings": {
     "com/amberclient/mixins/amberclient/EntityESPMixin": {
       "Lnet/minecraft/client/util/math/MatrixStack;pop()V": "Lnet/minecraft/class_4587;method_22909()V",
-      "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V"
+      "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V",
+      "updateRenderState*": "Lnet/minecraft/class_922;method_62355(Lnet/minecraft/class_1309;Lnet/minecraft/class_10042;F)V"
     },
     "com/amberclient/mixins/client/ClientPlayNetworkHandlerMixin": {
       "onWorldTimeUpdate": "Lnet/minecraft/class_634;method_11079(Lnet/minecraft/class_2761;)V",
@@ -35,7 +36,8 @@
     "named:intermediary": {
       "com/amberclient/mixins/amberclient/EntityESPMixin": {
         "Lnet/minecraft/client/util/math/MatrixStack;pop()V": "Lnet/minecraft/class_4587;method_22909()V",
-        "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V"
+        "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V",
+        "updateRenderState*": "Lnet/minecraft/class_922;method_62355(Lnet/minecraft/class_1309;Lnet/minecraft/class_10042;F)V"
       },
       "com/amberclient/mixins/client/ClientPlayNetworkHandlerMixin": {
         "onWorldTimeUpdate": "Lnet/minecraft/class_634;method_11079(Lnet/minecraft/class_2761;)V",

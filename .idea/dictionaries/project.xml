@@ -2,6 +2,8 @@
   <dictionary name="project">
     <words>
       <w>amberclient</w>
+      <w>cactivated</w>
+      <w>cdeactivated</w>
       <w>cdisabled</w>
       <w>cenabled</w>
       <w>fullbright</w>

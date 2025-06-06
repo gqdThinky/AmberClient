@@ -24,9 +24,12 @@ public abstract class EntityESPMixin<T extends LivingEntity, S extends LivingEnt
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;pop()V", shift = At.Shift.BEFORE))
     private void onRenderBeforePop(S renderState, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        EntityESP esp = EntityESP.getInstance();
+        EntityESP esp = EntityESP.Companion.getInstance(); // Access via Companion
+        LivingEntity entity = EntityESP.Companion.getStateToEntity().get(renderState); // Access via Companion
 
-        if (!esp.isEnabled() || renderState == null) return;
+        if (entity != null && entity == MinecraftClient.getInstance().player) { return; }
+
+        if (esp == null || !esp.isEnabled() || renderState == null) return;
 
         boolean isPlayer = renderState instanceof PlayerEntityRenderState;
 
@@ -40,12 +43,7 @@ public abstract class EntityESPMixin<T extends LivingEntity, S extends LivingEnt
         M model = renderer.getModel();
 
         // Render outline
-        int outlineColor;
-        if (isPlayer) {
-            outlineColor = 0xFFFF8000; // Orange for players
-        } else {
-            outlineColor = 0xFF708090; // Gray for mobs
-        }
+        int outlineColor = isPlayer ? 0xFFFF8000 : 0xFF708090;
 
         matrices.push();
         model.render(matrices,
@@ -56,12 +54,13 @@ public abstract class EntityESPMixin<T extends LivingEntity, S extends LivingEnt
         );
         matrices.pop();
 
-        // Render nametag if enabled
-        if (esp.getShowNametagsSetting().isEnabled() || esp.getShowHealthSetting().isEnabled()) {
+        // Render name/health info
+        if (esp.getEntityInfosSetting().isEnabled()) {
             renderNametag(renderState, matrices, vertexConsumers, light, esp);
         }
     }
 
+    @Unique
     private void renderNametag(S renderState, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, EntityESP esp) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
@@ -69,19 +68,28 @@ public abstract class EntityESPMixin<T extends LivingEntity, S extends LivingEnt
         String name = "";
         String health = "";
 
-        // TODO: Get entity information
-        if (renderState instanceof PlayerEntityRenderState playerState) {
-            if (esp.getShowNametagsSetting().isEnabled()) {
-                name = playerState.name;
-            }
-            if (esp.getShowHealthSetting().isEnabled()) {
-                health = "HP: 20/20";
+        LivingEntity entity = EntityESP.Companion.getStateToEntity().get(renderState); // Access via Companion
+        if (entity != null) {
+            if (esp.getEntityInfosSetting().isEnabled()) {
+                if (entity.hasCustomName()) {
+                    name = entity.getCustomName().getString();
+                } else if (renderState instanceof PlayerEntityRenderState playerState) {
+                    name = playerState.name;
+                } else {
+                    name = entity.getType().getName().getString();
+                }
+
+                int healthValue = (int) entity.getHealth();
+                int maxHealth = (int) entity.getMaxHealth();
+                health = "HP: " + healthValue + "/" + maxHealth;
             }
         } else {
-            if (esp.getShowNametagsSetting().isEnabled()) {
-                name = "Mob";
-            }
-            if (esp.getShowHealthSetting().isEnabled()) {
+            if (esp.getEntityInfosSetting().isEnabled()) {
+                if (renderState instanceof PlayerEntityRenderState playerState) {
+                    name = playerState.name;
+                } else {
+                    name = "Mob";
+                }
                 health = "HP: Unknown";
             }
         }
@@ -92,15 +100,13 @@ public abstract class EntityESPMixin<T extends LivingEntity, S extends LivingEnt
 
         matrices.push();
 
-        float heightOffset = renderState instanceof PlayerEntityRenderState ? -1.2F : -0.6f; // TODO: above the entity, probably not the best way to do so
+        float heightOffset = renderState instanceof PlayerEntityRenderState ? -1.2F : -1.0f;
         matrices.translate(0.0, heightOffset, 0.0);
-
-        matrices.multiply(client.getEntityRenderDispatcher().getRotation());
+        matrices.multiply(client.getEntityRenderDispatcher().camera.getRotation());
         matrices.scale(-0.025f, 0.025f, 0.025f);
 
         Matrix4f matrix = matrices.peek().getPositionMatrix();
 
-        // Calculate dimensions for each line
         int nameWidth = name.isEmpty() ? 0 : textRenderer.getWidth(name);
         int healthWidth = health.isEmpty() ? 0 : textRenderer.getWidth(health);
         int maxWidth = Math.max(nameWidth, healthWidth);
@@ -112,41 +118,70 @@ public abstract class EntityESPMixin<T extends LivingEntity, S extends LivingEnt
         if (!name.isEmpty()) totalHeight += lineHeight;
         if (!health.isEmpty()) totalHeight += lineHeight;
 
-        VertexConsumer backgroundBuffer = vertexConsumers.getBuffer(RenderLayer.getGuiOverlay());
+        VertexConsumer backgroundBuffer = vertexConsumers.getBuffer(RenderLayer.getGui());
 
         int bgLeft = -maxWidth / 2 - padding;
         int bgRight = maxWidth / 2 + padding;
         int bgTop = -padding;
         int bgBottom = totalHeight + padding;
 
-        drawQuad(backgroundBuffer, matrix, bgLeft, bgTop, bgRight, bgBottom, 0xC0000000);
-
-        int currentY = 0;
-
-        if (!name.isEmpty()) {
-            float nameX = -nameWidth / 2.0f;
-            textRenderer.draw(name, nameX, currentY, 0xFFFFFFFF, false, matrix, vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
-            currentY += lineHeight;
-        }
-
-        if (!health.isEmpty()) {
-            float healthX = -healthWidth / 2.0f;
-            textRenderer.draw(health, healthX, currentY, 0xFFFFFFFF, false, matrix, vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
-        }
+        drawBothSides(backgroundBuffer, matrix, bgLeft, bgTop, bgRight, bgBottom, 0xC0000000);
+        drawTextBothSides(textRenderer, name, health, nameWidth, healthWidth, lineHeight, matrix, vertexConsumers, light);
 
         matrices.pop();
     }
 
     @Unique
-    private void drawQuad(VertexConsumer buffer, Matrix4f matrix, int left, int top, int right, int bottom, int color) {
+    private void drawTextBothSides(TextRenderer textRenderer, String name, String health, int nameWidth, int healthWidth, int lineHeight, Matrix4f matrix, VertexConsumerProvider vertexConsumers, int light) {
+        int currentY = 0;
+        float nameX = -nameWidth / 2.0f;
+        float healthX = -healthWidth / 2.0f;
+
+        if (!name.isEmpty()) {
+            textRenderer.draw(name, nameX, currentY, 0xFFFFFFFF, false, matrix, vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, 0, light);
+            currentY += lineHeight;
+        }
+
+        if (!health.isEmpty()) {
+            textRenderer.draw(health, healthX, currentY, 0xFFFFFFFF, false, matrix, vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, 0, light);
+        }
+
+        Matrix4f backMatrix = new Matrix4f(matrix);
+        backMatrix.scale(-1.0f, 1.0f, 1.0f);
+        currentY = 0;
+
+        if (!name.isEmpty()) {
+            textRenderer.draw(name, nameX, currentY, 0xFFFFFFFF, false, backMatrix, vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, 0, light);
+            currentY += lineHeight;
+        }
+
+        if (!health.isEmpty()) {
+            textRenderer.draw(health, healthX, currentY, 0xFFFFFFFF, false, backMatrix, vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, 0, light);
+        }
+    }
+
+    @Unique
+    private void drawBothSides(VertexConsumer buffer, Matrix4f matrix, int left, int top, int right, int bottom, int color) {
         float a = (color >> 24 & 0xFF) / 255.0f;
         float r = (color >> 16 & 0xFF) / 255.0f;
         float g = (color >> 8 & 0xFF) / 255.0f;
         float b = (color & 0xFF) / 255.0f;
 
+        // Front face
         buffer.vertex(matrix, left, bottom, 0).color(r, g, b, a);
         buffer.vertex(matrix, right, bottom, 0).color(r, g, b, a);
         buffer.vertex(matrix, right, top, 0).color(r, g, b, a);
         buffer.vertex(matrix, left, top, 0).color(r, g, b, a);
+
+        // Back face
+        buffer.vertex(matrix, left, top, 0).color(r, g, b, a);
+        buffer.vertex(matrix, right, top, 0).color(r, g, b, a);
+        buffer.vertex(matrix, right, bottom, 0).color(r, g, b, a);
+        buffer.vertex(matrix, left, bottom, 0).color(r, g, b, a);
+    }
+
+    @Inject(method = "updateRenderState*", at = @At("TAIL"))
+    private void onUpdateRenderState(T entity, S state, float tickDelta, CallbackInfo ci) {
+        EntityESP.Companion.getStateToEntity().put(state, entity); // Access via Companion
     }
 }
