@@ -1,6 +1,6 @@
 {
   "mappings": {
-    "com/amberclient/mixins/amberclient/LivingEntityRendererMixin": {
+    "com/amberclient/mixins/amberclient/EntityESPMixin": {
       "Lnet/minecraft/client/util/math/MatrixStack;pop()V": "Lnet/minecraft/class_4587;method_22909()V",
       "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V"
     },
@@ -33,7 +33,7 @@
   },
   "data": {
     "named:intermediary": {
-      "com/amberclient/mixins/amberclient/LivingEntityRendererMixin": {
+      "com/amberclient/mixins/amberclient/EntityESPMixin": {
         "Lnet/minecraft/client/util/math/MatrixStack;pop()V": "Lnet/minecraft/class_4587;method_22909()V",
         "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V"
       },

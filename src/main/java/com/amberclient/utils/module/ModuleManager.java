@@ -1,40 +1,31 @@
 package com.amberclient.utils.module;
 
-import com.amberclient.modules.combat.AutoClicker;
-import com.amberclient.modules.combat.Hitbox;
-import com.amberclient.modules.combat.KillAura;
-import com.amberclient.modules.hud.ActiveMods;
-import com.amberclient.modules.hud.Transparency;
-import com.amberclient.modules.movement.NoFall;
-import com.amberclient.modules.movement.SafeWalk;
-import com.amberclient.modules.player.FastBreak;
-import com.amberclient.modules.player.FastPlace;
-import com.amberclient.modules.render.EntityESP;
-import com.amberclient.modules.render.Fullbright;
-import com.amberclient.modules.render.xray.Xray;
-
 import net.minecraft.client.MinecraftClient;
+import org.reflections.Reflections;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class ModuleManager {
     private static final ModuleManager INSTANCE = new ModuleManager();
-    public final List<Module> modules = new ArrayList<>();
+    private final List<Module> modules = new ArrayList<>();
 
     private ModuleManager() {
-        // Register modules
-        registerModule(new NoFall());
-        registerModule(new Xray());
-        registerModule(new Fullbright());
-        registerModule(new ActiveMods());
-        registerModule(new Hitbox());
-        registerModule(new KillAura());
-        registerModule(new AutoClicker());
-        registerModule(new FastPlace());
-        registerModule(new FastBreak());
-        registerModule(new SafeWalk());
-        registerModule(new Transparency());
-        registerModule(new EntityESP());
+        Reflections reflections = new Reflections("com.amberclient.modules");
+
+        // Find all Module subclasses
+        Set<Class<? extends Module>> moduleClasses = reflections.getSubTypesOf(Module.class);
+
+        for (Class<? extends Module> moduleClass : moduleClasses) {
+            try {
+                registerModule(moduleClass.getDeclaredConstructor().newInstance());
+            } catch (Exception e) {
+                System.err.println("Error during module instantiation " + moduleClass.getSimpleName() + ": " + e.getMessage());
+            }
+        }
     }
 
     public static ModuleManager getInstance() {
@@ -42,16 +33,13 @@ public class ModuleManager {
     }
 
     public List<Module> getModules() {
-        return new ArrayList<>(modules);
+        return Collections.unmodifiableList(modules);
     }
 
-    public static Module getModule(Class<? extends Module> moduleClass) {
-        for (Module module : INSTANCE.modules) { // Changed to INSTANCE.modules
-            if (module.getClass() == moduleClass) {
-                return module;
-            }
-        }
-        return null;
+    public static Optional<Module> getModule(Class<? extends Module> moduleClass) {
+        return INSTANCE.modules.stream()
+                .filter(module -> module.getClass() == moduleClass)
+                .findFirst();
     }
 
     public void toggleModule(Module module) {
@@ -61,19 +49,18 @@ public class ModuleManager {
     }
 
     public void onTick() {
-        // Check that the client and player exist
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 
-        for (Module module : modules) {
-            if (module.isEnabled()) {
-                try {
-                    module.onTick();
-                } catch (Exception e) {
-                    System.err.println("Error in " + module.getName() + ": " + e.getMessage());
-                }
-            }
-        }
+        modules.stream()
+                .filter(Module::isEnabled)
+                .forEach(module -> {
+                    try {
+                        module.onTick();
+                    } catch (Exception e) {
+                        System.err.println("Error in " + module.getName() + ": " + e.getMessage());
+                    }
+                });
     }
 
     public void registerModule(Module module) {

@@ -32,7 +32,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	implementation "net.lenni0451:LambdaEvents:2.4.2"
+	implementation 'org.reflections:reflections:0.10.2'
 }
 
 processResources {
