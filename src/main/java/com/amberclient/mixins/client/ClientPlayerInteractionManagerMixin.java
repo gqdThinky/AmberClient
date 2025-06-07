@@ -1,7 +1,7 @@
 package com.amberclient.mixins.client;
 
 import com.amberclient.modules.player.FastBreak;
-import com.amberclient.utils.general.BlockUtils;
+import com.amberclient.utils.general.BlockUtils; // Ensure this import points to the Kotlin object
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -46,7 +46,7 @@ public class ClientPlayerInteractionManagerMixin {
         }
 
         // Skip if block is unbreakable or not selected for fast breaking
-        if (BlockUtils.isUnbreakable(this.currentBreakingPos) || !fastBreakBlock) return;
+        if (BlockUtils.INSTANCE.isUnbreakable(this.currentBreakingPos) || !fastBreakBlock) return;
 
         // Send block breaking packet to speed up breaking
         Direction direction = client.player.getHorizontalFacing();
