@@ -13,7 +13,7 @@ glintSpeed:0.5
 glintStrength:0.75
 prioritizeChunkUpdates:0
 fullscreen:false
-gamma:1.0
+gamma:0.5
 graphicsMode:1
 guiScale:2
 maxFps:260
@@ -123,6 +123,7 @@ key_key.hotbar.6:key.keyboard.6
 key_key.hotbar.7:key.keyboard.7
 key_key.hotbar.8:key.keyboard.8
 key_key.hotbar.9:key.keyboard.9
+key_key.amberclient.open_click_gui:key.keyboard.right.shift
 soundCategory_master:0.20916679501001081
 soundCategory_music:0.0
 soundCategory_record:0.1991876842450048

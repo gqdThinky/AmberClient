@@ -1,5 +1,3 @@
-/amber top
-/amber dummy
 /locate biome minecraft:plains
 /tp @s -42 68 -279
 /amber dummy
@@ -48,3 +46,5 @@
 /amber dataitem
 /amber dataitem 1
 /amber dataitem 0
+/time set da
+/time set day
