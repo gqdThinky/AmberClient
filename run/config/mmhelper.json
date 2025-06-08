@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "mm": {
+    "highlightMurders": true,
+    "innocentHighlightOptions": "AS_MURDER",
+    "detectiveHighlightOptions": "ALWAYS",
+    "highlightGold": true,
+    "highlightBows": true,
+    "showNameTags": false,
+    "highlightSpectators": false
+  },
+  "checkForUpdates": true,
+  "shownUpdateNotif": false
+}

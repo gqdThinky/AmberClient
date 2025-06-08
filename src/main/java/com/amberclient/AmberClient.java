@@ -5,6 +5,7 @@ import com.amberclient.screens.ClickGUI;
 import com.amberclient.commands.AmberCommand;
 import com.amberclient.utils.KeybindsManager;
 import com.amberclient.utils.module.ModuleManager;
+import com.amberclient.utils.murdererfinder.config.ConfigManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
@@ -42,6 +43,7 @@ public class AmberClient implements ModInitializer {
 		AmberCommand.register();
 
 		KeybindsManager.INSTANCE.initialize();
+		ConfigManager.init();
 
 		LOGGER.info("Amber Client started! Version: " + MOD_VERSION);
 	}

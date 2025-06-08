@@ -52,6 +52,8 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${inputs.properties.archivesName}"}
 	}
+
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 publishing {
