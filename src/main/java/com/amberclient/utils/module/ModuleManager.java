@@ -6,6 +6,7 @@ import com.amberclient.modules.combat.KillAura;
 import com.amberclient.modules.hud.ActiveMods;
 import com.amberclient.modules.hud.Transparency;
 import com.amberclient.modules.minigames.MMFinder;
+import com.amberclient.modules.movement.AutoClutch;
 import com.amberclient.modules.movement.NoFall;
 import com.amberclient.modules.movement.SafeWalk;
 import com.amberclient.modules.player.FastBreak;
@@ -38,6 +39,7 @@ public class ModuleManager {
         registerModule(new EntityESP());
         registerModule(new Fullbright());
         registerModule(new MMFinder());
+        registerModule(new AutoClutch());
     }
 
     public static ModuleManager getInstance() {
