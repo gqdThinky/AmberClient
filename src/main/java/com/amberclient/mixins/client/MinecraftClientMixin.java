@@ -2,13 +2,17 @@ package com.amberclient.mixins.client;
 
 import com.amberclient.modules.player.FastPlace;
 import com.amberclient.modules.combat.Hitbox;
+import com.amberclient.modules.render.EntityESP;
+import com.amberclient.utils.murdererfinder.access.EntityMixinAccess;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -43,5 +47,31 @@ public class MinecraftClientMixin {
     private void onTick(CallbackInfo ci) {
         if (FastPlace.isFastPlaceEnabled && ((MinecraftClient) (Object) this).options.useKey.isPressed())
             this.itemUseCooldown = 0;
+    }
+
+    @Inject(method = "hasOutline", at = @At("HEAD"), cancellable = true)
+    private void onHasOutline(Entity entity, CallbackInfoReturnable<Boolean> info) {
+        EntityESP espModule = EntityESP.getInstance();
+        if (espModule == null || !espModule.isEnabled()) return;
+
+        if (entity instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) entity;
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client.player == null) return;
+
+            double distance = client.player.getPos().distanceTo(livingEntity.getPos());
+            double range = espModule.getRangeSetting().getDoubleValue() * 16.0; // Convert chunks to blocks
+
+            if (distance > range) return;
+
+            // Apply outline and set glow color based on settings
+            if (espModule.getRenderPlayersSetting().getBooleanValue() && livingEntity instanceof net.minecraft.entity.player.PlayerEntity) {
+                ((EntityMixinAccess) entity).setGlowColor(0xFFF126);
+                info.setReturnValue(true);
+            } else if (espModule.getRenderMobsSetting().getBooleanValue() && !(livingEntity instanceof net.minecraft.entity.player.PlayerEntity)) {
+                ((EntityMixinAccess) entity).setGlowColor(0x15BFD6);
+                info.setReturnValue(true);
+            }
+        }
     }
 }

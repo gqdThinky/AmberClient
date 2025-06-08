@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger
 import java.util.*
 
 class EntityESP : Module("Entity ESP", "Display outlines around entity models (players & mobs)", "Render"), ConfigurableModule {
-
     companion object {
         const val MOD_ID = "amberclient-entityesp"
         val LOGGER: Logger = LogManager.getLogger(MOD_ID)
@@ -26,7 +25,6 @@ class EntityESP : Module("Entity ESP", "Display outlines around entity models (p
         fun getInstance(): EntityESP? = INSTANCE
     }
 
-    // Rest of the class remains unchanged
     private val renderPlayersSetting: ModuleSetting
     private val renderMobsSetting: ModuleSetting
     private val rangeSetting: ModuleSetting
@@ -36,7 +34,7 @@ class EntityESP : Module("Entity ESP", "Display outlines around entity models (p
     init {
         INSTANCE = this
         renderPlayersSetting = ModuleSetting("Render Players", "Displays outlines for players", true)
-        renderMobsSetting = ModuleSetting("Render Mobs", "Displays outlines for mobs", true)
+        renderMobsSetting = ModuleSetting("Render Mobs", "Displays outlines for mobs", false)
         rangeSetting = ModuleSetting("Render Range", "X (in chunks)", 4.0, 1.0, 8.0, 1.0)
         entityInfosSetting = ModuleSetting("Entity Infos", "Shows nametags and health above entities", true)
 
@@ -50,12 +48,10 @@ class EntityESP : Module("Entity ESP", "Display outlines around entity models (p
 
     override fun onEnable() {
         val client = MinecraftClient.getInstance()
-        client.player?.let { player ->
-            player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l${name} §r§cactivated"),
-                true
-            )
-        }
+        client.player?.sendMessage(
+            Text.literal("§4[§cAmberClient§4] §c§l${name} §r§cactivated"),
+            true
+        )
         LOGGER.info("$name module enabled")
     }
 
@@ -77,31 +73,31 @@ class EntityESP : Module("Entity ESP", "Display outlines around entity models (p
         when (setting) {
             renderPlayersSetting -> {
                 player.sendMessage(
-                    Text.literal("§6AutoClicker settings updated: renderPlayers=${renderPlayersSetting.booleanValue}"),
+                    Text.literal("§6EntityESP settings updated: renderPlayers=${renderPlayersSetting.booleanValue}"),
                     true
                 )
-                LOGGER.info("AutoClicker settings updated: renderPlayers={}", renderPlayersSetting.booleanValue)
+                LOGGER.info("EntityESP settings updated: renderPlayers={}", renderPlayersSetting.booleanValue)
             }
             renderMobsSetting -> {
                 player.sendMessage(
-                    Text.literal("§6AutoClicker settings updated: renderMobs=${renderMobsSetting.booleanValue}"),
+                    Text.literal("§6EntityESP settings updated: renderMobs=${renderMobsSetting.booleanValue}"),
                     true
                 )
-                LOGGER.info("AutoClicker settings updated: renderMobs={}", renderMobsSetting.booleanValue)
+                LOGGER.info("EntityESP settings updated: renderMobs={}", renderMobsSetting.booleanValue)
             }
             rangeSetting -> {
                 player.sendMessage(
-                    Text.literal("§6AutoClicker settings updated: range=${rangeSetting.integerValue}"),
+                    Text.literal("§6EntityESP settings updated: range=${rangeSetting.doubleValue}"),
                     true
                 )
-                LOGGER.info("AutoClicker settings updated: range={}", rangeSetting.integerValue)
+                LOGGER.info("EntityESP settings updated: range={}", rangeSetting.doubleValue)
             }
             entityInfosSetting -> {
                 player.sendMessage(
-                    Text.literal("§6AutoClicker settings updated: entityInfos=${entityInfosSetting.booleanValue}"),
+                    Text.literal("§6EntityESP settings updated: entityInfos=${entityInfosSetting.booleanValue}"),
                     true
                 )
-                LOGGER.info("AutoClicker settings updated: entityInfos={}", entityInfosSetting.booleanValue)
+                LOGGER.info("EntityESP settings updated: entityInfos={}", entityInfosSetting.booleanValue)
             }
         }
     }
@@ -109,4 +105,5 @@ class EntityESP : Module("Entity ESP", "Display outlines around entity models (p
     fun getRenderPlayersSetting(): ModuleSetting = renderPlayersSetting
     fun getRenderMobsSetting(): ModuleSetting = renderMobsSetting
     fun getEntityInfosSetting(): ModuleSetting = entityInfosSetting
+    fun getRangeSetting(): ModuleSetting = rangeSetting
 }
