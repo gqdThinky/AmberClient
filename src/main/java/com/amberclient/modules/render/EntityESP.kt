@@ -46,24 +46,6 @@ class EntityESP : Module("Entity ESP", "Display outlines around entity models (p
         }
     }
 
-    override fun onEnable() {
-        val client = MinecraftClient.getInstance()
-        client.player?.sendMessage(
-            Text.literal("§4[§cAmberClient§4] §c§l${name} §r§cactivated"),
-            true
-        )
-        LOGGER.info("$name module enabled")
-    }
-
-    override fun onDisable() {
-        val client = MinecraftClient.getInstance()
-        client.player?.sendMessage(
-            Text.literal("§4[§cAmberClient§4] §c§l${name} §r§cdeactivated"),
-            true
-        )
-        LOGGER.info("$name module disabled")
-    }
-
     override fun getSettings(): List<ModuleSetting> = settings
 
     override fun onSettingChanged(setting: ModuleSetting) {

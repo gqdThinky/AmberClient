@@ -44,20 +44,14 @@ public class Hitbox extends Module implements ConfigurableModule {
 
     @Override
     public void onEnable() {
-        getClient().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cenabled"), true);
         isHitboxModuleEnabled = true;
-        LOGGER.info("Hitbox module enabled");
         EventManager.getInstance().add(PreMotionListener.class, rotationFaker);
         EventManager.getInstance().add(PostMotionListener.class, rotationFaker);
     }
 
     @Override
     public void onDisable() {
-        getClient().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdisabled"), true);
         isHitboxModuleEnabled = false;
-        LOGGER.info("Hitbox module disabled");
         EventManager.getInstance().remove(PreMotionListener.class, rotationFaker);
         EventManager.getInstance().remove(PostMotionListener.class, rotationFaker);
     }

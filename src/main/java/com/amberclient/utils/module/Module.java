@@ -1,6 +1,7 @@
 package com.amberclient.utils.module;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 
 public abstract class Module {
     private final String name;
@@ -41,11 +42,23 @@ public abstract class Module {
 
     protected void enable() {
         enabled = true;
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player != null) {
+            mc.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cmodule enabled"), true);
+        }
+
         onEnable();
     }
 
     protected void disable() {
         enabled = false;
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player != null) {
+            mc.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cmodule disabled"), true);
+        }
+
         onDisable();
     }
 

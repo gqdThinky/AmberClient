@@ -19,20 +19,12 @@ public class Fullbright extends Module {
             originalGamma = mc.options.getGamma().getValue();
             mc.options.getGamma().setValue(fullbrightGamma);
         }
-        if (mc.player != null) {
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cenabled"), true);
-        }
     }
 
     @Override
     protected void onDisable() {
         if (mc.options != null) {
             mc.options.getGamma().setValue(originalGamma);
-        }
-        if (mc.player != null) {
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdisabled"), true);
         }
     }
 }

@@ -55,19 +55,7 @@ public class KillAura extends Module implements ConfigurableModule {
     }
 
     @Override
-    public void onEnable() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        client.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
-        LOGGER.info("{} module activated", getName());
-    }
-
-    @Override
-    public void onDisable() {
-        stopAttacking();
-        MinecraftClient client = MinecraftClient.getInstance();
-        client.player.sendMessage(Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
-        LOGGER.info("{} module disabled", getName());
-    }
+    public void onDisable() { stopAttacking(); }
 
     private GameMode getGameMode(PlayerEntity player) {
         if (player == null || MinecraftClient.getInstance().getNetworkHandler() == null) return null;

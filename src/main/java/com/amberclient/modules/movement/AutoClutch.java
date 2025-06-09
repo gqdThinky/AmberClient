@@ -8,7 +8,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SnowBlock;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -34,8 +33,6 @@ public class AutoClutch extends Module implements ConfigurableModule {
     private final ModuleSetting holdMode;
 
     protected MinecraftClient mc = MinecraftClient.getInstance();
-    private float startYaw;
-    private float startPitch;
     private boolean wasKeyPressed = false;
     private long lastPlaceTime = 0;
     private static final long PLACE_DELAY = 50; // 50ms comme l'original
@@ -57,21 +54,9 @@ public class AutoClutch extends Module implements ConfigurableModule {
     @Override
     public void onEnable() {
         if (mc.player != null) {
-            startYaw = mc.player.getYaw();
-            startPitch = mc.player.getPitch();
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
+            float startYaw = mc.player.getYaw();
+            float startPitch = mc.player.getPitch();
         }
-        LOGGER.info(getName() + " module enabled");
-    }
-
-    @Override
-    public void onDisable() {
-        if (mc.player != null) {
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
-        }
-        LOGGER.info(getName() + " module disabled");
     }
 
     public void handleKeyInput() {

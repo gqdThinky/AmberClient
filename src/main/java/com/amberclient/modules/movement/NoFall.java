@@ -14,26 +14,8 @@ public class NoFall extends Module {
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private final int tickCounter = 0;
-
     public NoFall() {
         super("NoFall", "Prevents fall damage", "Movement");
-    }
-
-    @Override
-    protected void onEnable() {
-        MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
-
-        LOGGER.info("NoFall module enabled");
-    }
-
-    @Override
-    protected void onDisable() {
-        MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§deactivated"), true);
-
-        LOGGER.info("NoFall module disabled");
     }
 
     @Override

@@ -45,25 +45,12 @@ public class SafeWalk extends Module implements ConfigurableModule {
 
     @Override
     public void onEnable() {
-        if (mc.player != null) {
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cenabled"), true);
-        }
-        LOGGER.info("SafeWalk module enabled");
         currentBlock = null;
         safewalk = true;
     }
 
     @Override
-    public void onDisable() {
-        if (mc.player != null) {
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdisabled"), true);
-            mc.player.setPose(EntityPose.STANDING);
-        }
-        LOGGER.info("SafeWalk module disabled");
-        safewalk = false;
-    }
+    public void onDisable() { safewalk = false; }
 
     @Override
     public void onTick() {

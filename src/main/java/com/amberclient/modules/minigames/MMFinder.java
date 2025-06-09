@@ -58,31 +58,22 @@ public class MMFinder extends Module implements ConfigurableModule {
 
     @Override
     public void onEnable() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
-            client.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
-        }
-
         try {
             MurdererFinder.setModEnabled(true);
             System.out.println("MurdererFinder mod has been activated!");
         } catch (Exception e) {
             System.err.println("Failed to activate MurdererFinder mod: " + e.getMessage());
         }
-        LOGGER.info(getName() + " module enabled");
     }
 
     @Override
     public void onDisable() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
-            client.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
+        try {
+            MurdererFinder.setModEnabled(false);
+            System.out.println("MurdererFinder mod has been deactivated!");
+        } catch (Exception e) {
+            System.err.println("Failed to deactivate MurdererFinder mod: " + e.getMessage());
         }
-
-        MurdererFinder.setModEnabled(false);
-        LOGGER.info(getName() + " module disabled");
     }
 
     @Override

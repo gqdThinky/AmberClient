@@ -18,21 +18,21 @@ public class FastBreak extends Module implements ConfigurableModule {
     private static FastBreak instance;
     public static boolean isFastBreakEnabled;
 
-    private final ModuleSetting activationChance = new ModuleSetting(
-            "Activation Chance",
-            "Probability of FastBreak activating for a block. Lower values reduce anti-cheat detection.",
-            1.0, 0.0, 1.0, 0.01
-    );
-    private final ModuleSetting legitMode = new ModuleSetting(
-            "Legit Mode",
-            "Only removes block-breaking delay without speeding up the process. Safer for anti-cheat.",
-            false
-    );
+    private final List<ModuleSetting> settings;
+    private final ModuleSetting activationChance;
+    private final ModuleSetting legitMode;
 
     public FastBreak() {
         super("FastBreak", "Breaks blocks way faster", "Player");
         instance = this;
         isFastBreakEnabled = false;
+
+        this.activationChance = new ModuleSetting("Activation Chance", "Probability of FastBreak activating for a block. Lower values reduce anti-cheat detection.",1.0, 0.0, 1.0, 0.01);
+        this.legitMode = new ModuleSetting("Legit Mode", "Only removes block-breaking delay without speeding up the process. Safer for anti-cheat.",false);
+
+        this.settings = new ArrayList<>();
+        this.settings.add(activationChance);
+        this.settings.add(legitMode);
     }
 
     public static FastBreak getInstance() {
@@ -40,30 +40,17 @@ public class FastBreak extends Module implements ConfigurableModule {
     }
 
     @Override
+    public void onEnable() { isFastBreakEnabled = true; }
+
+    @Override
+    public void onDisable() { isFastBreakEnabled = false; }
+
+    @Override
     public List<ModuleSetting> getSettings() {
         List<ModuleSetting> settings = new ArrayList<>();
         settings.add(activationChance);
         settings.add(legitMode);
         return settings;
-    }
-
-    @Override
-    public void onEnable() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        client.player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
-        LOGGER.info(getName() + " module enabled");
-        isFastBreakEnabled = true;
-    }
-
-    @Override
-    public void onDisable() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        client.player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true
-        );
-        LOGGER.info(getName() + " module disabled");
-        isFastBreakEnabled = false;
     }
 
     public double getActivationChance() {
