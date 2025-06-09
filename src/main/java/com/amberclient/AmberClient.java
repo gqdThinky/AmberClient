@@ -49,10 +49,10 @@ public class AmberClient implements ModInitializer {
 	}
 
 	private void onClientTick(MinecraftClient client) {
-		if (KeybindsManager.INSTANCE.getOpenClickGui().wasPressed() && client.currentScreen == null) {
+		if (KeybindsManager.INSTANCE.getOpenClickGui().wasPressed() && client.currentScreen == null)
 			client.setScreen(new ClickGUI());
-		}
 
+		ModuleManager.getInstance().handleKeyInputs();
 		ModuleManager.getInstance().onTick();
 	}
 }

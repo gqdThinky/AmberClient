@@ -51,16 +51,10 @@ public class ModuleManager {
     }
 
     public static Optional<Module> getModule(Class<? extends Module> moduleClass) {
-        return INSTANCE.modules.stream()
-                .filter(module -> module.getClass() == moduleClass)
-                .findFirst();
+        return INSTANCE.modules.stream().filter(module -> module.getClass() == moduleClass).findFirst();
     }
 
-    public void toggleModule(Module module) {
-        if (module != null) {
-            module.toggle();
-        }
-    }
+    public void toggleModule(Module module) { if (module != null) module.toggle(); }
 
     public void onTick() {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -80,6 +74,12 @@ public class ModuleManager {
     public void registerModule(Module module) {
         if (module != null && !modules.contains(module)) {
             modules.add(module);
+        }
+    }
+
+    public void handleKeyInputs() {
+        for (Module module : modules) {
+            module.handleKeyInput();
         }
     }
 }

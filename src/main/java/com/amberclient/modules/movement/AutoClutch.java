@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class AutoClutch extends Module implements ConfigurableModule {
     public static final String MOD_ID = "amberclient-autoclutch";
@@ -35,7 +36,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
     private final ModuleSetting rotationSpeed;
     private final ModuleSetting smartRotation;
 
-    protected MinecraftClient mc = MinecraftClient.getInstance();
+    protected MinecraftClient mc = getClient();
     private boolean wasKeyPressed = false;
     private long lastPlaceTime = 0;
     private long placeDelay = 50; // Dynamic delay based on CPS setting
@@ -46,7 +47,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
         super("AutoClutch", "R", "Movement");
 
         // Initialize settings
-        range = new ModuleSetting("Range", "Distance to search for block placement (blocks)", 4.0, 1.0, 6.0, 1.0);
+        range = new ModuleSetting("Range", "Distance to search for block placement", 4.0, 1.0, 8.0, 1.0);
         cpsCap = new ModuleSetting("Uncap CPS", "Disable CPS limitation", true);
         cpsLimit = new ModuleSetting("CPS Limit", "Maximum clicks per second", 20.0, 1.0, 50.0, 1.0);
         holdMode = new ModuleSetting("Hold Mode", "Deactivate module when key is released", false);
@@ -71,35 +72,30 @@ public class AutoClutch extends Module implements ConfigurableModule {
             float startYaw = mc.player.getYaw();
             float startPitch = mc.player.getPitch();
             hasTarget = false;
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
         }
         LOGGER.info(getName() + " module enabled");
     }
 
     @Override
     public void onDisable() {
-        if (mc.player != null) {
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
-        }
         hasTarget = false;
         LOGGER.info(getName() + " module disabled");
     }
 
+    @Override
     public void handleKeyInput() {
         boolean isKeyPressed = KeybindsManager.INSTANCE.getAutoClutchKey().isPressed();
 
-        if (isKeyPressed && !wasKeyPressed) {
+        if (isKeyPressed) {
             if (!holdMode.getBooleanValue()) {
-                toggle();
+                if (!wasKeyPressed) toggle();
             } else {
                 if (!isEnabled()) {
                     this.enabled = true;
                     onEnable();
                 }
             }
-        } else if (!isKeyPressed && wasKeyPressed) {
+        } else if (wasKeyPressed) {
             if (holdMode.getBooleanValue() && isEnabled()) {
                 this.enabled = false;
                 onDisable();
@@ -113,14 +109,11 @@ public class AutoClutch extends Module implements ConfigurableModule {
         handleKeyInput();
 
         if (isEnabled() && mc.player != null && mc.world != null) {
-            // Check if we need to place blocks
             if (shouldPlaceBlock()) {
-                // Find the best placement position
                 PlacementInfo bestPlacement = findBestPlacement();
 
                 if (bestPlacement != null) {
                     if (smartRotation.getBooleanValue()) {
-                        // Smooth rotation to target
                         updateRotation(bestPlacement.yaw, bestPlacement.pitch);
                     }
 
@@ -142,7 +135,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
         BlockPos playerBlockPos = new BlockPos((int) playerPos.x, (int) playerPos.y, (int) playerPos.z);
 
         // Check if player is falling and there's no block below
-        return mc.player.getVelocity().y < 0 && isAirBlock(getBlock(playerBlockPos.down()));
+        return mc.player.getVelocity().y < 0 && isAirBlock(Objects.requireNonNull(getBlock(playerBlockPos.down())));
     }
 
     private PlacementInfo findBestPlacement() {
@@ -154,32 +147,26 @@ public class AutoClutch extends Module implements ConfigurableModule {
         PlacementInfo bestPlacement = null;
         double closestDistance = Double.MAX_VALUE;
 
-        // Search in a circular pattern around the player, ONLY BELOW
         int searchRange = (int) range.getDoubleValue();
 
-        // Commence par chercher directement sous le joueur
         for (int y = -1; y >= -searchRange; y--) {
-            // Cherche d'abord directement en dessous
             BlockPos directBelow = playerBlockPos.add(0, y, 0);
             PlacementInfo placement = canPlaceAt(directBelow);
             if (placement != null) {
-                return placement; // Priorité au placement direct en dessous
+                return placement;
             }
 
-            // Ensuite cherche dans un cercle autour du joueur à cette hauteur
             for (int radius = 1; radius <= searchRange; radius++) {
-                for (int angle = 0; angle < 360; angle += 15) { // Vérifie tous les 15 degrés pour un bon coverage
+                for (int angle = 0; angle < 360; angle += 15) {
                     double radians = Math.toRadians(angle);
                     int x = (int) Math.round(radius * Math.cos(radians));
                     int z = (int) Math.round(radius * Math.sin(radians));
 
                     BlockPos targetPos = playerBlockPos.add(x, y, z);
 
-                    // Vérifie la distance réelle
                     double distance = playerPos.distanceTo(Vec3d.ofCenter(targetPos));
                     if (distance > searchRange) continue;
 
-                    // Check if this position is good for placement
                     placement = canPlaceAt(targetPos);
                     if (placement != null && distance < closestDistance) {
                         closestDistance = distance;
@@ -188,7 +175,6 @@ public class AutoClutch extends Module implements ConfigurableModule {
                 }
             }
 
-            // Si on a trouvé un placement à cette hauteur, on le retourne
             if (bestPlacement != null) {
                 return bestPlacement;
             }
@@ -199,7 +185,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
 
     private boolean canPlaceBlock() {
         if (cpsCap.getBooleanValue()) {
-            return true; // No CPS limitation
+            return true;
         }
 
         long currentTime = System.currentTimeMillis();
@@ -209,35 +195,31 @@ public class AutoClutch extends Module implements ConfigurableModule {
     private void updatePlaceDelay() {
         if (!cpsCap.getBooleanValue()) {
             double cps = cpsLimit.getDoubleValue();
-            placeDelay = (long) (1000.0 / cps); // Convert CPS to milliseconds delay
+            placeDelay = (long) (1000.0 / cps);
         } else {
-            placeDelay = 0; // No delay when CPS cap is disabled
+            placeDelay = 0;
         }
     }
 
     private PlacementInfo canPlaceAt(BlockPos pos) {
         if (mc.player == null || mc.world == null) return null;
 
-        // Vérifier que la position est bien en dessous du joueur
         Vec3d playerPos = mc.player.getPos();
         if (pos.getY() >= (int) playerPos.y) return null;
 
-        // Check if position is air
-        if (!isAirBlock(getBlock(pos))) return null;
+        if (!isAirBlock(Objects.requireNonNull(getBlock(pos)))) return null;
 
-        // Check if we have blocks to place
-        if (!hasBlocks()) return null;
+        if (hasBlocks()) return null;
 
         Vec3d eyesPos = new Vec3d(mc.player.getX(),
                 mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()),
                 mc.player.getZ());
 
         // Find the best face to place against
-        for (Direction side : Direction.values()) {
+        for (Direction side : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN}) {
             BlockPos neighbor = pos.offset(side);
             Direction placementSide = side.getOpposite();
 
-            // Check if neighbor is solid
             BlockState neighborState = mc.world.getBlockState(neighbor);
             if (!neighborState.isSolidBlock(mc.world, neighbor)) continue;
 
@@ -245,10 +227,8 @@ public class AutoClutch extends Module implements ConfigurableModule {
             Vec3d hitVec = Vec3d.ofCenter(neighbor)
                     .add(Vec3d.of(placementSide.getVector()).multiply(0.5));
 
-            // Check if within reach
             if (eyesPos.squaredDistanceTo(hitVec) > 36.0) continue;
 
-            // Calculate rotation needed
             float[] angles = calculateRotation(hitVec);
 
             return new PlacementInfo(pos, neighbor, placementSide, hitVec, angles[0], angles[1]);
@@ -258,16 +238,13 @@ public class AutoClutch extends Module implements ConfigurableModule {
     }
 
     private boolean placeBlockAt(PlacementInfo placement) {
-        if (mc.player == null || !hasBlocks()) return false;
+        if (mc.player == null || hasBlocks()) return false;
 
-        // Select block in hotbar
         selectBlockInHotbar();
 
-        // Set rotation
         mc.player.setYaw(placement.yaw);
         mc.player.setPitch(placement.pitch);
 
-        // Place block
         BlockHitResult hitResult = new BlockHitResult(placement.hitVec, placement.side, placement.neighbor, false);
         assert mc.interactionManager != null;
         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hitResult);
@@ -279,7 +256,6 @@ public class AutoClutch extends Module implements ConfigurableModule {
     private void updateRotation(float newYaw, float newPitch) {
         if (mc.player == null) return;
 
-        // Rotation smoothing
         float targetYaw = 0;
         float targetPitch = 0;
         if (!hasTarget) {
@@ -287,7 +263,6 @@ public class AutoClutch extends Module implements ConfigurableModule {
             targetPitch = newPitch;
             hasTarget = true;
         } else {
-            // Smooth rotation
             float speed = (float) rotationSpeed.getDoubleValue();
 
             float yawDiff = MathHelper.wrapDegrees(newYaw - mc.player.getYaw());
@@ -319,8 +294,8 @@ public class AutoClutch extends Module implements ConfigurableModule {
     }
 
     private boolean hasBlocks() {
-        if (mc.player == null) return false;
-        return getFirstHotBarSlotWithBlocks() != -1;
+        if (mc.player == null) return true;
+        return getFirstHotBarSlotWithBlocks() == -1;
     }
 
     private void selectBlockInHotbar() {
@@ -335,31 +310,11 @@ public class AutoClutch extends Module implements ConfigurableModule {
     }
 
     // Utility classes
-    private static class PlacementInfo {
-        final BlockPos pos;
-        final BlockPos neighbor;
-        final Direction side;
-        final Vec3d hitVec;
-        final float yaw;
-        final float pitch;
+    private record PlacementInfo(BlockPos pos, BlockPos neighbor, Direction side, Vec3d hitVec, float yaw, float pitch) { }
 
-        PlacementInfo(BlockPos pos, BlockPos neighbor, Direction side, Vec3d hitVec, float yaw, float pitch) {
-            this.pos = pos;
-            this.neighbor = neighbor;
-            this.side = side;
-            this.hitVec = hitVec;
-            this.yaw = yaw;
-            this.pitch = pitch;
-        }
-    }
-
-    // Keep existing utility methods
     public boolean isAirBlock(Block block) {
         if (block.getDefaultState().isAir()) {
-            if (block instanceof SnowBlock && block.getDefaultState().get(SnowBlock.LAYERS) > 1) {
-                return false;
-            }
-            return true;
+            return !(block instanceof SnowBlock) || block.getDefaultState().get(SnowBlock.LAYERS) <= 1;
         }
         return false;
     }

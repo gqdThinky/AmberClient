@@ -77,6 +77,11 @@ public abstract class Module {
         // Override in subclasses to implement per-tick logic
     }
 
+    // Called every client tick to handle key inputs (even if module is disabled)
+    public void handleKeyInput() {
+        // Override in subclasses if needed
+    }
+
     protected MinecraftClient getClient() {
         return MinecraftClient.getInstance();
     }
