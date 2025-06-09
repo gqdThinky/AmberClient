@@ -16,955 +16,430 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ClickGUI extends Screen {
     // Theme colors
-    private static final int BASE_BACKGROUND_COLOR = new Color(20, 20, 25, 200).getRGB();
-    private static final int BASE_PANEL_COLOR = new Color(30, 30, 35, 255).getRGB();
-    private static final int ACCENT_COLOR = new Color(255, 165, 0).getRGB();
-    private static final int ACCENT_HOVER_COLOR = new Color(255, 190, 50).getRGB();
-    private static final int TEXT_COLOR = new Color(220, 220, 220).getRGB();
-    private static final int TEXT_SHADOW_COLOR = new Color(0, 0, 0, 100).getRGB();
-    private static final int OUTLINE_COLOR = new Color(255, 255, 255, 180).getRGB();
+    private static final int BASE_BG = new Color(20, 20, 25, 200).getRGB(), PANEL_BG = new Color(30, 30, 35, 255).getRGB();
+    private static final int ACCENT = new Color(255, 165, 0).getRGB(), ACCENT_HOVER = new Color(255, 190, 50).getRGB();
+    private static final int TEXT = new Color(220, 220, 220).getRGB(), OUTLINE = new Color(255, 255, 255, 180).getRGB();
 
-    // Animation
-    private float animationProgress = 0.0f;
-    private long lastTime;
-
-    // Categories
+    // State
+    private float animProgress = 0.0f, configAnim = 0.0f, mainScroll = 0.0f, configScroll = 0.0f;
+    private long lastTime = System.currentTimeMillis();
     private final List<Category> categories = new ArrayList<>();
-    private int selectedCategory = 0;
-
-    // For scrolling
-    private float scrollOffset = 0.0f;
-    private boolean isDragging = false;
-    private int dragStartY;
-    private float dragStartOffset;
-
-    // Track clicked modules for feedback
+    private int selectedCat = 0;
+    private final ScrollState main = new ScrollState();
+    private final ScrollState config = new ScrollState();
+    private ModuleWrapper configModule = null;
+    private int configOffsetX = -350, configOffsetY = 0;
+    private boolean configDragging = false;
+    private int configDragX, configDragY;
+    private ModuleSetting draggedSetting = null;
     private final List<ModuleWrapper> clickedModules = new ArrayList<>();
     private long clickTime = 0;
-    private static final long CLICK_FEEDBACK_DURATION = 300;
-
-    // Configuration panel
-    private ModuleWrapper configModule = null;
-    private float configPanelAnimation = 0.0f;
-    private float configScrollOffset = 0.0f;
-    private boolean isConfigDragging = false;
-    private int configDragStartY;
-    private float configDragStartOffset;
-    private static final int CONFIG_PANEL_OFFSET_X = -350;
-
-    // Configuration panel dragging
-    private boolean isConfigPanelDragging = false;
-    private int configPanelDragStartX;
-    private int configPanelDragStartY;
-    private int configPanelOffsetX = CONFIG_PANEL_OFFSET_X;
-    private int configPanelOffsetY = 0;
-
-    // Slider dragging for DOUBLE settings
-    private ModuleSetting draggedSetting = null;
-    private double sliderStartValue;
+    private static final long CLICK_DURATION = 300;
 
     public ClickGUI() {
         super(Text.literal("Amber Client - by @gqdThinky"));
-        lastTime = System.currentTimeMillis();
-        initializeCategories();
+        initCategories();
     }
 
-    private void initializeCategories() {
-        List<Module> modules = ModuleManager.getInstance().getModules();
-        Map<String, List<Module>> categoryMap = new HashMap<>();
-        for (Module module : modules) {
-            String categoryName = module.getCategory();
-            categoryMap.computeIfAbsent(categoryName, k -> new ArrayList<>()).add(module);
-        }
-
-        // Create categories
-        for (Map.Entry<String, List<Module>> entry : categoryMap.entrySet()) {
-            String categoryName = entry.getKey();
-            List<Module> categoryModules = entry.getValue();
-            List<ModuleWrapper> wrappedModules = new ArrayList<>();
-            for (Module module : categoryModules) {
-                wrappedModules.add(new ModuleWrapper(module));
-            }
-            categories.add(new Category(categoryName, wrappedModules));
-        }
-
-        Category hudCategory = null;
-        for (Category category : categories) {
-            if (category.getName().equals("HUD")) {
-                hudCategory = category;
-                break;
-            }
-        }
-        if (hudCategory != null) {
-            categories.remove(hudCategory);
-            categories.add(hudCategory);
-        }
-
-        categories.sort((c1, c2) -> {
-            if (c1.getName().equals("HUD") || c2.getName().equals("HUD")) {
-                return 0;
-            }
-            return c1.getName().compareToIgnoreCase(c2.getName());
-        });
+    private static class ScrollState {
+        boolean isDragging = false;
+        int dragStartY;
+        float dragStartOffset;
     }
 
-    private Transparency getTransparencyModule() {
-        for (Module module : ModuleManager.getInstance().getModules()) {
-            if (module instanceof Transparency) {
-                return (Transparency) module;
-            }
+    private record PanelBounds(int x, int y, int width, int height) { }
+
+    private void initCategories() {
+        Map<String, List<Module>> catMap = new HashMap<>();
+        ModuleManager.getInstance().getModules().forEach(m -> catMap.computeIfAbsent(m.getCategory(), k -> new ArrayList<>()).add(m));
+
+        // Add non-HUD categories, sorted
+        catMap.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals("HUD"))
+                .sorted(Map.Entry.comparingByKey(String.CASE_INSENSITIVE_ORDER))
+                .forEach(entry -> categories.add(new Category(entry.getKey(), entry.getValue().stream().map(ModuleWrapper::new).toList())));
+
+        // Add HUD category at the end if it exists
+        List<Module> hudModules = catMap.get("HUD");
+        if (hudModules != null && !hudModules.isEmpty()) {
+            List<ModuleWrapper> wrappedHudModules = hudModules.stream().map(ModuleWrapper::new).toList();
+            categories.add(new Category("HUD", wrappedHudModules));
         }
-        return null;
     }
 
-    private int applyTransparency(int baseColor, float transparency) {
-        int r = (baseColor >> 16) & 0xFF;
-        int g = (baseColor >> 8) & 0xFF;
-        int b = baseColor & 0xFF;
-        int a = (int) (((baseColor >> 24) & 0xFF) * transparency);
-        return (a << 24) | (r << 16) | (g << 8) | b;
+    private float getTransparency() {
+        return ModuleManager.getInstance().getModules().stream()
+                .filter(m -> m instanceof Transparency && m.isEnabled())
+                .map(m -> (float) ((Transparency) m).getTransparencyLevel())
+                .findFirst().orElse(1.0f);
+    }
+
+    private int applyTransparency(int color, float alpha) {
+        return ((int) (((color >> 24) & 0xFF) * alpha) << 24) | (color & 0xFFFFFF);
     }
 
     @Override
     protected void init() {
         super.init();
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("×"), button -> this.close())
-                .dimensions(this.width - 25, 5, 20, 20)
-                .tooltip(Tooltip.of(Text.literal("Close")))
-                .build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("×"), b -> close())
+                .dimensions(width - 25, 5, 20, 20).tooltip(Tooltip.of(Text.literal("Close"))).build());
     }
 
     @Override
     public void render(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
-        long currentTime = System.currentTimeMillis();
-        long timeDiff = currentTime - lastTime;
-        lastTime = currentTime;
+        long time = System.currentTimeMillis();
+        animProgress = MathHelper.clamp(animProgress + (time - lastTime) / 300.0f, 0.0f, 1.0f);
+        configAnim = MathHelper.clamp(configAnim + (configModule != null ? 1 : -1) * (time - lastTime) / 200.0f, 0.0f, 1.0f);
+        lastTime = time;
 
-        if (animationProgress < 1.0f) {
-            animationProgress += timeDiff / 300.0f;
-            animationProgress = MathHelper.clamp(animationProgress, 0.0f, 1.0f);
-        }
-        if (configModule != null && configPanelAnimation < 1.0f) {
-            configPanelAnimation += timeDiff / 200.0f;
-            configPanelAnimation = MathHelper.clamp(configPanelAnimation, 0.0f, 1.0f);
-        } else if (configModule == null && configPanelAnimation > 0.0f) {
-            configPanelAnimation -= timeDiff / 200.0f;
-            configPanelAnimation = MathHelper.clamp(configPanelAnimation, 0.0f, 1.0f);
-        }
+        float trans = getTransparency();
+        renderBackground(context, mouseX, mouseY, delta);
+        context.fill(0, 0, width, height, applyTransparency(BASE_BG, trans));
 
-        // Get transparency level from Transparency module
-        float transparency = 1.0f;
-        Transparency transparencyModule = getTransparencyModule();
-        if (transparencyModule != null && transparencyModule.isEnabled()) {
-            transparency = (float) transparencyModule.getTransparencyLevel();
-        }
+        int centerX = width / 2;
+        context.drawCenteredTextWithShadow(textRenderer, "AMBER CLIENT", centerX, 52, ACCENT);
 
-        this.renderBackground(context, mouseX, mouseY, delta);
-        context.fill(0, 0, this.width, this.height, applyTransparency(BASE_BACKGROUND_COLOR, transparency));
+        PanelBounds mainPanel = calcPanel();
+        context.fill(mainPanel.x, mainPanel.y, mainPanel.x + mainPanel.width, mainPanel.y + mainPanel.height,
+                applyTransparency(PANEL_BG, animProgress * trans));
 
-        int logoSize = 32;
-        int centerX = this.width / 2;
-        int headerY = 15;
-        context.drawCenteredTextWithShadow(this.textRenderer, "AMBER CLIENT", centerX, headerY + logoSize + 5, ACCENT_COLOR);
+        int sepX = mainPanel.x + 150;
+        context.fill(sepX, mainPanel.y, sepX + 2, mainPanel.y + mainPanel.height, ACCENT);
 
-        int panelWidth = Math.min(this.width - 40, 800);
-        int panelHeight = Math.min(this.height - 100, 400);
-        int panelX = centerX - panelWidth / 2;
-        int panelY = headerY + logoSize + 25;
+        renderCategories(context, mainPanel.x, mainPanel.y, mainPanel.height, mouseX, mouseY, trans);
+        renderModules(context, sepX + 10, mainPanel.y, mainPanel.width - 160, mainPanel.height, mouseX, mouseY, trans);
 
-        float scale = 0.8f + 0.2f * animationProgress;
-        float alpha = animationProgress * transparency;
+        int statusY = mainPanel.y + mainPanel.height + 5;
+        context.fill(mainPanel.x, statusY, mainPanel.x + mainPanel.width, statusY + 20, applyTransparency(PANEL_BG, trans));
+        context.drawTextWithShadow(textRenderer, configModule != null ? "Configuring: " + configModule.name :
+                "Amber Client " + AmberClient.MOD_VERSION + " • MC 1.21.4", mainPanel.x + 10, statusY + 6, TEXT);
 
-        int scaledWidth = (int)(panelWidth * scale);
-        int scaledHeight = (int)(panelHeight * scale);
-        int scaledX = centerX - scaledWidth / 2;
-        int scaledY = panelY + (panelHeight - scaledHeight) / 2;
-
-        scaledX = Math.round(scaledX);
-        scaledY = Math.round(scaledY);
-
-        int panelColorWithAlpha = applyTransparency(BASE_PANEL_COLOR, alpha);
-
-        context.fill(scaledX, scaledY, scaledX + scaledWidth, scaledY + scaledHeight, panelColorWithAlpha);
-
-        int categoryWidth = 150;
-        int separatorX = scaledX + categoryWidth;
-        context.fill(separatorX, scaledY, separatorX + 2, scaledY + scaledHeight, ACCENT_COLOR);
-
-        renderCategories(context, scaledX, scaledY, categoryWidth, scaledHeight, mouseX, mouseY);
-        renderModules(context, separatorX + 10, scaledY, scaledWidth - categoryWidth - 10, scaledHeight, mouseX, mouseY);
-
-        int statusBarY = scaledY + scaledHeight + 5;
-        context.fill(scaledX, statusBarY, scaledX + scaledWidth, statusBarY + 20, applyTransparency(BASE_PANEL_COLOR, transparency));
-
-        String statusText = configModule != null ?
-                "Configuring: " + configModule.getName() :
-                "Amber Client " + getModVersion() + " • MC 1.21.4";
-        context.drawTextWithShadow(this.textRenderer, statusText, scaledX + 10, statusBarY + 6, TEXT_COLOR);
-
-        if (configPanelAnimation > 0.0f && configModule != null) {
-            renderConfigPanel(context, mouseX, mouseY);
-        }
-
+        if (configAnim > 0.0f && configModule != null) renderConfigPanel(context, mouseX, mouseY);
         super.render(context, mouseX, mouseY, delta);
     }
 
-    private void renderCategories(DrawContext context, int x, int y, int width, int height, int mouseX, int mouseY) {
-        // Get transparency level for categories
-        float transparency = 1.0f;
-        Transparency transparencyModule = getTransparencyModule();
-        if (transparencyModule != null && transparencyModule.isEnabled()) {
-            transparency = (float) transparencyModule.getTransparencyLevel();
-        }
+    private PanelBounds calcPanel() {
+        int w = Math.min(width - 40, 800), h = Math.min(height - 100, 400);
+        float scale = 0.8f + 0.2f * animProgress;
+        int scaledW = (int)(w * scale), scaledH = (int)(h * scale);
+        return new PanelBounds(width / 2 - scaledW / 2, 82 + (h - scaledH) / 2, scaledW, scaledH);
+    }
 
-        int categoryHeight = 40;
-        int spacing = 5;
-        int totalHeight = categories.size() * (categoryHeight + spacing) - spacing;
-        int startY = y + (height - totalHeight) / 2;
-
+    private void renderCategories(DrawContext context, int x, int y, int h, int mouseX, int mouseY, float trans) {
+        int catH = 40, sp = 5, totalH = categories.size() * (catH + sp) - sp, startY = y + (h - totalH) / 2;
         for (int i = 0; i < categories.size(); i++) {
-            Category category = categories.get(i);
-            int categoryY = startY + i * (categoryHeight + spacing);
-            int categoryX = x + 10;
-            int categoryWidth = width - 20;
-
-            boolean isHovered = mouseX >= categoryX && mouseX <= categoryX + categoryWidth &&
-                    mouseY >= categoryY && mouseY <= categoryY + categoryHeight;
-
-            int bgColor = (selectedCategory == i) ? ACCENT_COLOR :
-                    (isHovered ? applyTransparency(new Color(50, 50, 55, 220).getRGB(), transparency) : applyTransparency(BASE_PANEL_COLOR, transparency));
-
-            categoryX = Math.round(categoryX);
-            categoryY = Math.round(categoryY);
-            context.fill(categoryX, categoryY, categoryX + categoryWidth, categoryY + categoryHeight, bgColor);
-
-            int textColor = (selectedCategory == i) ? Color.WHITE.getRGB() : TEXT_COLOR;
-            String name = category.getName();
-
-            int textX = categoryX + categoryWidth / 2;
-            int textY = categoryY + (categoryHeight - 8) / 2;
-
-            context.drawCenteredTextWithShadow(this.textRenderer, name, textX, textY, textColor);
+            Category cat = categories.get(i);
+            int catY = startY + i * (catH + sp), catX = x + 10;
+            boolean hover = isMouseOver(mouseX, mouseY, catX, catY, 150 - 20, catH);
+            int bg = selectedCat == i ? ACCENT : hover ? applyTransparency(new Color(50, 50, 55, 220).getRGB(), trans) :
+                    applyTransparency(PANEL_BG, trans);
+            context.fill(catX, catY, catX + 150 - 20, catY + catH, bg);
+            context.drawCenteredTextWithShadow(textRenderer, cat.name, catX + (150 - 20) / 2, catY + (catH - 8) / 2,
+                    selectedCat == i ? Color.WHITE.getRGB() : TEXT);
         }
     }
 
-    private void renderModules(DrawContext context, int x, int y, int width, int height, int mouseX, int mouseY) {
-        if (selectedCategory < 0 || selectedCategory >= categories.size()) {
-            return;
+    private void renderModules(DrawContext context, int x, int y, int w, int h, int mouseX, int mouseY, float trans) {
+        if (selectedCat < 0 || selectedCat >= categories.size()) return;
+        Category cat = categories.get(selectedCat);
+        context.drawTextWithShadow(textRenderer, cat.name.toUpperCase(), x, y + 10, ACCENT);
+
+        int top = y + 30, areaH = h - 40;
+        context.enableScissor(x, top, x + w, top + areaH);
+
+        int modH = 30, sp = 5, contentH = cat.modules.size() * (modH + sp) - sp;
+        mainScroll = MathHelper.clamp(mainScroll, 0, Math.max(0, contentH - areaH));
+        for (int i = 0; i < cat.modules.size(); i++) {
+            ModuleWrapper mod = cat.modules.get(i);
+            int modY = top + i * (modH + sp) - (int)mainScroll;
+            if (modY + modH < top || modY > top + areaH) continue;
+
+            context.fill(x, modY, x + w, modY + modH, mod.isEnabled() ? new Color(ACCENT).darker().getRGB() :
+                    applyTransparency(new Color(40, 40, 45, 220).getRGB(), trans));
+            context.drawTextWithShadow(textRenderer, mod.name, x + 10, modY + 7, TEXT);
+            context.drawTextWithShadow(textRenderer, mod.desc, x + 10, modY + 20, new Color(180, 180, 180).getRGB());
+            if (mod.isConfigurable) context.drawTextWithShadow(textRenderer, "⚙", x + w - 50, modY + 7, Color.WHITE.getRGB());
+
+            int togX = x + w - 24, togY = modY + 5;
+            boolean hover = isMouseOver(mouseX, mouseY, togX, togY, 18, 18);
+            boolean clicked = clickedModules.contains(mod) && (System.currentTimeMillis() - clickTime) < CLICK_DURATION;
+            int color = clicked || hover ? ACCENT_HOVER : new Color(245, 235, 216).getRGB();
+            drawBorder(context, togX, togY, 18, 18);
+            context.fill(togX, togY, togX + 18, togY + 18, color);
+            if (mod.isEnabled()) context.drawTextWithShadow(textRenderer, "✓", togX + 7, togY + 5, Color.WHITE.getRGB());
         }
 
-        // Get transparency level for modules
-        float transparency = 1.0f;
-        Transparency transparencyModule = getTransparencyModule();
-        if (transparencyModule != null && transparencyModule.isEnabled()) {
-            transparency = (float) transparencyModule.getTransparencyLevel();
+        if (contentH > areaH) {
+            float ratio = (float) areaH / contentH;
+            int thumbH = Math.max(20, (int)(areaH * ratio));
+            int thumbY = top + (int)((areaH - thumbH) * (mainScroll / Math.max(0, contentH - areaH)));
+            context.fill(x + w - 20, top, x + w - 10, top + areaH, applyTransparency(new Color(50, 50, 55).getRGB(), trans));
+            context.fill(x + w - 20, thumbY, x + w - 10, thumbY + thumbH, ACCENT);
         }
-
-        Category category = categories.get(selectedCategory);
-        List<ModuleWrapper> modules = category.getModules();
-
-        String title = category.getName().toUpperCase();
-        context.drawTextWithShadow(this.textRenderer, title, Math.round(x), Math.round(y + 10), ACCENT_COLOR);
-
-        int scrollAreaTop = Math.round(y + 30);
-        int scrollAreaHeight = Math.round(height - 40);
-        int scrollAreaBottom = scrollAreaTop + scrollAreaHeight;
-
-        context.enableScissor(x, scrollAreaTop, x + width, scrollAreaBottom);
-
-        int moduleHeight = 30;
-        int spacing = 5;
-        int moduleWidth = width - 30;
-
-        int contentHeight = modules.size() * (moduleHeight + spacing) - spacing;
-        int maxScroll = Math.max(0, contentHeight - scrollAreaHeight);
-        scrollOffset = MathHelper.clamp(scrollOffset, 0, maxScroll);
-
-        for (int i = 0; i < modules.size(); i++) {
-            ModuleWrapper module = modules.get(i);
-            int moduleY = Math.round(scrollAreaTop + i * (moduleHeight + spacing) - (int)scrollOffset);
-
-            if (moduleY + moduleHeight < scrollAreaTop || moduleY > scrollAreaBottom) {
-                continue;
-            }
-
-            int moduleBgColor = module.isEnabled() ?
-                    new Color(ACCENT_COLOR).darker().getRGB() : // Pas de transparence pour les modules activés
-                    applyTransparency(new Color(40, 40, 45, 220).getRGB(), transparency);
-
-            int moduleX = Math.round(x);
-            context.fill(moduleX, moduleY, moduleX + moduleWidth, moduleY + moduleHeight, moduleBgColor);
-
-            context.drawTextWithShadow(this.textRenderer, module.getName(), moduleX + 10, moduleY + 7, TEXT_COLOR);
-            context.drawTextWithShadow(this.textRenderer, module.getDescription(), moduleX + 10, moduleY + 20, new Color(180, 180, 180).getRGB());
-
-            if (module.getWrappedModule() instanceof ConfigurableModule) {
-                int configX = moduleX + moduleWidth - 50;
-                context.drawTextWithShadow(this.textRenderer, "⚙", configX, moduleY + 7, Color.WHITE.getRGB());
-            }
-
-            int toggleX = Math.round(moduleX + moduleWidth - 24);
-            int toggleY = Math.round(moduleY + 5);
-            int toggleWidth = 18;
-            int toggleHeight = 18;
-
-            boolean isHovered = mouseX >= toggleX && mouseX <= toggleX + toggleWidth &&
-                    mouseY >= toggleY && mouseY <= toggleY + toggleHeight;
-
-            boolean isClicked = clickedModules.contains(module) && (System.currentTimeMillis() - clickTime) < CLICK_FEEDBACK_DURATION;
-
-            int toggleColor;
-            if (isClicked) {
-                toggleColor = ACCENT_HOVER_COLOR;
-            } else if (isHovered) {
-                toggleColor = ACCENT_HOVER_COLOR;
-            } else {
-                toggleColor = new Color(245, 235, 216).getRGB();
-            }
-
-            context.fill(toggleX - 1, toggleY - 1, toggleX + toggleWidth + 1, toggleY, OUTLINE_COLOR);
-            context.fill(toggleX - 1, toggleY + toggleHeight, toggleX + toggleWidth + 1, toggleY + toggleHeight + 1, OUTLINE_COLOR);
-            context.fill(toggleX - 1, toggleY, toggleX, toggleY + toggleHeight, OUTLINE_COLOR);
-            context.fill(toggleX + toggleWidth, toggleY, toggleX + toggleWidth + 1, toggleY + toggleHeight, OUTLINE_COLOR);
-
-            context.fill(toggleX, toggleY, toggleX + toggleWidth, toggleY + toggleHeight, toggleColor);
-
-            if (module.isEnabled()) {
-                context.drawTextWithShadow(this.textRenderer, "✓", toggleX + 7, toggleY + 5, Color.WHITE.getRGB());
-            }
-        }
-
-        if (contentHeight > scrollAreaHeight) {
-            int scrollbarX = Math.round(x + width - 20);
-            int scrollbarWidth = 10;
-            context.fill(scrollbarX, scrollAreaTop, scrollbarX + scrollbarWidth, scrollAreaBottom, applyTransparency(new Color(50, 50, 55).getRGB(), transparency));
-            float scrollRatio = (float) scrollAreaHeight / contentHeight;
-            int thumbHeight = Math.max(20, (int)(scrollAreaHeight * scrollRatio));
-            int thumbY = Math.round(scrollAreaTop + (int)((scrollAreaHeight - thumbHeight) * (scrollOffset / maxScroll)));
-            context.fill(scrollbarX, thumbY, scrollbarX + scrollbarWidth, thumbY + thumbHeight, ACCENT_COLOR);
-        }
-
         context.disableScissor();
     }
 
     private void renderConfigPanel(DrawContext context, int mouseX, int mouseY) {
-        int panelWidth = Math.min(this.width - 40, 300);
-        int panelHeight = Math.min(this.height - 100, 400);
-        int centerX = this.width / 2;
-        int headerY = 15;
-        int logoSize = 32;
-        int panelY = headerY + logoSize + 25;
+        PanelBounds p = calcConfigPanel();
+        context.fill(p.x, p.y, p.x + p.width, p.y + p.height, PANEL_BG);
+        context.fill(p.x, p.y, p.x + p.width, p.y + 30, ACCENT);
+        context.drawTextWithShadow(textRenderer, configModule.name + " Settings", p.x + 10, p.y + 10, Color.WHITE.getRGB());
 
-        int configPanelX = centerX + (this.width - panelWidth) / 2 + configPanelOffsetX;
-        int configPanelY = panelY + configPanelOffsetY;
-        int configPanelWidth = panelWidth;
-        int configPanelHeight = panelHeight;
+        boolean hover = isMouseOver(mouseX, mouseY, p.x + p.width - 25, p.y + 5, 20, 20);
+        context.fill(p.x + p.width - 25, p.y + 5, p.x + p.width - 5, p.y + 25,
+                hover ? new Color(255, 80, 80).getRGB() : new Color(200, 50, 50).getRGB());
+        context.drawTextWithShadow(textRenderer, "×", p.x + p.width - 18, p.y + 10, Color.WHITE.getRGB());
 
-        // Animation: slide from right
-        int maxOffset = this.width;
-        int currentOffset = (int) (maxOffset * (1.0f - configPanelAnimation));
-        configPanelX -= currentOffset;
+        List<ModuleSetting> settings = configModule.settings;
+        int top = p.y + 40, areaH = p.height - 50;
+        context.enableScissor(p.x, top, p.x + p.width, top + areaH);
 
-        // Use base panel color without transparency
-        int panelColorWithAlpha = BASE_PANEL_COLOR;
-
-        context.fill(configPanelX, configPanelY, configPanelX + configPanelWidth, configPanelY + configPanelHeight, panelColorWithAlpha);
-
-        // Header
-        context.fill(configPanelX, configPanelY, configPanelX + configPanelWidth, configPanelY + 30, ACCENT_COLOR);
-        context.drawTextWithShadow(this.textRenderer, configModule.getName() + " Settings", configPanelX + 10, configPanelY + 10, Color.WHITE.getRGB());
-
-        // Close button
-        int closeButtonX = configPanelX + configPanelWidth - 25;
-        int closeButtonY = configPanelY + 5;
-        boolean closeHovered = mouseX >= closeButtonX && mouseX <= closeButtonX + 20 &&
-                mouseY >= closeButtonY && mouseY <= closeButtonY + 20;
-
-        int closeButtonColor = closeHovered ? new Color(255, 80, 80).getRGB() : new Color(200, 50, 50).getRGB();
-        context.fill(closeButtonX, closeButtonY, closeButtonX + 20, closeButtonY + 20, closeButtonColor);
-        context.drawTextWithShadow(this.textRenderer, "×", closeButtonX + 7, closeButtonY + 5, Color.WHITE.getRGB());
-
-        // Settings list
-        List<ModuleSetting> settings = ((ConfigurableModule) configModule.getWrappedModule()).getSettings();
-        int settingsAreaTop = configPanelY + 40;
-        int settingsAreaHeight = configPanelHeight - 50;
-        int settingsAreaBottom = settingsAreaTop + settingsAreaHeight;
-
-        context.enableScissor(configPanelX, settingsAreaTop, configPanelX + configPanelWidth, settingsAreaBottom);
-
-        int settingHeight = 40;
-        int spacing = 5;
-        int settingWidth = configPanelWidth - 20;
-        int contentHeight = settings.size() * (settingHeight + spacing) - spacing;
-        int maxScroll = Math.max(0, contentHeight - settingsAreaHeight);
-        configScrollOffset = MathHelper.clamp(configScrollOffset, 0, maxScroll);
-
+        int setH = 40, sp = 5, contentH = settings.size() * (setH + sp) - sp;
+        configScroll = MathHelper.clamp(configScroll, 0, Math.max(0, contentH - areaH));
         for (int i = 0; i < settings.size(); i++) {
-            ModuleSetting setting = settings.get(i);
-            int settingY = settingsAreaTop + i * (settingHeight + spacing) - (int) configScrollOffset;
+            ModuleSetting s = settings.get(i);
+            int setY = top + i * (setH + sp) - (int)configScroll;
+            if (setY + setH < top || setY > top + areaH) continue;
 
-            if (settingY + settingHeight < settingsAreaTop || settingY > settingsAreaBottom) {
-                continue;
-            }
+            context.fill(p.x + 10, setY, p.x + p.width - 10, setY + setH, new Color(40, 40, 45, 220).getRGB());
+            context.drawTextWithShadow(textRenderer, s.getName(), p.x + 20, setY + 10, TEXT);
+            context.drawTextWithShadow(textRenderer, s.getDescription(), p.x + 20, setY + 25, new Color(180, 180, 180).getRGB());
 
-            int settingX = configPanelX + 10;
-            context.fill(settingX, settingY, settingX + settingWidth, settingY + settingHeight, new Color(40, 40, 45, 220).getRGB());
-
-            context.drawTextWithShadow(this.textRenderer, setting.getName(), settingX + 10, settingY + 10, TEXT_COLOR);
-            context.drawTextWithShadow(this.textRenderer, setting.getDescription(), settingX + 10, settingY + 25, new Color(180, 180, 180).getRGB());
-
-            if (setting.getType() == ModuleSetting.SettingType.BOOLEAN) {
-                int toggleX = settingX + settingWidth - 60;
-                int toggleY = settingY + 10;
-                int toggleWidth = 40;
-                int toggleHeight = 20;
-
-                boolean isOn = setting.getBooleanValue();
-                boolean toggleHovered = mouseX >= toggleX && mouseX <= toggleX + toggleWidth &&
-                        mouseY >= toggleY && mouseY <= toggleY + toggleHeight;
-
-                // Toggle background
-                int toggleBgColor = toggleHovered ?
-                        (isOn ? new Color(255, 190, 50).getRGB() : new Color(120, 120, 120).getRGB()) :
-                        (isOn ? ACCENT_COLOR : new Color(100, 100, 100).getRGB());
-
-                context.fill(toggleX, toggleY, toggleX + toggleWidth, toggleY + toggleHeight, toggleBgColor);
-
-                // Border
-                context.fill(toggleX - 1, toggleY - 1, toggleX + toggleWidth + 1, toggleY, OUTLINE_COLOR);
-                context.fill(toggleX - 1, toggleY + toggleHeight, toggleX + toggleWidth + 1, toggleY + toggleHeight + 1, OUTLINE_COLOR);
-                context.fill(toggleX - 1, toggleY, toggleX, toggleY + toggleHeight, OUTLINE_COLOR);
-                context.fill(toggleX + toggleWidth, toggleY, toggleX + toggleWidth + 1, toggleY + toggleHeight, OUTLINE_COLOR);
-
-                // Text
-                String toggleText = isOn ? "ON" : "OFF";
-                int textWidth = this.textRenderer.getWidth(toggleText);
-                int textX = toggleX + (toggleWidth - textWidth) / 2;
-                int textY = toggleY + (toggleHeight - 8) / 2;
-                context.drawTextWithShadow(this.textRenderer, toggleText, textX, textY, Color.WHITE.getRGB());
-            } else if (setting.getType() == ModuleSetting.SettingType.DOUBLE && setting.hasRange()) {
-                int sliderX = settingX + settingWidth - 100;
-                int sliderY = settingY + 10;
-                int sliderWidth = 80;
-                int sliderHeight = 10;
-
-                double min = setting.getMinValue().doubleValue();
-                double max = setting.getMaxValue().doubleValue();
-                double value = setting.getDoubleValue();
-                double range = max - min;
-                double normalizedValue = (value - min) / range;
-                int filledWidth = (int) (sliderWidth * normalizedValue);
-
-                // Slider background
-                context.fill(sliderX, sliderY, sliderX + sliderWidth, sliderY + sliderHeight, new Color(100, 100, 100).getRGB());
-                // Filled portion
-                context.fill(sliderX, sliderY, sliderX + filledWidth, sliderY + sliderHeight, ACCENT_COLOR);
-                // Border
-                context.fill(sliderX - 1, sliderY - 1, sliderX + sliderWidth + 1, sliderY, OUTLINE_COLOR);
-                context.fill(sliderX - 1, sliderY + sliderHeight, sliderX + sliderWidth + 1, sliderY + sliderHeight + 1, OUTLINE_COLOR);
-                context.fill(sliderX - 1, sliderY, sliderX, sliderY + sliderHeight, OUTLINE_COLOR);
-                context.fill(sliderX + sliderWidth, sliderY, sliderX + sliderWidth + 1, sliderY + sliderHeight, OUTLINE_COLOR);
-
-                // Display current value
-                String valueText = String.format("%.2f", value);
-                context.drawTextWithShadow(this.textRenderer, valueText, sliderX + sliderWidth + 5, sliderY + 1, TEXT_COLOR);
+            if (s.getType() == ModuleSetting.SettingType.BOOLEAN) {
+                boolean on = s.getBooleanValue(), hoverB = isMouseOver(mouseX, mouseY, p.x + p.width - 60, setY + 10, 40, 20);
+                int bg = hoverB ? (on ? ACCENT_HOVER : new Color(120, 120, 120).getRGB()) : (on ? ACCENT : new Color(100, 100, 100).getRGB());
+                context.fill(p.x + p.width - 60, setY + 10, p.x + p.width - 20, setY + 30, bg);
+                drawBorder(context, p.x + p.width - 60, setY + 10, 40, 20);
+                context.drawTextWithShadow(textRenderer, on ? "ON" : "OFF", p.x + p.width - 50, setY + 15, Color.WHITE.getRGB());
+            } else if (s.getType() == ModuleSetting.SettingType.DOUBLE && s.hasRange()) {
+                double v = s.getDoubleValue(), min = s.getMinValue().doubleValue(), max = s.getMaxValue().doubleValue();
+                context.fill(p.x + p.width - 100, setY + 10, p.x + p.width - 20, setY + 20, new Color(100, 100, 100).getRGB());
+                context.fill(p.x + p.width - 100, setY + 10, p.x + p.width - 100 + (int)(80 * (v - min) / (max - min)), setY + 20, ACCENT);
+                drawBorder(context, p.x + p.width - 100, setY + 10, 80, 10);
+                context.drawTextWithShadow(textRenderer, String.format("%.2f", v), p.x + p.width - 15, setY + 11, TEXT);
             }
         }
 
-        if (contentHeight > settingsAreaHeight) {
-            int scrollbarX = configPanelX + configPanelWidth - 15;
-            int scrollbarWidth = 5;
-            context.fill(scrollbarX, settingsAreaTop, scrollbarX + scrollbarWidth, settingsAreaBottom, new Color(50, 50, 55).getRGB());
-            float scrollRatio = (float) settingsAreaHeight / contentHeight;
-            int thumbHeight = Math.max(20, (int) (settingsAreaHeight * scrollRatio));
-            int thumbY = settingsAreaTop + (int) ((settingsAreaHeight - thumbHeight) * (configScrollOffset / maxScroll));
-            context.fill(scrollbarX, thumbY, scrollbarX + scrollbarWidth, thumbY + thumbHeight, ACCENT_COLOR);
+        if (contentH > areaH) {
+            float ratio = (float) areaH / contentH;
+            int thumbH = Math.max(20, (int)(areaH * ratio));
+            int thumbY = top + (int)((areaH - thumbH) * (configScroll / Math.max(0, contentH - areaH)));
+            context.fill(p.x + p.width - 15, top, p.x + p.width - 10, top + areaH, new Color(50, 50, 55).getRGB());
+            context.fill(p.x + p.width - 15, thumbY, p.x + p.width - 10, thumbY + thumbH, ACCENT);
         }
-
         context.disableScissor();
     }
 
+    private PanelBounds calcConfigPanel() {
+        int w = Math.min(width - 40, 300), h = Math.min(height - 100, 400);
+        int x = width / 2 + (width - w) / 2 + configOffsetX - (int)(width * (1.0f - configAnim));
+        return new PanelBounds(x, 82 + configOffsetY, w, h);
+    }
+
+    private void drawBorder(DrawContext context, int x, int y, int w, int h) {
+        context.fill(x - 1, y - 1, x + w + 1, y, OUTLINE);
+        context.fill(x - 1, y + h, x + w + 1, y + h + 1, OUTLINE);
+        context.fill(x - 1, y, x, y + h, OUTLINE);
+        context.fill(x + w, y, x + w + 1, y + h, OUTLINE);
+    }
+
+    private boolean isMouseOver(int mx, int my, int x, int y, int w, int h) {
+        return mx >= x && mx <= x + w && my >= y && my <= y + h;
+    }
+
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (animationProgress < 1.0f) {
-            return false;
-        }
-
-        // Handle clicks on the configuration panel first
-        if (configModule != null && configPanelAnimation > 0.0f) {
-            int panelWidth = Math.min(this.width - 40, 300);
-            int panelHeight = Math.min(this.height - 100, 400);
-            int centerX = this.width / 2;
-            int headerY = 15;
-            int logoSize = 32;
-            int panelY = headerY + logoSize + 25;
-
-            int configPanelX = centerX + (this.width - panelWidth) / 2 + configPanelOffsetX;
-            int maxOffset = this.width;
-            int currentOffset = (int)(maxOffset * (1.0f - configPanelAnimation));
-            configPanelX -= currentOffset;
-            int configPanelY = panelY + configPanelOffsetY;
-
-            if (mouseX >= configPanelX && mouseX <= configPanelX + panelWidth &&
-                    mouseY >= configPanelY && mouseY <= configPanelY + panelHeight) {
-                // Close button
-                int closeButtonX = configPanelX + panelWidth - 25;
-                int closeButtonY = configPanelY + 5;
-                if (mouseX >= closeButtonX && mouseX <= closeButtonX + 20 &&
-                        mouseY >= closeButtonY && mouseY <= closeButtonY + 20) {
-                    configModule = null;
-                    configScrollOffset = 0.0f;
-                    draggedSetting = null;
+    public boolean mouseClicked(double mx, double my, int button) {
+        if (animProgress < 1.0f) return false;
+        if (configModule != null && configAnim > 0.0f) {
+            PanelBounds p = calcConfigPanel();
+            if (isMouseOver((int)mx, (int)my, p.x, p.y, p.width, p.height)) {
+                if (isMouseOver((int)mx, (int)my, p.x + p.width - 25, p.y + 5, 20, 20)) {
+                    configModule = null; configScroll = 0.0f; draggedSetting = null;
                     return true;
                 }
-
-                // Dragging the header
-                if (mouseX >= configPanelX && mouseX <= configPanelX + panelWidth &&
-                        mouseY >= configPanelY && mouseY <= configPanelY + 30) {
-                    isConfigPanelDragging = true;
-                    configPanelDragStartX = (int) mouseX;
-                    configPanelDragStartY = (int) mouseY;
+                if (isMouseOver((int)mx, (int)my, p.x, p.y, p.width, 30)) {
+                    configDragging = true; configDragX = (int)mx; configDragY = (int)my;
                     return true;
                 }
-
-                // Clicks on settings
-                List<ModuleSetting> settings = ((ConfigurableModule)configModule.getWrappedModule()).getSettings();
-                int settingsAreaTop = configPanelY + 40;
-                int settingsAreaHeight = panelHeight - 50;
-                int settingHeight = 40;
-                int spacing = 5;
-                int settingWidth = panelWidth - 20;
-
+                List<ModuleSetting> settings = configModule.settings;
+                int top = p.y + 40, setH = 40, sp = 5;
                 for (int i = 0; i < settings.size(); i++) {
-                    ModuleSetting setting = settings.get(i);
-                    int settingY = settingsAreaTop + i * (settingHeight + spacing) - (int)configScrollOffset;
-                    int settingX = configPanelX + 10;
-
-                    if (settingY + settingHeight < settingsAreaTop || settingY > settingsAreaTop + settingsAreaHeight) {
-                        continue;
-                    }
-
-                    if (setting.getType() == ModuleSetting.SettingType.BOOLEAN) {
-                        int toggleX = settingX + settingWidth - 60;
-                        int toggleY = settingY + 10;
-                        int toggleWidth = 40;
-                        int toggleHeight = 20;
-
-                        if (mouseX >= toggleX && mouseX <= toggleX + toggleWidth &&
-                                mouseY >= toggleY && mouseY <= toggleY + toggleHeight) {
-                            setting.setBooleanValue(!setting.getBooleanValue());
-                            ((ConfigurableModule)configModule.getWrappedModule()).onSettingChanged(setting);
-                            return true;
-                        }
-                    } else if (setting.getType() == ModuleSetting.SettingType.DOUBLE && setting.hasRange()) {
-                        int sliderX = settingX + settingWidth - 100;
-                        int sliderY = settingY + 10;
-                        int sliderWidth = 80;
-                        int sliderHeight = 10;
-
-                        if (mouseX >= sliderX && mouseX <= sliderX + sliderWidth &&
-                                mouseY >= sliderY && mouseY <= sliderY + sliderHeight) {
-                            draggedSetting = setting;
-                            sliderStartValue = setting.getDoubleValue();
-
-                            double min = setting.getMinValue().doubleValue();
-                            double max = setting.getMaxValue().doubleValue();
-                            double range = max - min;
-                            double normalizedValue = ((mouseX - sliderX) / sliderWidth) * range + min;
-                            double step = setting.getStepValue().doubleValue();
-                            normalizedValue = Math.round(normalizedValue / step) * step;
-                            normalizedValue = MathHelper.clamp(normalizedValue, min, max);
-                            setting.setDoubleValue(normalizedValue);
-                            ((ConfigurableModule)configModule.getWrappedModule()).onSettingChanged(setting);
-                            return true;
-                        }
-                    }
-                }
-
-                // Scrollbar
-                int scrollbarX = configPanelX + configPanelY - 15;
-                int scrollbarWidth = 5;
-                if (mouseX >= scrollbarX && mouseX <= scrollbarX + scrollbarWidth &&
-                        mouseY >= settingsAreaTop && mouseY <= settingsAreaTop + settingsAreaHeight) {
-                    isConfigDragging = true;
-                    configDragStartY = (int) mouseY;
-                    configDragStartOffset = configScrollOffset;
-                    return true;
-                }
-
-                // Consume the event if the click is within the panel
-                return true;
-            }
-        }
-
-        // Handle widgets (like the main close button)
-        if (super.mouseClicked(mouseX, mouseY, button)) {
-            return true;
-        }
-
-        // Handle clicks on the main panel
-        int panelWidth = Math.min(this.width - 40, 800);
-        int panelHeight = Math.min(this.height - 100, 400);
-        int centerX = this.width / 2;
-        int headerY = 15;
-        int logoSize = 32;
-        int panelY = headerY + logoSize + 25;
-
-        float scale = 0.8f + 0.2f * animationProgress;
-        int scaledWidth = (int)(panelWidth * scale);
-        int scaledHeight = (int)(panelHeight * scale);
-        int scaledX = centerX - scaledWidth / 2;
-        int scaledY = panelY + (panelHeight - scaledHeight) / 2;
-
-        int categoryWidth = 150;
-        int categoryHeight = 40;
-        int spacing = 5;
-        int totalCategoryHeight = categories.size() * (categoryHeight + spacing) - spacing;
-        int startCategoryY = scaledY + (scaledHeight - totalCategoryHeight) / 2;
-
-        for (int i = 0; i < categories.size(); i++) {
-            int categoryY = startCategoryY + i * (categoryHeight + spacing);
-            int categoryX = scaledX + 10;
-            int catWidth = categoryWidth - 20;
-
-            if (mouseX >= categoryX && mouseX <= categoryX + catWidth &&
-                    mouseY >= categoryY && mouseY <= categoryY + categoryHeight) {
-                selectedCategory = i;
-                scrollOffset = 0;
-                return true;
-            }
-        }
-
-        int separatorX = scaledX + categoryWidth;
-        int moduleAreaX = separatorX + 10;
-        int moduleAreaY = scaledY + 30;
-        int moduleAreaWidth = scaledWidth - categoryWidth - 10;
-        int moduleAreaHeight = scaledHeight - 40;
-        int scrollAreaTop = moduleAreaY;
-        int scrollAreaBottom = moduleAreaY + moduleAreaHeight;
-
-        boolean moduleClicked = false;
-
-        if (selectedCategory >= 0 && selectedCategory < categories.size()) {
-            Category category = categories.get(selectedCategory);
-            List<ModuleWrapper> modules = category.getModules();
-
-            int moduleHeight = 30;
-            int moduleSpacing = 5;
-            int moduleWidth = moduleAreaWidth - 30;
-
-            for (int i = 0; i < modules.size(); i++) {
-                ModuleWrapper module = modules.get(i);
-                int moduleY = scrollAreaTop + i * (moduleHeight + moduleSpacing) - (int)scrollOffset;
-
-                if (moduleY + moduleHeight < scrollAreaTop || moduleY > scrollAreaBottom) {
-                    continue;
-                }
-
-                int moduleX = moduleAreaX;
-
-                if (module.getWrappedModule() instanceof ConfigurableModule) {
-                    if (button == 1 && // Right-click
-                            mouseX >= moduleX && mouseX <= moduleX + moduleWidth &&
-                            mouseY >= moduleY && mouseY <= moduleY + moduleHeight) {
-                        openConfigPanel(module);
+                    ModuleSetting s = settings.get(i);
+                    int setY = top + i * (setH + sp) - (int)configScroll;
+                    if (setY + setH < top || setY > top + p.height - 50) continue;
+                    if (s.getType() == ModuleSetting.SettingType.BOOLEAN &&
+                            isMouseOver((int)mx, (int)my, p.x + p.width - 60, setY + 10, 40, 20)) {
+                        s.setBooleanValue(!s.getBooleanValue());
+                        ((ConfigurableModule)configModule.module).onSettingChanged(s);
+                        return true;
+                    } else if (s.getType() == ModuleSetting.SettingType.DOUBLE && s.hasRange() &&
+                            isMouseOver((int)mx, (int)my, p.x + p.width - 100, setY + 10, 80, 10)) {
+                        draggedSetting = s;
+                        double min = s.getMinValue().doubleValue(), max = s.getMaxValue().doubleValue();
+                        double val = MathHelper.clamp(Math.round(((mx - (p.x + p.width - 100)) / 80) * (max - min) + min) /
+                                s.getStepValue().doubleValue() * s.getStepValue().doubleValue(), min, max);
+                        s.setDoubleValue(val);
+                        ((ConfigurableModule)configModule.module).onSettingChanged(s);
                         return true;
                     }
-                    if (button == 0) { // Left-click on the config icon
-                        int configX = moduleX + moduleWidth - 50;
-                        int configY = moduleY + 7;
-                        int configSize = 10;
-                        if (mouseX >= configX && mouseX <= configX + configSize &&
-                                mouseY >= configY && mouseY <= configY + configSize) {
-                            openConfigPanel(module);
-                            return true;
-                        }
-                    }
                 }
-
-                int toggleX = moduleAreaX + moduleWidth - 24;
-                int toggleY = moduleY + 5;
-                int toggleWidth = 18;
-                int toggleHeight = 18;
-
-                if (mouseX >= toggleX && mouseX <= toggleX + toggleWidth &&
-                        mouseY >= toggleY && mouseY <= toggleY + toggleHeight) {
-                    if (!clickedModules.contains(module)) {
-                        clickedModules.add(module);
-                    }
-                    clickTime = System.currentTimeMillis();
-                    ModuleManager.getInstance().toggleModule(module.getWrappedModule());
-                    moduleClicked = true;
-                    break;
+                if (isMouseOver((int)mx, (int)my, p.x + p.width - 15, top, 5, p.height - 50)) {
+                    config.isDragging = true; config.dragStartY = (int)my; config.dragStartOffset = configScroll;
+                    return true;
                 }
+                return true;
             }
         }
+        if (super.mouseClicked(mx, my, button)) return true;
 
-        int scrollbarX = moduleAreaX + moduleAreaWidth - 20;
-        int scrollbarWidth = 10;
-
-        if (mouseX >= scrollbarX && mouseX <= scrollbarX + scrollbarWidth &&
-                mouseY >= moduleAreaY && mouseY <= moduleAreaY + moduleAreaHeight) {
-            isDragging = true;
-            dragStartY = (int) mouseY;
-            dragStartOffset = scrollOffset;
+        PanelBounds p = calcPanel();
+        int catH = 40, sp = 5, totalH = categories.size() * (catH + sp) - sp, startY = p.y + (p.height - totalH) / 2;
+        for (int i = 0; i < categories.size(); i++) {
+            if (isMouseOver((int)mx, (int)my, p.x + 10, startY + i * (catH + sp), 130, catH)) {
+                selectedCat = i; mainScroll = 0;
+                return true;
+            }
+        }
+        if (selectedCat < 0 || selectedCat >= categories.size()) return false;
+        List<ModuleWrapper> mods = categories.get(selectedCat).modules;
+        int modX = p.x + 160, modY = p.y + 30, modW = p.width - 190, modH = 30;
+        int moduleAreaWidth = p.width - 160;
+        for (int i = 0; i < mods.size(); i++) {
+            ModuleWrapper m = mods.get(i);
+            int y = modY + i * (modH + sp) - (int)mainScroll;
+            if (y + modH < modY || y > modY + p.height - 40) continue;
+            if (m.isConfigurable) {
+                if (button == 1 && isMouseOver((int)mx, (int)my, modX, y, modW, modH)) {
+                    openConfigPanel(m); return true;
+                }
+                if (button == 0 && isMouseOver((int)mx, (int)my, modX + moduleAreaWidth - 50, y + 7, 10, 10)) {
+                    openConfigPanel(m); return true;
+                }
+            }
+            if (isMouseOver((int)mx, (int)my, modX + moduleAreaWidth - 24, y + 5, 18, 18)) {
+                clickedModules.clear(); clickedModules.add(m); clickTime = System.currentTimeMillis();
+                ModuleManager.getInstance().toggleModule(m.module);
+                return true;
+            }
+        }
+        if (isMouseOver((int)mx, (int)my, modX + modW - 20, modY, 10, p.height - 40)) {
+            main.isDragging = true; main.dragStartY = (int)my; main.dragStartOffset = mainScroll;
             return true;
         }
-
-        if (!moduleClicked) {
-            clickedModules.clear();
-        }
-
-        return moduleClicked;
+        clickedModules.clear();
+        return false;
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        isDragging = false;
-        isConfigDragging = false;
-        isConfigPanelDragging = false;
+    public boolean mouseReleased(double mx, double my, int button) {
+        main.isDragging = config.isDragging = configDragging = false;
         draggedSetting = null;
         clickedModules.clear();
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(mx, my, button);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (isConfigPanelDragging && configModule != null) {
-            int deltaX = (int) mouseX - configPanelDragStartX;
-            int deltaY = (int) mouseY - configPanelDragStartY;
-
-            configPanelOffsetX += deltaX;
-            configPanelOffsetY += deltaY;
-
-            // Limit to prevent panel from going off-screen
-            int panelWidth = Math.min(this.width - 40, 300);
-            int panelHeight = Math.min(this.height - 100, 400);
-            configPanelOffsetX = MathHelper.clamp(configPanelOffsetX, -this.width + 50, this.width - 50);
-            configPanelOffsetY = MathHelper.clamp(configPanelOffsetY, -panelHeight + 30, this.height - 30);
-
-            configPanelDragStartX = (int) mouseX;
-            configPanelDragStartY = (int) mouseY;
+    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        if (configDragging && configModule != null) {
+            configOffsetX += (int)mx - configDragX; configOffsetY += (int)my - configDragY;
+            configOffsetX = MathHelper.clamp(configOffsetX, -width + 50, width - 50);
+            configOffsetY = MathHelper.clamp(configOffsetY, -Math.min(height - 100, 400) + 30, height - 30);
+            configDragX = (int)mx; configDragY = (int)my;
             return true;
         }
-
         if (draggedSetting != null && draggedSetting.getType() == ModuleSetting.SettingType.DOUBLE) {
-            int panelWidth = Math.min(this.width - 40, 300);
-            int centerX = this.width / 2;
-            int headerY = 15;
-            int logoSize = 32;
-            int panelY = headerY + logoSize + 25;
-            int configPanelX = centerX + (this.width - panelWidth) / 2 + configPanelOffsetX;
-            int maxOffset = this.width;
-            int currentOffset = (int)(maxOffset * (1.0f - configPanelAnimation));
-            configPanelX -= currentOffset;
-            int settingsAreaTop = panelY + 40;
-            int settingWidth = panelWidth - 20;
-
-            List<ModuleSetting> settings = ((ConfigurableModule)configModule.getWrappedModule()).getSettings();
-            int settingHeight = 40;
-            int spacing = 5;
-            for (int i = 0; i < settings.size(); i++) {
-                ModuleSetting setting = settings.get(i);
-                if (setting != draggedSetting) continue;
-
-                int settingY = settingsAreaTop + i * (settingHeight + spacing) - (int)configScrollOffset;
-                int settingX = configPanelX + 10;
-                int sliderX = settingX + settingWidth - 100;
-                int sliderWidth = 80;
-
-                double min = setting.getMinValue().doubleValue();
-                double max = setting.getMaxValue().doubleValue();
-                double range = max - min;
-                double normalizedValue = ((mouseX - sliderX) / sliderWidth) * range + min;
-                double step = setting.getStepValue().doubleValue();
-                normalizedValue = Math.round(normalizedValue / step) * step;
-                normalizedValue = MathHelper.clamp(normalizedValue, min, max);
-                setting.setDoubleValue(normalizedValue);
-                ((ConfigurableModule)configModule.getWrappedModule()).onSettingChanged(setting);
+            PanelBounds p = calcConfigPanel();
+            int setH = 40, sp = 5;
+            for (int i = 0; i < configModule.settings.size(); i++) {
+                if (configModule.settings.get(i) != draggedSetting) continue;
+                int setY = p.y + 40 + i * (setH + sp) - (int)configScroll;
+                double min = draggedSetting.getMinValue().doubleValue(), max = draggedSetting.getMaxValue().doubleValue();
+                double val = MathHelper.clamp(Math.round(((mx - (p.x + p.width - 100)) / 80) * (max - min) + min) /
+                        draggedSetting.getStepValue().doubleValue() * draggedSetting.getStepValue().doubleValue(), min, max);
+                draggedSetting.setDoubleValue(val);
+                ((ConfigurableModule)configModule.module).onSettingChanged(draggedSetting);
                 return true;
             }
         }
-
-        if (isConfigDragging && configModule != null) {
-            int panelHeight = Math.min(this.width - 40, 400);
-            int headerY = 15;
-            int logoSize = 32;
-            int panelY = headerY + logoSize + 25;
-            int settingsAreaHeight = panelHeight - 50;
-            List<ModuleSetting> settings = ((ConfigurableModule)configModule.getWrappedModule()).getSettings();
-            int settingHeight = 40;
-            int spacing = 5;
-            int contentHeight = settings.size() * (settingHeight + spacing) - spacing;
-            int maxScroll = Math.max(0, contentHeight - settingsAreaHeight);
-
-            int dragDelta = (int) mouseY - configDragStartY;
-            float scrollRatio = (float) maxScroll / (settingsAreaHeight - 20);
-            configScrollOffset = configDragStartOffset + dragDelta * scrollRatio;
-            configScrollOffset = MathHelper.clamp(configScrollOffset, 0, maxScroll);
+        if (config.isDragging && configModule != null) {
+            int h = Math.min(height - 100, 400), areaH = h - 50;
+            int contentH = configModule.settings.size() * 45 - 5;
+            configScroll = config.dragStartOffset + ((int)my - config.dragStartY) * (float)Math.max(0, contentH - areaH) / (areaH - 20);
+            configScroll = MathHelper.clamp(configScroll, 0, Math.max(0, contentH - areaH));
             return true;
         }
-
-        if (isDragging && selectedCategory >= 0 && selectedCategory < categories.size()) {
-            int panelWidth = Math.min(this.width - 40, 800);
-            int panelHeight = Math.min(this.height - 100, 400);
-            int centerX = this.width / 2;
-            int headerY = 15;
-            int logoSize = 32;
-            int panelY = headerY + logoSize + 25;
-            float scale = 0.8f + 0.2f * animationProgress;
-            int scaledHeight = (int)(panelHeight * scale);
-            int moduleAreaHeight = scaledHeight - 40;
-            List<ModuleWrapper> modules = categories.get(selectedCategory).getModules();
-            int moduleHeight = 30;
-            int spacing = 5;
-            int contentHeight = modules.size() * (moduleHeight + spacing) - spacing;
-            int maxScroll = Math.max(0, contentHeight - moduleAreaHeight);
-            int dragDelta = (int) mouseY - dragStartY;
-            float scrollRatio = (float) maxScroll / (moduleAreaHeight - 20);
-            scrollOffset = dragStartOffset + dragDelta * scrollRatio;
-            scrollOffset = MathHelper.clamp(scrollOffset, 0, maxScroll);
+        if (main.isDragging && selectedCat >= 0 && selectedCat < categories.size()) {
+            PanelBounds p = calcPanel();
+            int areaH = p.height - 40, contentH = categories.get(selectedCat).modules.size() * 35 - 5;
+            mainScroll = main.dragStartOffset + ((int)my - main.dragStartY) * (float)Math.max(0, contentH - areaH) / (areaH - 20);
+            mainScroll = MathHelper.clamp(mainScroll, 0, Math.max(0, contentH - areaH));
             return true;
         }
-
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(mx, my, button, dx, dy);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (configModule != null && configPanelAnimation > 0.0f) {
-            int panelWidth = Math.min(this.width - 40, 300);
-            int panelHeight = Math.min(this.height - 100, 400);
-            int centerX = this.width / 2;
-            int headerY = 15;
-            int logoSize = 32;
-            int panelY = headerY + logoSize + 25;
-            int configPanelX = centerX + (this.width - panelWidth) / 2 + configPanelOffsetX;
-            int settingsAreaTop = panelY + 40;
-            int settingsAreaHeight = panelHeight - 50;
-
-            if (mouseX >= configPanelX && mouseX <= configPanelX + panelWidth &&
-                    mouseY >= panelY && mouseY <= panelY + panelHeight) {
-                configScrollOffset -= scrollY * 15;
-                List<ModuleSetting> settings = ((ConfigurableModule)configModule.getWrappedModule()).getSettings();
-                int settingHeight = 40;
-                int spacing = 5;
-                int contentHeight = settings.size() * (settingHeight + spacing) - spacing;
-                int maxScroll = Math.max(0, contentHeight - settingsAreaHeight);
-                configScrollOffset = MathHelper.clamp(configScrollOffset, 0, maxScroll);
+    public boolean mouseScrolled(double mx, double my, double scrollX, double scrollY) {
+        if (configModule != null && configAnim > 0.0f) {
+            PanelBounds p = calcConfigPanel();
+            if (isMouseOver((int)mx, (int)my, p.x, p.y, p.width, p.height)) {
+                int contentH = configModule.settings.size() * 45 - 5, areaH = p.height - 50;
+                configScroll = (float) MathHelper.clamp(configScroll - scrollY * 15, 0, Math.max(0, contentH - areaH));
                 return true;
             }
         }
-
-        scrollOffset -= scrollY * 15;
-        if (selectedCategory >= 0 && selectedCategory < categories.size()) {
-            int panelWidth = Math.min(this.width - 40, 800);
-            int panelHeight = Math.min(this.height - 100, 400);
-            int centerX = this.width / 2;
-            int headerY = 15;
-            int logoSize = 32;
-            int panelY = headerY + logoSize + 25;
-            float scale = 0.8f + 0.2f * animationProgress;
-            int scaledHeight = (int)(panelHeight * scale);
-            int moduleAreaHeight = scaledHeight - 40;
-            List<ModuleWrapper> modules = categories.get(selectedCategory).getModules();
-            int moduleHeight = 30;
-            int spacing = 5;
-            int contentHeight = modules.size() * (moduleHeight + spacing) - spacing;
-            int maxScroll = Math.max(0, contentHeight - moduleAreaHeight);
-            scrollOffset = MathHelper.clamp(scrollOffset, 0, maxScroll);
-        } else {
-            scrollOffset = 0;
-        }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        if (selectedCat >= 0 && selectedCat < categories.size()) {
+            PanelBounds p = calcPanel();
+            int contentH = categories.get(selectedCat).modules.size() * 35 - 5, areaH = p.height - 40;
+            mainScroll = (float) MathHelper.clamp(mainScroll - scrollY * 15, 0, Math.max(0, contentH - areaH));
+        } else mainScroll = 0;
+        return super.mouseScrolled(mx, my, scrollX, scrollY);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(int keyCode, int scanCode, int mods) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            if (configModule != null) {
-                configModule = null;
-                configScrollOffset = 0.0f;
-                draggedSetting = null;
-                return true;
-            }
-            this.close();
+            if (configModule != null) { configModule = null; configScroll = 0.0f; draggedSetting = null; return true; }
+            close();
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(keyCode, scanCode, mods);
     }
 
     @Override
     public void close() {
-        configModule = null;
-        configScrollOffset = 0.0f;
-        draggedSetting = null;
+        configModule = null; configScroll = 0.0f; draggedSetting = null;
         super.close();
     }
 
-    private void openConfigPanel(ModuleWrapper module) {
-        if (module.getWrappedModule() instanceof ConfigurableModule) {
-            configModule = module;
-            configPanelAnimation = 0.0f;
-            configScrollOffset = 0.0f;
-            configPanelOffsetX = CONFIG_PANEL_OFFSET_X;
-            configPanelOffsetY = 0;
+    private void openConfigPanel(ModuleWrapper m) {
+        if (m.isConfigurable) {
+            configModule = m; configAnim = 0.0f; configScroll = 0.0f; configOffsetX = -350; configOffsetY = 0;
         }
     }
 
-    private static class Category {
-        private final String name;
-        private final List<ModuleWrapper> modules;
-
-        public Category(String name, List<ModuleWrapper> modules) {
-            this.name = name;
-            this.modules = modules;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public List<ModuleWrapper> getModules() {
-            return modules;
-        }
-    }
+    private record Category(String name, List<ModuleWrapper> modules) { }
 
     private static class ModuleWrapper {
-        private final Module module;
-        public ModuleWrapper(Module module) {
-            this.module = module;
+        final Module module;
+        final String name, desc;
+        final boolean isConfigurable;
+        final List<ModuleSetting> settings;
+        ModuleWrapper(Module m) {
+            module = m; name = m.getName(); desc = m.getDescription();
+            isConfigurable = m instanceof ConfigurableModule;
+            settings = isConfigurable ? ((ConfigurableModule)m).getSettings() : List.of();
         }
-        public String getName() {
-            return module.getName();
-        }
-        public String getDescription() {
-            return module.getDescription();
-        }
-        public boolean isEnabled() {
-            return module.isEnabled();
-        }
-        public void toggle() {
-            module.toggle();
-        }
-        public Module getWrappedModule() {
-            return module;
-        }
+        boolean isEnabled() { return module.isEnabled(); }
     }
 
-    private static String getModVersion(){
-        return AmberClient.MOD_VERSION;
-    }
-
+    // Prevents the Click GUI from being blurred
     @Override
     public void renderBackground(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderInGameBackground(context);
+        renderInGameBackground(context);
     }
 }
