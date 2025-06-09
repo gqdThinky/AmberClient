@@ -25,8 +25,6 @@ public class FastPlace extends Module {
     @Override
     public void onEnable() {
         MinecraftClient client = MinecraftClient.getInstance();
-        client.player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
 
         isFastPlaceEnabled = true;
         LOGGER.info(getName() + " module enabled");
@@ -35,8 +33,6 @@ public class FastPlace extends Module {
     @Override
     public void onDisable() {
         MinecraftClient client = MinecraftClient.getInstance();
-        client.player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
 
         isFastPlaceEnabled = false;
         LOGGER.info(getName() + " module disabled");

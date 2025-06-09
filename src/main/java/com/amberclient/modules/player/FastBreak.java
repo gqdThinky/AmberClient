@@ -50,8 +50,6 @@ public class FastBreak extends Module implements ConfigurableModule {
     @Override
     public void onEnable() {
         MinecraftClient client = MinecraftClient.getInstance();
-        client.player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
         LOGGER.info(getName() + " module enabled");
         isFastBreakEnabled = true;
     }
@@ -59,9 +57,6 @@ public class FastBreak extends Module implements ConfigurableModule {
     @Override
     public void onDisable() {
         MinecraftClient client = MinecraftClient.getInstance();
-        client.player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true
-        );
         LOGGER.info(getName() + " module disabled");
         isFastBreakEnabled = false;
     }

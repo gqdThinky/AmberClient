@@ -40,21 +40,11 @@ public class AutoClicker extends Module implements ConfigurableModule {
 
     @Override
     protected void onEnable() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
-            client.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
-        }
         LOGGER.info("AutoClicker module enabled");
     }
 
     @Override
     protected void onDisable() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player != null) {
-            client.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
-        }
         LOGGER.info("AutoClicker module disabled");
     }
 

@@ -26,16 +26,12 @@ public class Xray extends Module {
         SettingsStore.getInstance().get().setActive(true);
         // Perform a full scan of the area on activation
         ScanTask.runTask(true);
-        MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
     }
 
     @Override
     public void onDisable() {
         SettingsStore.getInstance().get().setActive(false);
         ScanTask.renderQueue.clear();
-        MinecraftClient.getInstance().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
     }
 
     @Override

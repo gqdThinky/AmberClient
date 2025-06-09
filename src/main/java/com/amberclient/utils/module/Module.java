@@ -41,11 +41,19 @@ public abstract class Module {
 
     protected void enable() {
         enabled = true;
+        if (mc.player != null) {
+            mc.player.sendMessage(
+                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cenabled"), true);
+        }
         onEnable();
     }
 
     protected void disable() {
         enabled = false;
+        if (mc.player != null) {
+            mc.player.sendMessage(
+                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdisabled"), true);
+        }
         onDisable();
     }
 

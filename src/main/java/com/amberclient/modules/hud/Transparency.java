@@ -49,15 +49,11 @@ public class Transparency extends Module implements ConfigurableModule {
 
     @Override
     public void onEnable() {
-        getClient().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cenabled"), true);
         LOGGER.info("Transparency module enabled");
     }
 
     @Override
     public void onDisable() {
-        getClient().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdisabled"), true);
         LOGGER.info("Transparency module disabled");
     }
 }

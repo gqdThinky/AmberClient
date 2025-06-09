@@ -59,18 +59,12 @@ public class AutoClutch extends Module implements ConfigurableModule {
         if (mc.player != null) {
             startYaw = mc.player.getYaw();
             startPitch = mc.player.getPitch();
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cactivated"), true);
         }
         LOGGER.info(getName() + " module enabled");
     }
 
     @Override
     public void onDisable() {
-        if (mc.player != null) {
-            mc.player.sendMessage(
-                    Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdeactivated"), true);
-        }
         LOGGER.info(getName() + " module disabled");
     }
 

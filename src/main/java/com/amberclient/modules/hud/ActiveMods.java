@@ -26,14 +26,12 @@ public class ActiveMods extends Module implements ConfigurableModule {
 
     @Override
     protected void onEnable() {
-        getClient().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cenabled"), true);
+
     }
 
     @Override
     protected void onDisable() {
-        getClient().player.sendMessage(
-                Text.literal("§4[§cAmberClient§4] §c§l" + getName() + " §r§cdisabled"), true);
+        
     }
 
     @Override
