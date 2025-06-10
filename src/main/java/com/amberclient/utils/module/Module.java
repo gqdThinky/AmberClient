@@ -8,6 +8,7 @@ public abstract class Module {
     private final String description;
     private final String category;
     protected boolean enabled;
+    protected MinecraftClient client = MinecraftClient.getInstance();
 
     public Module(String name, String description, String category) {
         this.name = name;
@@ -83,6 +84,6 @@ public abstract class Module {
     }
 
     protected MinecraftClient getClient() {
-        return MinecraftClient.getInstance();
+        return client;
     }
 }
