@@ -35,6 +35,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
     private final ModuleSetting holdMode;
     private final ModuleSetting rotationSpeed;
     private final ModuleSetting smartRotation;
+    private final ModuleSetting humanizeRotations;
 
     protected MinecraftClient mc = getClient();
     private boolean wasKeyPressed = false;
@@ -44,7 +45,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
     private boolean hasTarget = false;
 
     public AutoClutch() {
-        super("AutoClutch", "R", "Movement");
+        super("AutoClutch", "Automatically clutches. Blocks might disappear if knockback is too intense", "Movement");
 
         // Initialize settings
         range = new ModuleSetting("Range", "Distance to search for block placement", 4.0, 1.0, 8.0, 1.0);
@@ -53,6 +54,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
         holdMode = new ModuleSetting("Hold Mode", "Deactivate module when key is released", false);
         rotationSpeed = new ModuleSetting("Rotation Speed", "Speed of rotation smoothing", 15.0, 1.0, 50.0, 1.0);
         smartRotation = new ModuleSetting("Smart Rotation", "Intelligently rotate to closest placement", true);
+        humanizeRotations = new ModuleSetting("Humanize Rotations", "Add human-like rotation variations", false);
 
         settings = new ArrayList<>();
         settings.add(range);
@@ -61,6 +63,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
         settings.add(holdMode);
         settings.add(rotationSpeed);
         settings.add(smartRotation);
+        settings.add(humanizeRotations);
 
         // Calculate initial delay
         updatePlaceDelay();
@@ -73,13 +76,13 @@ public class AutoClutch extends Module implements ConfigurableModule {
             float startPitch = mc.player.getPitch();
             hasTarget = false;
         }
-        LOGGER.info(getName() + " module enabled");
+        LOGGER.info("{} module enabled", getName());
     }
 
     @Override
     public void onDisable() {
         hasTarget = false;
-        LOGGER.info(getName() + " module disabled");
+        LOGGER.info("{} module disabled", getName());
     }
 
     @Override
@@ -265,6 +268,20 @@ public class AutoClutch extends Module implements ConfigurableModule {
         } else {
             float speed = (float) rotationSpeed.getDoubleValue();
 
+            // Humanize rotations if enabled
+            if (humanizeRotations.getBooleanValue()) {
+
+                float randomFactor = 0.7f + (float) (Math.random() * 0.6f);
+                speed *= randomFactor;
+
+                // Add micro-jitter to simulate human mouse movement
+                float jitterYaw = (float) ((Math.random() - 0.5));
+                float jitterPitch = (float) ((Math.random() - 0.5) * 0.6);
+
+                newYaw += jitterYaw;
+                newPitch += jitterPitch;
+            }
+
             float yawDiff = MathHelper.wrapDegrees(newYaw - mc.player.getYaw());
             float pitchDiff = newPitch - mc.player.getPitch();
 
@@ -385,6 +402,12 @@ public class AutoClutch extends Module implements ConfigurableModule {
                     Text.literal("§6AutoClutch settings updated: Smart Rotation=" + status),
                     true);
             LOGGER.info("AutoClutch settings updated: Smart Rotation={}", status);
+        } else if (setting == humanizeRotations) {
+            String status = humanizeRotations.getBooleanValue() ? "enabled" : "disabled";
+            mc.player.sendMessage(
+                    Text.literal("§6AutoClutch settings updated: Humanize Rotations=" + status),
+                    true);
+            LOGGER.info("AutoClutch settings updated: Humanize Rotations={}", status);
         }
     }
 }
