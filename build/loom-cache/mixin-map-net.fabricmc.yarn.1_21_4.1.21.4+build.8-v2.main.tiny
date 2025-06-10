@@ -1,0 +1,13 @@
+v1	named	intermediary
+FIELD	com/amberclient/mixins/client/ClientPlayerInteractionManagerMixin	I	blockBreakingCooldown	field_3716
+FIELD	com/amberclient/mixins/client/ClientPlayerInteractionManagerMixin	Lnet/minecraft/util/math/BlockPos;	currentBreakingPos	field_3714
+FIELD	com/amberclient/mixins/client/ClientPlayerInteractionManagerMixin	F	currentBreakingProgress	field_3715
+FIELD	com/amberclient/mixins/client/EntityMixin	Lnet/minecraft/world/World;	world	field_6002
+FIELD	com/amberclient/mixins/client/MinecraftClientMixin	I	itemUseCooldown	field_1752
+METHOD	com/amberclient/mixins/client/EntityMixin	()Z	isOnGround	method_24828
+METHOD	com/amberclient/mixins/client/EntityMixin	()Z	isSneaking	method_5715
+METHOD	com/amberclient/mixins/client/EntityMixin	()D	getX	method_23317
+METHOD	com/amberclient/mixins/client/EntityMixin	()D	getY	method_23318
+METHOD	com/amberclient/mixins/client/EntityMixin	()D	getZ	method_23321
+METHOD	com/amberclient/mixins/client/EntityMixin	()Lnet/minecraft/util/math/Box;	getBoundingBox	method_5829
+METHOD	com/amberclient/mixins/client/EntityMixin	(Lnet/minecraft/util/math/Box;)V	setBoundingBox	method_5857

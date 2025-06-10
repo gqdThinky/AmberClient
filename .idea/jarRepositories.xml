@@ -56,5 +56,15 @@
       <option name="name" value="maven3" />
       <option name="url" value="https://maven.lenni0451.net/releases" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="meteor-maven" />
+      <option name="name" value="meteor-maven" />
+      <option name="url" value="https://maven.meteordev.org" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven3" />
+      <option name="name" value="maven3" />
+      <option name="url" value="https://jitpack.io" />
+    </remote-repository>
   </component>
 </project>

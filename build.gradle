@@ -14,7 +14,6 @@ base {
 repositories {
 	maven { url = "https://maven.fabricmc.net/" }
 	maven { url = "https://maven.architectury.dev/" }
-	maven { url "https://maven.lenni0451.net/releases" }
 	mavenCentral()
 }
 
@@ -30,8 +29,8 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-	modImplementation("net.fabricmc:fabric-language-kotlin:1.10.8+kotlin.1.9.0")
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+	modImplementation "net.fabricmc:fabric-language-kotlin:1.11.0+kotlin.2.0.0"
 }
 
 processResources {
