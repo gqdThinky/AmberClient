@@ -1,5 +1,3 @@
-/time set day
-/kill @e[type=minecraft:zombie]
 /amber dummy
 /kill @e[type=minecraft:zombie]
 /amber dummy
@@ -48,3 +46,5 @@
 /gamemode creative
 /time set night
 /gamemode survival
+/gamemode creative
+/time set day

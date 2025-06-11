@@ -185,6 +185,24 @@ public class ModuleSetting {
             if (maxValue != null && value > maxValue.intValue()) {
                 value = maxValue.intValue();
             }
+
+            if (stepValue != null && stepValue.intValue() > 0) {
+                int step = stepValue.intValue();
+                int min = minValue != null ? minValue.intValue() : 0;
+
+                int stepsFromMin = (value - min) / step;
+                int roundedSteps = Math.round((float)(value - min) / step);
+
+                value = min + (roundedSteps * step);
+
+                if (minValue != null && value < minValue.intValue()) {
+                    value = minValue.intValue();
+                }
+                if (maxValue != null && value > maxValue.intValue()) {
+                    value = maxValue.intValue();
+                }
+            }
+
             this.value = value;
         } else {
             throw new IllegalStateException("Setting is not an integer");
@@ -199,6 +217,24 @@ public class ModuleSetting {
             if (maxValue != null && value > maxValue.doubleValue()) {
                 value = maxValue.doubleValue();
             }
+
+            if (stepValue != null && stepValue.doubleValue() > 0) {
+                double step = stepValue.doubleValue();
+                double min = minValue != null ? minValue.doubleValue() : 0.0;
+
+                double stepsFromMin = (value - min) / step;
+                double roundedSteps = Math.round(stepsFromMin);
+
+                value = min + (roundedSteps * step);
+
+                if (minValue != null && value < minValue.doubleValue()) {
+                    value = minValue.doubleValue();
+                }
+                if (maxValue != null && value > maxValue.doubleValue()) {
+                    value = maxValue.doubleValue();
+                }
+            }
+
             this.value = value;
         } else {
             throw new IllegalStateException("Setting is not a double");

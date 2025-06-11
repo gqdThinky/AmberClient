@@ -7,9 +7,16 @@
   },
   "minecraft:adventure/adventuring_time": {
     "criteria": {
-      "minecraft:forest": "2025-05-27 10:21:18 +0200"
+      "minecraft:forest": "2025-05-27 10:21:18 +0200",
+      "minecraft:plains": "2025-06-11 16:45:55 +0200"
     },
     "done": false
+  },
+  "minecraft:recipes/misc/mojang_banner_pattern": {
+    "criteria": {
+      "has_enchanted_golden_apple": "2025-06-11 16:45:54 +0200"
+    },
+    "done": true
   },
   "DataVersion": 4189
 }
