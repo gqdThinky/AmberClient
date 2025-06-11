@@ -27,7 +27,7 @@ public class ModuleManager {
                 Module module = moduleClass.getDeclaredConstructor().newInstance();
                 registerModule(module);
             } catch (Exception e) {
-                System.err.println("Error during module instantiation " + moduleClass.getSimpleName() + ": " + e.getMessage());
+                System.err.println("Error during module instantiation of " + moduleClass.getSimpleName() + ": " + e.getMessage());
             }
         }
     }

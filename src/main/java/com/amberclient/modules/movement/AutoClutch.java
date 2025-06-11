@@ -30,7 +30,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
     // Settings
     private final List<ModuleSetting> settings;
     private final ModuleSetting range;
-    private final ModuleSetting cpsCap;
+    private final ModuleSetting uncapCps;
     private final ModuleSetting cpsLimit;
     private final ModuleSetting holdMode;
     private final ModuleSetting rotationSpeed;
@@ -40,7 +40,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
     protected MinecraftClient mc = getClient();
     private boolean wasKeyPressed = false;
     private long lastPlaceTime = 0;
-    private long placeDelay = 50; // Dynamic delay based on CPS setting
+    private long placeDelay = 50;
 
     private boolean hasTarget = false;
 
@@ -49,19 +49,19 @@ public class AutoClutch extends Module implements ConfigurableModule {
 
         // Initialize settings
         range = new ModuleSetting("Range", "Distance to search for block placement", 4.0, 1.0, 8.0, 1.0);
-        cpsCap = new ModuleSetting("Uncap CPS", "Disable CPS limitation", true);
-        cpsLimit = new ModuleSetting("CPS Limit", "Maximum clicks per second", 20.0, 1.0, 50.0, 1.0);
-        holdMode = new ModuleSetting("Hold Mode", "Deactivate module when key is released", false);
         rotationSpeed = new ModuleSetting("Rotation Speed", "Speed of rotation smoothing", 15.0, 1.0, 50.0, 1.0);
+        cpsLimit = new ModuleSetting("CPS Limit", "Maximum clicks per second (if Uncap CPS is disabled)", 20.0, 1.0, 50.0, 1.0);
+        uncapCps = new ModuleSetting("Uncap CPS", "Disable CPS limitation (for longer clutches)", true);
+        holdMode = new ModuleSetting("Hold Mode", "Deactivate module when key is released", false);
         smartRotation = new ModuleSetting("Smart Rotation", "Intelligently rotate to closest placement", true);
         humanizeRotations = new ModuleSetting("Humanize Rotations", "Add human-like rotation variations", false);
 
         settings = new ArrayList<>();
         settings.add(range);
-        settings.add(cpsCap);
-        settings.add(cpsLimit);
-        settings.add(holdMode);
         settings.add(rotationSpeed);
+        settings.add(cpsLimit);
+        settings.add(uncapCps);
+        settings.add(holdMode);
         settings.add(smartRotation);
         settings.add(humanizeRotations);
 
@@ -120,7 +120,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
                         updateRotation(bestPlacement.yaw, bestPlacement.pitch);
                     }
 
-                    // Place block if CPS allows or CPS cap is disabled
+                    // Place block if CPS allows or uncap CPS is enabled
                     if (canPlaceBlock()) {
                         if (placeBlockAt(bestPlacement)) {
                             lastPlaceTime = System.currentTimeMillis();
@@ -187,7 +187,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
     }
 
     private boolean canPlaceBlock() {
-        if (cpsCap.getBooleanValue()) {
+        if (uncapCps.getBooleanValue()) {
             return true;
         }
 
@@ -196,7 +196,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
     }
 
     private void updatePlaceDelay() {
-        if (!cpsCap.getBooleanValue()) {
+        if (!uncapCps.getBooleanValue()) {
             double cps = cpsLimit.getDoubleValue();
             placeDelay = (long) (1000.0 / cps);
         } else {
@@ -372,8 +372,8 @@ public class AutoClutch extends Module implements ConfigurableModule {
                     Text.literal("§6AutoClutch settings updated: Range=" + range.getDoubleValue() + " blocks"),
                     true);
             LOGGER.info("AutoClutch settings updated: Range={} blocks", range.getDoubleValue());
-        } else if (setting == cpsCap) {
-            String status = cpsCap.getBooleanValue() ? "enabled" : "disabled";
+        } else if (setting == uncapCps) {
+            String status = uncapCps.getBooleanValue() ? "enabled" : "disabled";
             updatePlaceDelay();
             mc.player.sendMessage(
                     Text.literal("§6AutoClutch settings updated: CPS Cap=" + status),
