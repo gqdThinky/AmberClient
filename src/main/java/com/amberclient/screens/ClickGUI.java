@@ -74,8 +74,9 @@ public class ClickGUI extends Screen {
     private float getTransparency() {
         return ModuleManager.getInstance().getModules().stream()
                 .filter(m -> m instanceof Transparency && m.isEnabled())
-                .map(m -> (float) ((Transparency) m).getTransparencyLevel())
-                .findFirst().orElse(1.0f);
+                .map(m -> ((Transparency) m).getTransparencyLevel())
+                .findFirst()
+                .orElse(0.75f);
     }
 
     private int applyTransparency(int color, float alpha) {
