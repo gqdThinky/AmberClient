@@ -1,5 +1,6 @@
 package com.amberclient.events;
 
+import net.minecraft.network.packet.Packet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ public class EventManager {
     private static final EventManager INSTANCE = new EventManager(); // Singleton instance
     private final List<PreMotionListener> preMotionListeners = new ArrayList<>();
     private final List<PostMotionListener> postMotionListeners = new ArrayList<>();
+    private final List<PacketReceiveListener> packetReceiveListeners = new ArrayList<>();
 
     // Private constructor to prevent external instantiation
     public EventManager() {
@@ -22,6 +24,8 @@ public class EventManager {
             preMotionListeners.add((PreMotionListener) listener);
         } else if (type == PostMotionListener.class && listener instanceof PostMotionListener) {
             postMotionListeners.add((PostMotionListener) listener);
+        } else if (type == PacketReceiveListener.class && listener instanceof PacketReceiveListener) {
+            packetReceiveListeners.add((PacketReceiveListener) listener);
         }
     }
 
@@ -30,6 +34,8 @@ public class EventManager {
             preMotionListeners.remove(listener);
         } else if (type == PostMotionListener.class) {
             postMotionListeners.remove(listener);
+        } else if (type == PacketReceiveListener.class) {
+            packetReceiveListeners.remove(listener);
         }
     }
 
@@ -42,6 +48,12 @@ public class EventManager {
     public void firePostMotion() {
         for (PostMotionListener listener : new ArrayList<>(postMotionListeners)) {
             listener.onPostMotion();
+        }
+    }
+
+    public void firePacketReceive(Packet<?> packet) {
+        for (PacketReceiveListener listener : new ArrayList<>(packetReceiveListeners)) {
+            listener.onPacketReceive(packet);
         }
     }
 }

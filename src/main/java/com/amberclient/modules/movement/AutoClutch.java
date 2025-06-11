@@ -45,7 +45,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
     private boolean hasTarget = false;
 
     public AutoClutch() {
-        super("AutoClutch", "Automatically clutches. Blocks might disappear if knockback is too intense", "Movement");
+        super("AutoClutch", "Automatically clutches (blocks might disappear sometimes). Can be use as diagonal scaffold", "Movement");
 
         // Initialize settings
         range = new ModuleSetting("Range", "Distance to search for block placement", 4.0, 1.0, 8.0, 1.0);
@@ -71,17 +71,13 @@ public class AutoClutch extends Module implements ConfigurableModule {
 
     @Override
     public void onEnable() {
-        if (mc.player != null) {
-            float startYaw = mc.player.getYaw();
-            float startPitch = mc.player.getPitch();
-            hasTarget = false;
-        }
+        if (mc.player != null) { hasTarget = false; }
         LOGGER.info("{} module enabled", getName());
     }
 
     @Override
     public void onDisable() {
-        hasTarget = false;
+        if (mc.player != null) { hasTarget = false; }
         LOGGER.info("{} module disabled", getName());
     }
 

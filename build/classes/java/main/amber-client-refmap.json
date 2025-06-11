@@ -5,7 +5,13 @@
       "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V",
       "updateRenderState*": "Lnet/minecraft/class_922;method_62355(Lnet/minecraft/class_1309;Lnet/minecraft/class_10042;F)V"
     },
+    "com/amberclient/mixins/amberclient/EntityVelocityUpdateS2CPacketAccessor": {
+      "velocityX": "field_12563:I",
+      "velocityY": "field_12562:I",
+      "velocityZ": "field_12561:I"
+    },
     "com/amberclient/mixins/client/ClientPlayNetworkHandlerMixin": {
+      "onEntityVelocityUpdate": "Lnet/minecraft/class_634;method_11132(Lnet/minecraft/class_2743;)V",
       "onWorldTimeUpdate": "Lnet/minecraft/class_634;method_11079(Lnet/minecraft/class_2761;)V",
       "tick": "Lnet/minecraft/class_634;method_18784()V"
     },
@@ -71,7 +77,13 @@
         "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V",
         "updateRenderState*": "Lnet/minecraft/class_922;method_62355(Lnet/minecraft/class_1309;Lnet/minecraft/class_10042;F)V"
       },
+      "com/amberclient/mixins/amberclient/EntityVelocityUpdateS2CPacketAccessor": {
+        "velocityX": "field_12563:I",
+        "velocityY": "field_12562:I",
+        "velocityZ": "field_12561:I"
+      },
       "com/amberclient/mixins/client/ClientPlayNetworkHandlerMixin": {
+        "onEntityVelocityUpdate": "Lnet/minecraft/class_634;method_11132(Lnet/minecraft/class_2743;)V",
         "onWorldTimeUpdate": "Lnet/minecraft/class_634;method_11079(Lnet/minecraft/class_2761;)V",
         "tick": "Lnet/minecraft/class_634;method_18784()V"
       },
