@@ -16,7 +16,7 @@ public class Velocity extends Module implements ConfigurableModule {
 
     private final ModuleSettings horizontalScale = new ModuleSettings("Horizontal Scale", "X/Z velocity scale", 0.8, 0.0, 1.0, 0.05);
     private final ModuleSettings verticalScale = new ModuleSettings("Vertical Scale", "Y velocity scale", 0.8, 0.0, 1.0, 0.05);
-    private final ModuleSettings contextualReduction = new ModuleSettings("Contextual", "Reduce based on game context", true);
+    private final ModuleSettings contextualReduction = new ModuleSettings("Contextual", "Reduce based on player's position (sneaking, standing, ...)", true);
     private final ModuleSettings randomization = new ModuleSettings("Randomization", "Add slight randomness to avoid patterns", true);
 
     private final List<ModuleSettings> settings = new ArrayList<>();
@@ -81,7 +81,7 @@ public class Velocity extends Module implements ConfigurableModule {
 
         if (contextualReduction.getBooleanValue()) {
             if (player.isSneaking()) {
-                horizontalReduction *= 1.2;
+                horizontalReduction *= 1.5;
             }
 
             if (player.isOnGround()) {

@@ -45,7 +45,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
     private boolean hasTarget = false;
 
     public AutoClutch() {
-        super("AutoClutch", "Automatically clutches (blocks might disappear sometimes). Can be use as diagonal scaffold", "Movement");
+        super("AutoClutch", "Automatically clutches (blocks disappear sometimes)", "Movement");
 
         // Initialize settings
         range = new ModuleSettings("Range", "Distance to search for block placement", 4.0, 1.0, 8.0, 1.0);
@@ -65,7 +65,7 @@ public class AutoClutch extends Module implements ConfigurableModule {
         settings.add(smartRotation);
         settings.add(humanizeRotations);
 
-        // Calculate initial delay
+        // initial delay
         updatePlaceDelay();
     }
 
@@ -133,7 +133,6 @@ public class AutoClutch extends Module implements ConfigurableModule {
         Vec3d playerPos = mc.player.getPos();
         BlockPos playerBlockPos = new BlockPos((int) playerPos.x, (int) playerPos.y, (int) playerPos.z);
 
-        // Check if player is falling and there's no block below
         return mc.player.getVelocity().y < 0 && isAirBlock(Objects.requireNonNull(getBlock(playerBlockPos.down())));
     }
 
@@ -264,13 +263,11 @@ public class AutoClutch extends Module implements ConfigurableModule {
         } else {
             float speed = (float) rotationSpeed.getDoubleValue();
 
-            // Humanize rotations if enabled
             if (humanizeRotations.getBooleanValue()) {
 
                 float randomFactor = 0.7f + (float) (Math.random() * 0.6f);
                 speed *= randomFactor;
 
-                // Add micro-jitter to simulate human mouse movement
                 float jitterYaw = (float) ((Math.random() - 0.5));
                 float jitterPitch = (float) ((Math.random() - 0.5) * 0.6);
 
@@ -322,7 +319,8 @@ public class AutoClutch extends Module implements ConfigurableModule {
         }
     }
 
-    // Utility classes
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     private record PlacementInfo(BlockPos pos, BlockPos neighbor, Direction side, Vec3d hitVec, float yaw, float pitch) { }
 
     public boolean isAirBlock(Block block) {
