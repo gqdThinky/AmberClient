@@ -2,9 +2,7 @@ package com.amberclient.modules.player;
 
 import com.amberclient.utils.module.ConfigurableModule;
 import com.amberclient.utils.module.Module;
-import com.amberclient.utils.module.ModuleSetting;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
+import com.amberclient.utils.module.ModuleSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,17 +16,17 @@ public class FastBreak extends Module implements ConfigurableModule {
     private static FastBreak instance;
     public static boolean isFastBreakEnabled;
 
-    private final List<ModuleSetting> settings;
-    private final ModuleSetting activationChance;
-    private final ModuleSetting legitMode;
+    private final List<ModuleSettings> settings;
+    private final ModuleSettings activationChance;
+    private final ModuleSettings legitMode;
 
     public FastBreak() {
         super("FastBreak", "Breaks blocks way faster", "Player");
         instance = this;
         isFastBreakEnabled = false;
 
-        this.activationChance = new ModuleSetting("Activation Chance", "Probability of FastBreak activating for a block. Lower values reduce anti-cheat detection.",1.0, 0.0, 1.0, 0.01);
-        this.legitMode = new ModuleSetting("Legit Mode", "Only removes block-breaking delay without speeding up the process. Safer for anti-cheat.",false);
+        this.activationChance = new ModuleSettings("Activation Chance", "Probability of FastBreak activating for a block. Lower values reduce anti-cheat detection.",1.0, 0.0, 1.0, 0.01);
+        this.legitMode = new ModuleSettings("Legit Mode", "Only removes block-breaking delay without speeding up the process. Safer for anti-cheat.",false);
 
         this.settings = new ArrayList<>();
         this.settings.add(activationChance);
@@ -46,8 +44,8 @@ public class FastBreak extends Module implements ConfigurableModule {
     public void onDisable() { isFastBreakEnabled = false; }
 
     @Override
-    public List<ModuleSetting> getSettings() {
-        List<ModuleSetting> settings = new ArrayList<>();
+    public List<ModuleSettings> getSettings() {
+        List<ModuleSettings> settings = new ArrayList<>();
         settings.add(activationChance);
         settings.add(legitMode);
         return settings;

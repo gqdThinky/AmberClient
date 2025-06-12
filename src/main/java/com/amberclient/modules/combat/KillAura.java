@@ -2,7 +2,7 @@ package com.amberclient.modules.combat;
 
 import com.amberclient.utils.module.ConfigurableModule;
 import com.amberclient.utils.module.Module;
-import com.amberclient.utils.module.ModuleSetting;
+import com.amberclient.utils.module.ModuleSettings;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
@@ -33,21 +33,21 @@ public class KillAura extends Module implements ConfigurableModule {
     public static final String MOD_ID = "amberclient-killaura";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
-    private final List<ModuleSetting> settings;
+    private final List<ModuleSettings> settings;
     private long lastClickTime = 0;
     private int scanTick = 0;
     private boolean attacking = false;
 
     // Settings
-    private final ModuleSetting range = new ModuleSetting("Range", "Maximum attack range", 3.5, 0.5, 6, 0.25);
-    private final ModuleSetting clickDelay = new ModuleSetting("Click Delay", "Delay between clicks in ms", 100.0, 25.0, 500.0, 10.0);
-    private final ModuleSetting useWeaponSpeed = new ModuleSetting("Use Weapon Speed", "Use the weapon's attack speed", true);
-    private final ModuleSetting onlyOnClick = new ModuleSetting("Only on Click", "Attacks only when left-clicking", false);
-    private final ModuleSetting onlyOnLook = new ModuleSetting("Only on Look", "Attacks only when looking at an entity", false);
-    private final ModuleSetting wallsRange = new ModuleSetting("Walls Range", "Range through walls", 3.5, 0, 6, 0.1);
-    private final ModuleSetting ignoreTamed = new ModuleSetting("Ignore Tamed", "Ignore tamed mobs", false);
-    private final ModuleSetting pauseOnLag = new ModuleSetting("Pause on Lag", "Pause when server lags", true);
-    private final ModuleSetting tpsSync = new ModuleSetting("TPS Sync", "Sync attack speed with server TPS", true);
+    private final ModuleSettings range = new ModuleSettings("Range", "Maximum attack range", 3.5, 0.5, 6, 0.25);
+    private final ModuleSettings clickDelay = new ModuleSettings("Click Delay", "Delay between clicks in ms", 100.0, 25.0, 500.0, 10.0);
+    private final ModuleSettings useWeaponSpeed = new ModuleSettings("Use Weapon Speed", "Use the weapon's attack speed", true);
+    private final ModuleSettings onlyOnClick = new ModuleSettings("Only on Click", "Attacks only when left-clicking", false);
+    private final ModuleSettings onlyOnLook = new ModuleSettings("Only on Look", "Attacks only when looking at an entity", false);
+    private final ModuleSettings wallsRange = new ModuleSettings("Walls Range", "Range through walls", 3.5, 0, 6, 0.1);
+    private final ModuleSettings ignoreTamed = new ModuleSettings("Ignore Tamed", "Ignore tamed mobs", false);
+    private final ModuleSettings pauseOnLag = new ModuleSettings("Pause on Lag", "Pause when server lags", true);
+    private final ModuleSettings tpsSync = new ModuleSettings("TPS Sync", "Sync attack speed with server TPS", true);
 
     public KillAura() {
         super("KillAura", "Automatically attacks nearby entities", "Combat");
@@ -192,12 +192,12 @@ public class KillAura extends Module implements ConfigurableModule {
     }
 
     @Override
-    public List<ModuleSetting> getSettings() {
+    public List<ModuleSettings> getSettings() {
         return settings;
     }
 
     @Override
-    public void onSettingChanged(ModuleSetting setting) {
+    public void onSettingChanged(ModuleSettings setting) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 

@@ -5,7 +5,7 @@ import com.amberclient.events.PreMotionListener;
 import com.amberclient.events.PostMotionListener;
 import com.amberclient.utils.module.ConfigurableModule;
 import com.amberclient.utils.module.Module;
-import com.amberclient.utils.module.ModuleSetting;
+import com.amberclient.utils.module.ModuleSettings;
 import com.amberclient.utils.rotation.RotationFaker;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.Logger;
@@ -22,19 +22,19 @@ public class Hitbox extends Module implements ConfigurableModule {
     private static boolean calculatingTarget = false;
     private static Hitbox instance;
 
-    private final List<ModuleSetting> settings;
-    private final ModuleSetting expandX;
-    private final ModuleSetting expandYUp;
-    private final ModuleSetting expandZ;
+    private final List<ModuleSettings> settings;
+    private final ModuleSettings expandX;
+    private final ModuleSettings expandYUp;
+    private final ModuleSettings expandZ;
     private final RotationFaker rotationFaker = new RotationFaker();
 
     public Hitbox() {
         super("Hitbox", "(DETECTABLE) Increases hitboxes' size", "Combat");
         instance = this;
 
-        expandX = new ModuleSetting("Expand X", "Horizontal hitbox expansion", 0.25, 0.0, 2.0, 0.05);
-        expandYUp = new ModuleSetting("Expand Y Up", "Upward hitbox expansion", 0.6, 0.0, 2.0, 0.05);
-        expandZ = new ModuleSetting("Expand Z", "Depth hitbox expansion", 0.25, 0.0, 2.0, 0.05);
+        expandX = new ModuleSettings("Expand X", "Horizontal hitbox expansion", 0.25, 0.0, 2.0, 0.05);
+        expandYUp = new ModuleSettings("Expand Y Up", "Upward hitbox expansion", 0.6, 0.0, 2.0, 0.05);
+        expandZ = new ModuleSettings("Expand Z", "Depth hitbox expansion", 0.25, 0.0, 2.0, 0.05);
 
         settings = new ArrayList<>();
         settings.add(expandX);
@@ -62,12 +62,12 @@ public class Hitbox extends Module implements ConfigurableModule {
     }
 
     @Override
-    public List<ModuleSetting> getSettings() {
+    public List<ModuleSettings> getSettings() {
         return settings;
     }
 
     @Override
-    public void onSettingChanged(ModuleSetting setting) {
+    public void onSettingChanged(ModuleSettings setting) {
         if (setting == expandX || setting == expandYUp || setting == expandZ) {
             if (getClient().player != null) {
                 getClient().player.sendMessage(

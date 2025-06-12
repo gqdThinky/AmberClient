@@ -5,7 +5,7 @@ Time: 2025-06-08 14:34:21
 Description: Unexpected error
 
 java.lang.IllegalStateException: Setting is not an integer
-	at knot//com.amberclient.utils.module.ModuleSetting.getIntegerValue(ModuleSetting.java:129)
+	at knot//com.amberclient.utils.module.ModuleSettings.getIntegerValue(ModuleSetting.java:129)
 	at knot//net.minecraft.client.MinecraftClient.handler$zze000$amber-client$onHasOutline(MinecraftClient.java:3102)
 	at knot//net.minecraft.client.MinecraftClient.hasOutline(MinecraftClient.java)
 	at knot//net.minecraft.client.render.WorldRenderer.getEntitiesToRender(WorldRenderer.java:826)
@@ -27,7 +27,7 @@ A detailed walkthrough of the error, its code path and all known details is as f
 -- Head --
 Thread: Render thread
 Stacktrace:
-	at knot//com.amberclient.utils.module.ModuleSetting.getIntegerValue(ModuleSetting.java:129)
+	at knot//com.amberclient.utils.module.ModuleSettings.getIntegerValue(ModuleSetting.java:129)
 	at knot//net.minecraft.client.MinecraftClient.handler$zze000$amber-client$onHasOutline(MinecraftClient.java:3102)
 	at knot//net.minecraft.client.MinecraftClient.hasOutline(MinecraftClient.java)
 	at knot//net.minecraft.client.render.WorldRenderer.getEntitiesToRender(WorldRenderer.java:826)

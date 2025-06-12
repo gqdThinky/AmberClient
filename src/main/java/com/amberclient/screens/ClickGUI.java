@@ -5,7 +5,7 @@ import com.amberclient.modules.hud.Transparency;
 import com.amberclient.utils.module.Module;
 import com.amberclient.utils.module.ModuleManager;
 import com.amberclient.utils.module.ConfigurableModule;
-import com.amberclient.utils.module.ModuleSetting;
+import com.amberclient.utils.module.ModuleSettings;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -35,7 +35,7 @@ public class ClickGUI extends Screen {
     private int configOffsetX = -350, configOffsetY = 0;
     private boolean configDragging = false;
     private int configDragX, configDragY;
-    private ModuleSetting draggedSetting = null;
+    private ModuleSettings draggedSetting = null;
     private final List<ModuleWrapper> clickedModules = new ArrayList<>();
     private long clickTime = 0;
     private static final long CLICK_DURATION = 300;
@@ -195,14 +195,14 @@ public class ClickGUI extends Screen {
                 hover ? new Color(255, 80, 80).getRGB() : new Color(200, 50, 50).getRGB());
         context.drawTextWithShadow(textRenderer, "×", p.x + p.width - 18, p.y + 10, Color.WHITE.getRGB());
 
-        List<ModuleSetting> settings = configModule.settings;
+        List<ModuleSettings> settings = configModule.settings;
         int top = p.y + 40, areaH = p.height - 50;
         context.enableScissor(p.x, top, p.x + p.width, top + areaH);
 
         int setH = 40, sp = 5, contentH = settings.size() * (setH + sp) - sp;
         configScroll = MathHelper.clamp(configScroll, 0, Math.max(0, contentH - areaH));
         for (int i = 0; i < settings.size(); i++) {
-            ModuleSetting s = settings.get(i);
+            ModuleSettings s = settings.get(i);
             int setY = top + i * (setH + sp) - (int)configScroll;
             if (setY + setH < top || setY > top + areaH) continue;
 
@@ -210,13 +210,13 @@ public class ClickGUI extends Screen {
             context.drawTextWithShadow(textRenderer, s.getName(), p.x + 20, setY + 10, TEXT);
             context.drawTextWithShadow(textRenderer, s.getDescription(), p.x + 20, setY + 25, new Color(180, 180, 180).getRGB());
 
-            if (s.getType() == ModuleSetting.SettingType.BOOLEAN) {
+            if (s.getType() == ModuleSettings.SettingType.BOOLEAN) {
                 boolean on = s.getBooleanValue(), hoverB = isMouseOver(mouseX, mouseY, p.x + p.width - 60, setY + 10, 40, 20);
                 int bg = hoverB ? (on ? ACCENT_HOVER : new Color(120, 120, 120).getRGB()) : (on ? ACCENT : new Color(100, 100, 100).getRGB());
                 context.fill(p.x + p.width - 60, setY + 10, p.x + p.width - 20, setY + 30, bg);
                 drawBorder(context, p.x + p.width - 60, setY + 10, 40, 20);
                 context.drawTextWithShadow(textRenderer, on ? "ON" : "OFF", p.x + p.width - 50, setY + 15, Color.WHITE.getRGB());
-            } else if (s.getType() == ModuleSetting.SettingType.DOUBLE && s.hasRange()) {
+            } else if (s.getType() == ModuleSettings.SettingType.DOUBLE && s.hasRange()) {
                 double v = s.getDoubleValue(), min = s.getMinValue().doubleValue(), max = s.getMaxValue().doubleValue();
                 context.fill(p.x + p.width - 100, setY + 10, p.x + p.width - 20, setY + 20, new Color(100, 100, 100).getRGB());
                 context.fill(p.x + p.width - 100, setY + 10, p.x + p.width - 100 + (int)(80 * (v - min) / (max - min)), setY + 20, ACCENT);
@@ -266,24 +266,25 @@ public class ClickGUI extends Screen {
                     configDragging = true; configDragX = (int)mx; configDragY = (int)my;
                     return true;
                 }
-                List<ModuleSetting> settings = configModule.settings;
+                List<ModuleSettings> settings = configModule.settings;
                 int top = p.y + 40, setH = 40, sp = 5;
                 for (int i = 0; i < settings.size(); i++) {
-                    ModuleSetting s = settings.get(i);
+                    ModuleSettings s = settings.get(i);
                     int setY = top + i * (setH + sp) - (int)configScroll;
                     if (setY + setH < top || setY > top + p.height - 50) continue;
-                    if (s.getType() == ModuleSetting.SettingType.BOOLEAN &&
+                    if (s.getType() == ModuleSettings.SettingType.BOOLEAN &&
                             isMouseOver((int)mx, (int)my, p.x + p.width - 60, setY + 10, 40, 20)) {
                         s.setBooleanValue(!s.getBooleanValue());
                         ((ConfigurableModule)configModule.module).onSettingChanged(s);
                         return true;
-                    } else if (s.getType() == ModuleSetting.SettingType.DOUBLE && s.hasRange() &&
+                    } else if (s.getType() == ModuleSettings.SettingType.DOUBLE && s.hasRange() &&
                             isMouseOver((int)mx, (int)my, p.x + p.width - 100, setY + 10, 80, 10)) {
                         draggedSetting = s;
                         double min = s.getMinValue().doubleValue(), max = s.getMaxValue().doubleValue();
-                        double val = MathHelper.clamp(Math.round(((mx - (p.x + p.width - 100)) / 80) * (max - min) + min) /
-                                s.getStepValue().doubleValue() * s.getStepValue().doubleValue(), min, max);
-                        s.setDoubleValue(val);
+                        double normalized = (mx - (p.x + p.width - 100)) / 80.0;
+                        double rawValue = min + (max - min) * normalized;
+                        rawValue = MathHelper.clamp(rawValue, min, max);
+                        s.setDoubleValue(rawValue);
                         ((ConfigurableModule)configModule.module).onSettingChanged(s);
                         return true;
                     }
@@ -352,16 +353,17 @@ public class ClickGUI extends Screen {
             configDragX = (int)mx; configDragY = (int)my;
             return true;
         }
-        if (draggedSetting != null && draggedSetting.getType() == ModuleSetting.SettingType.DOUBLE) {
+        if (draggedSetting != null && draggedSetting.getType() == ModuleSettings.SettingType.DOUBLE) {
             PanelBounds p = calcConfigPanel();
             int setH = 40, sp = 5;
             for (int i = 0; i < configModule.settings.size(); i++) {
                 if (configModule.settings.get(i) != draggedSetting) continue;
                 int setY = p.y + 40 + i * (setH + sp) - (int)configScroll;
                 double min = draggedSetting.getMinValue().doubleValue(), max = draggedSetting.getMaxValue().doubleValue();
-                double val = MathHelper.clamp(Math.round(((mx - (p.x + p.width - 100)) / 80) * (max - min) + min) /
-                        draggedSetting.getStepValue().doubleValue() * draggedSetting.getStepValue().doubleValue(), min, max);
-                draggedSetting.setDoubleValue(val);
+                double normalized = (mx - (p.x + p.width - 100)) / 80.0;
+                double rawValue = min + (max - min) * normalized;
+                rawValue = MathHelper.clamp(rawValue, min, max);
+                draggedSetting.setDoubleValue(rawValue);
                 ((ConfigurableModule)configModule.module).onSettingChanged(draggedSetting);
                 return true;
             }
@@ -429,7 +431,7 @@ public class ClickGUI extends Screen {
         final Module module;
         final String name, desc;
         final boolean isConfigurable;
-        final List<ModuleSetting> settings;
+        final List<ModuleSettings> settings;
         ModuleWrapper(Module m) {
             module = m; name = m.getName(); desc = m.getDescription();
             isConfigurable = m instanceof ConfigurableModule;

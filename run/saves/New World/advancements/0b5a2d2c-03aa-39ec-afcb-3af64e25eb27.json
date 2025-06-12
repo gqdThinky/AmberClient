@@ -12,5 +12,23 @@
     },
     "done": false
   },
+  "minecraft:husbandry/balanced_diet": {
+    "criteria": {
+      "enchanted_golden_apple": "2025-06-12 19:48:50 +0200"
+    },
+    "done": false
+  },
+  "minecraft:husbandry/root": {
+    "criteria": {
+      "consumed_item": "2025-06-12 19:48:50 +0200"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/mojang_banner_pattern": {
+    "criteria": {
+      "has_enchanted_golden_apple": "2025-06-12 19:48:15 +0200"
+    },
+    "done": true
+  },
   "DataVersion": 4189
 }

@@ -2,20 +2,20 @@ package com.amberclient.modules.hud
 
 import com.amberclient.utils.module.Module
 import com.amberclient.utils.module.ConfigurableModule
-import com.amberclient.utils.module.ModuleSetting
+import com.amberclient.utils.module.ModuleSettings
 import net.minecraft.text.Text
 
 class ActiveMods : Module("Active mods", "Toggles display of active modules", "HUD"), ConfigurableModule {
 
-    private val enableRGB: ModuleSetting
-    private val settings: MutableList<ModuleSetting>
+    private val enableRGB: ModuleSettings
+    private val settings: MutableList<ModuleSettings>
 
     init {
         enabled = true
 
-        enableRGB = ModuleSetting("Enable RGB", "Use animated RGB text color", true)
+        enableRGB = ModuleSettings("Enable RGB", "Use animated RGB text color", true)
 
-        settings = mutableListOf<ModuleSetting>().apply {
+        settings = mutableListOf<ModuleSettings>().apply {
             add(enableRGB)
         }
     }
@@ -29,9 +29,9 @@ class ActiveMods : Module("Active mods", "Toggles display of active modules", "H
         )
     }
 
-    override fun getSettings(): List<ModuleSetting> = settings
+    override fun getSettings(): List<ModuleSettings> = settings
 
-    override fun onSettingChanged(setting: ModuleSetting) {
+    override fun onSettingChanged(setting: ModuleSettings) {
         if (setting == enableRGB) {
             updateRGBSetting()
         }

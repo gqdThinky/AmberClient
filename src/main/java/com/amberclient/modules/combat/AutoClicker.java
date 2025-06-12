@@ -2,7 +2,7 @@ package com.amberclient.modules.combat;
 
 import com.amberclient.utils.module.ConfigurableModule;
 import com.amberclient.utils.module.Module;
-import com.amberclient.utils.module.ModuleSetting;
+import com.amberclient.utils.module.ModuleSettings;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -21,16 +21,16 @@ public class AutoClicker extends Module implements ConfigurableModule {
     public static final String MOD_ID = "amberclient-autoclicker";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
-    private final List<ModuleSetting> settings;
-    private final ModuleSetting clickDelay;
-    private final ModuleSetting useWeaponSpeed;
+    private final List<ModuleSettings> settings;
+    private final ModuleSettings clickDelay;
+    private final ModuleSettings useWeaponSpeed;
     private long lastClickTime;
 
     public AutoClicker() {
         super("AutoClicker", "Auto clicks when aiming at an entity", "Combat");
 
-        useWeaponSpeed = new ModuleSetting("Use Weapon Speed", "Use the attack delay of the held item", true);
-        clickDelay = new ModuleSetting("Default Click Delay", "Delay between clicks in ms (when weapon speed is disabled)", 100.0, 50.0, 500.0, 10.0);
+        useWeaponSpeed = new ModuleSettings("Use Weapon Speed", "Use the attack delay of the held item", true);
+        clickDelay = new ModuleSettings("Default Click Delay", "Delay between clicks in ms (when weapon speed is disabled)", 100.0, 50.0, 500.0, 10.0);
         lastClickTime = 0;
 
         settings = new ArrayList<>();
@@ -82,10 +82,10 @@ public class AutoClicker extends Module implements ConfigurableModule {
     }
 
     @Override
-    public List<ModuleSetting> getSettings() { return settings; }
+    public List<ModuleSettings> getSettings() { return settings; }
 
     @Override
-    public void onSettingChanged(ModuleSetting setting) {
+    public void onSettingChanged(ModuleSettings setting) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 

@@ -3,7 +3,7 @@ package com.amberclient.modules.movement;
 import com.amberclient.utils.KeybindsManager;
 import com.amberclient.utils.module.ConfigurableModule;
 import com.amberclient.utils.module.Module;
-import com.amberclient.utils.module.ModuleSetting;
+import com.amberclient.utils.module.ModuleSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SnowBlock;
@@ -28,14 +28,14 @@ public class AutoClutch extends Module implements ConfigurableModule {
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     // Settings
-    private final List<ModuleSetting> settings;
-    private final ModuleSetting range;
-    private final ModuleSetting uncapCps;
-    private final ModuleSetting cpsLimit;
-    private final ModuleSetting holdMode;
-    private final ModuleSetting rotationSpeed;
-    private final ModuleSetting smartRotation;
-    private final ModuleSetting humanizeRotations;
+    private final List<ModuleSettings> settings;
+    private final ModuleSettings range;
+    private final ModuleSettings uncapCps;
+    private final ModuleSettings cpsLimit;
+    private final ModuleSettings holdMode;
+    private final ModuleSettings rotationSpeed;
+    private final ModuleSettings smartRotation;
+    private final ModuleSettings humanizeRotations;
 
     protected MinecraftClient mc = getClient();
     private boolean wasKeyPressed = false;
@@ -48,13 +48,13 @@ public class AutoClutch extends Module implements ConfigurableModule {
         super("AutoClutch", "Automatically clutches (blocks might disappear sometimes). Can be use as diagonal scaffold", "Movement");
 
         // Initialize settings
-        range = new ModuleSetting("Range", "Distance to search for block placement", 4.0, 1.0, 8.0, 1.0);
-        rotationSpeed = new ModuleSetting("Rotation Speed", "Speed of rotation smoothing", 15.0, 1.0, 50.0, 1.0);
-        cpsLimit = new ModuleSetting("CPS Limit", "Maximum clicks per second (if Uncap CPS is disabled)", 20.0, 1.0, 50.0, 1.0);
-        uncapCps = new ModuleSetting("Uncap CPS", "Disable CPS limitation (for longer clutches)", true);
-        holdMode = new ModuleSetting("Hold Mode", "Deactivate module when key is released", false);
-        smartRotation = new ModuleSetting("Smart Rotation", "Intelligently rotate to closest placement", true);
-        humanizeRotations = new ModuleSetting("Humanize Rotations", "Add human-like rotation variations", false);
+        range = new ModuleSettings("Range", "Distance to search for block placement", 4.0, 1.0, 8.0, 1.0);
+        rotationSpeed = new ModuleSettings("Rotation Speed", "Speed of rotation smoothing", 15.0, 1.0, 50.0, 1.0);
+        cpsLimit = new ModuleSettings("CPS Limit", "Maximum clicks per second (if Uncap CPS is disabled)", 20.0, 1.0, 50.0, 1.0);
+        uncapCps = new ModuleSettings("Uncap CPS", "Disable CPS limitation (for longer clutches)", true);
+        holdMode = new ModuleSettings("Hold Mode", "Deactivate module when key is released", false);
+        smartRotation = new ModuleSettings("Smart Rotation", "Intelligently rotate to closest placement", true);
+        humanizeRotations = new ModuleSettings("Humanize Rotations", "Add human-like rotation variations", false);
 
         settings = new ArrayList<>();
         settings.add(range);
@@ -355,12 +355,12 @@ public class AutoClutch extends Module implements ConfigurableModule {
     }
 
     @Override
-    public List<ModuleSetting> getSettings() {
+    public List<ModuleSettings> getSettings() {
         return settings;
     }
 
     @Override
-    public void onSettingChanged(ModuleSetting setting) {
+    public void onSettingChanged(ModuleSettings setting) {
         if (mc.player == null) return;
 
         if (setting == range) {

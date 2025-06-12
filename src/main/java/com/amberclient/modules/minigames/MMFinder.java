@@ -1,9 +1,9 @@
 package com.amberclient.modules.minigames;
 
+import com.amberclient.utils.module.ModuleSettings;
 import com.amberclient.utils.murdererfinder.MurdererFinder;
 import com.amberclient.utils.module.ConfigurableModule;
 import com.amberclient.utils.module.Module;
-import com.amberclient.utils.module.ModuleSetting;
 import com.amberclient.utils.murdererfinder.config.Config;
 import com.amberclient.utils.murdererfinder.config.ConfigManager;
 import net.minecraft.client.MinecraftClient;
@@ -26,23 +26,23 @@ public class MMFinder extends Module implements ConfigurableModule {
 
     private static final MMFinder INSTANCE = new MMFinder();
 
-    private final List<ModuleSetting> settings;
-    private final ModuleSetting highlightMurders;
-    private final ModuleSetting highlightGold;
-    private final ModuleSetting highlightBows;
-    private final ModuleSetting showNameTags;
-    private final ModuleSetting highlightSpectators;
+    private final List<ModuleSettings> settings;
+    private final ModuleSettings highlightMurders;
+    private final ModuleSettings highlightGold;
+    private final ModuleSettings highlightBows;
+    private final ModuleSettings showNameTags;
+    private final ModuleSettings highlightSpectators;
 
     public MMFinder() {
         super("Murderer Finder", "Find the murderer in Hypixel's Murder Mystery", "Mini-games");
 
         // Initialize settings with values from Config
         Config config = ConfigManager.getConfig();
-        highlightMurders = new ModuleSetting("Highlight Murderers", "Highlight players identified as murderers", config.mm.shouldHighlightMurders());
-        highlightGold = new ModuleSetting("Highlight Gold", "Highlight gold items in the game", config.mm.shouldHighlightGold());
-        highlightBows = new ModuleSetting("Highlight Bows", "Highlight bows in the game", config.mm.shouldHighlightBows());
-        showNameTags = new ModuleSetting("Show Name Tags", "Display name tags for players", config.mm.shouldShowNameTags());
-        highlightSpectators = new ModuleSetting("Highlight Spectators", "Highlight spectator players", config.mm.shouldHighlightSpectators());
+        highlightMurders = new ModuleSettings("Highlight Murderers", "Highlight players identified as murderers", config.mm.shouldHighlightMurders());
+        highlightGold = new ModuleSettings("Highlight Gold", "Highlight gold items in the game", config.mm.shouldHighlightGold());
+        highlightBows = new ModuleSettings("Highlight Bows", "Highlight bows in the game", config.mm.shouldHighlightBows());
+        showNameTags = new ModuleSettings("Show Name Tags", "Display name tags for players", config.mm.shouldShowNameTags());
+        highlightSpectators = new ModuleSettings("Highlight Spectators", "Highlight spectator players", config.mm.shouldHighlightSpectators());
 
         settings = new ArrayList<>();
         settings.add(highlightMurders);
@@ -77,12 +77,12 @@ public class MMFinder extends Module implements ConfigurableModule {
     }
 
     @Override
-    public List<ModuleSetting> getSettings() {
+    public List<ModuleSettings> getSettings() {
         return settings;
     }
 
     @Override
-    public void onSettingChanged(ModuleSetting setting) {
+    public void onSettingChanged(ModuleSettings setting) {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player == null) return;
 

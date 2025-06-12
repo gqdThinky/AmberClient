@@ -2,7 +2,7 @@ package com.amberclient.utils.module;
 
 import java.util.Set;
 
-public class ModuleSetting {
+public class ModuleSettings {
     public enum SettingType {
         BOOLEAN,
         INTEGER,
@@ -21,8 +21,7 @@ public class ModuleSetting {
     private Number maxValue;
     private Number stepValue;
 
-    // Existing constructors
-    public ModuleSetting(String name, String description, boolean defaultValue) {
+    public ModuleSettings(String name, String description, boolean defaultValue) {
         this.name = name;
         this.description = description;
         this.type = SettingType.BOOLEAN;
@@ -30,7 +29,7 @@ public class ModuleSetting {
         this.defaultValue = defaultValue;
     }
 
-    public ModuleSetting(String name, String description, int defaultValue, int minValue, int maxValue) {
+    public ModuleSettings(String name, String description, int defaultValue, int minValue, int maxValue) {
         this.name = name;
         this.description = description;
         this.type = SettingType.INTEGER;
@@ -41,11 +40,11 @@ public class ModuleSetting {
         this.stepValue = 1;
     }
 
-    public ModuleSetting(String name, String description, int defaultValue) {
+    public ModuleSettings(String name, String description, int defaultValue) {
         this(name, description, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
 
-    public ModuleSetting(String name, String description, double defaultValue, double minValue, double maxValue, double step) {
+    public ModuleSettings(String name, String description, double defaultValue, double minValue, double maxValue, double step) {
         this.name = name;
         this.description = description;
         this.type = SettingType.DOUBLE;
@@ -56,15 +55,15 @@ public class ModuleSetting {
         this.stepValue = step;
     }
 
-    public ModuleSetting(String name, String description, double defaultValue, double minValue, double maxValue) {
+    public ModuleSettings(String name, String description, double defaultValue, double minValue, double maxValue) {
         this(name, description, defaultValue, minValue, maxValue, 0.1);
     }
 
-    public ModuleSetting(String name, String description, double defaultValue) {
+    public ModuleSettings(String name, String description, double defaultValue) {
         this(name, description, defaultValue, Double.MIN_VALUE, Double.MAX_VALUE, 0.1);
     }
 
-    public ModuleSetting(String name, String description, String defaultValue) {
+    public ModuleSettings(String name, String description, String defaultValue) {
         this.name = name;
         this.description = description;
         this.type = SettingType.STRING;
@@ -72,8 +71,7 @@ public class ModuleSetting {
         this.defaultValue = defaultValue;
     }
 
-    // New constructor for enums
-    public ModuleSetting(String name, String description, Enum<?> defaultValue) {
+    public ModuleSettings(String name, String description, Enum<?> defaultValue) {
         this.name = name;
         this.description = description;
         this.type = SettingType.ENUM;
@@ -81,8 +79,7 @@ public class ModuleSetting {
         this.defaultValue = defaultValue;
     }
 
-    // New constructor for sets
-    public ModuleSetting(String name, String description, Set<?> defaultValue) {
+    public ModuleSettings(String name, String description, Set<?> defaultValue) {
         this.name = name;
         this.description = description;
         this.type = SettingType.SET;
@@ -143,7 +140,6 @@ public class ModuleSetting {
         throw new IllegalStateException("Setting is not a string");
     }
 
-    // New getter for enums
     @SuppressWarnings("unchecked")
     public <T extends Enum<T>> T getEnumValue() {
         if (type == SettingType.ENUM) {
@@ -152,7 +148,6 @@ public class ModuleSetting {
         throw new IllegalStateException("Setting is not an enum");
     }
 
-    // New getter for sets
     @SuppressWarnings("unchecked")
     public <T> Set<T> getSetValue() {
         if (type == SettingType.SET) {
@@ -168,7 +163,6 @@ public class ModuleSetting {
         throw new IllegalStateException("Setting is not a boolean and cannot be checked as enabled/disabled");
     }
 
-    // Existing setters
     public void setBooleanValue(boolean value) {
         if (type == SettingType.BOOLEAN) {
             this.value = value;
@@ -249,7 +243,6 @@ public class ModuleSetting {
         }
     }
 
-    // New setter for enums
     public void setEnumValue(Enum<?> value) {
         if (type == SettingType.ENUM) {
             this.value = value;
@@ -258,7 +251,6 @@ public class ModuleSetting {
         }
     }
 
-    // New setter for sets
     public <T> void setSetValue(Set<T> value) {
         if (type == SettingType.SET) {
             this.value = value;

@@ -2,7 +2,7 @@ package com.amberclient.modules.movement;
 
 import com.amberclient.utils.module.ConfigurableModule;
 import com.amberclient.utils.module.Module;
-import com.amberclient.utils.module.ModuleSetting;
+import com.amberclient.utils.module.ModuleSettings;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -19,8 +19,8 @@ public class SafeWalk extends Module implements ConfigurableModule {
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     // Settings
-    private final ModuleSetting inAir = new ModuleSetting("InAir", "Enable SafeWalk in air", true);
-    private final ModuleSetting minemen = new ModuleSetting("Minemen", "Enable Minemen mode", true);
+    private final ModuleSettings inAir = new ModuleSettings("InAir", "Enable SafeWalk in air", true);
+    private final ModuleSettings minemen = new ModuleSettings("Minemen", "Enable Minemen mode", true);
 
     // Internal state
     private final MinecraftClient mc = MinecraftClient.getInstance();
@@ -37,7 +37,7 @@ public class SafeWalk extends Module implements ConfigurableModule {
     }
 
     @Override
-    public List<ModuleSetting> getSettings() {
+    public List<ModuleSettings> getSettings() {
         return Arrays.asList(inAir, minemen);
     }
 

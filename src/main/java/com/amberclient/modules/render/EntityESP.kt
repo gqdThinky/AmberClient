@@ -2,7 +2,7 @@ package com.amberclient.modules.render
 
 import com.amberclient.utils.module.ConfigurableModule
 import com.amberclient.utils.module.Module
-import com.amberclient.utils.module.ModuleSetting
+import com.amberclient.utils.module.ModuleSettings
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.entity.state.LivingEntityRenderState
 import net.minecraft.entity.LivingEntity
@@ -25,20 +25,20 @@ class EntityESP : Module("Entity ESP", "Display outlines around entity models (p
         fun getInstance(): EntityESP? = INSTANCE
     }
 
-    private val renderPlayersSetting: ModuleSetting
-    private val renderMobsSetting: ModuleSetting
-    private val rangeSetting: ModuleSetting
-    private val entityInfosSetting: ModuleSetting
-    private val settings: MutableList<ModuleSetting>
+    private val renderPlayersSetting: ModuleSettings
+    private val renderMobsSetting: ModuleSettings
+    private val rangeSetting: ModuleSettings
+    private val entityInfosSetting: ModuleSettings
+    private val settings: MutableList<ModuleSettings>
 
     init {
         INSTANCE = this
-        renderPlayersSetting = ModuleSetting("Render Players", "Displays outlines for players", true)
-        renderMobsSetting = ModuleSetting("Render Mobs", "Displays outlines for mobs", false)
-        rangeSetting = ModuleSetting("Render Range", "X (in chunks)", 4.0, 1.0, 8.0, 1.0)
-        entityInfosSetting = ModuleSetting("Entity Infos", "Shows nametags and health above entities", true)
+        renderPlayersSetting = ModuleSettings("Render Players", "Displays outlines for players", true)
+        renderMobsSetting = ModuleSettings("Render Mobs", "Displays outlines for mobs", false)
+        rangeSetting = ModuleSettings("Render Range", "X (in chunks)", 4.0, 1.0, 8.0, 1.0)
+        entityInfosSetting = ModuleSettings("Entity Infos", "Shows nametags and health above entities", true)
 
-        settings = mutableListOf<ModuleSetting>().apply {
+        settings = mutableListOf<ModuleSettings>().apply {
             add(renderPlayersSetting)
             add(renderMobsSetting)
             add(rangeSetting)
@@ -46,9 +46,9 @@ class EntityESP : Module("Entity ESP", "Display outlines around entity models (p
         }
     }
 
-    override fun getSettings(): List<ModuleSetting> = settings
+    override fun getSettings(): List<ModuleSettings> = settings
 
-    override fun onSettingChanged(setting: ModuleSetting) {
+    override fun onSettingChanged(setting: ModuleSettings) {
         val client = MinecraftClient.getInstance()
         val player = client.player ?: return
 
@@ -84,8 +84,8 @@ class EntityESP : Module("Entity ESP", "Display outlines around entity models (p
         }
     }
 
-    fun getRenderPlayersSetting(): ModuleSetting = renderPlayersSetting
-    fun getRenderMobsSetting(): ModuleSetting = renderMobsSetting
-    fun getEntityInfosSetting(): ModuleSetting = entityInfosSetting
-    fun getRangeSetting(): ModuleSetting = rangeSetting
+    fun getRenderPlayersSetting(): ModuleSettings = renderPlayersSetting
+    fun getRenderMobsSetting(): ModuleSettings = renderMobsSetting
+    fun getEntityInfosSetting(): ModuleSettings = entityInfosSetting
+    fun getRangeSetting(): ModuleSettings = rangeSetting
 }
