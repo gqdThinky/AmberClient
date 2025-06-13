@@ -1,42 +1,37 @@
 package com.amberclient.modules.combat;
 
+import com.amberclient.events.EventManager;
+import com.amberclient.events.PreVelocityEvent;
+import com.amberclient.events.PreVelocityListener;
 import com.amberclient.utils.module.ConfigurableModule;
 import com.amberclient.utils.module.Module;
 import com.amberclient.utils.module.ModuleSettings;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class Velocity extends Module implements ConfigurableModule {
-
+public class Velocity extends Module implements ConfigurableModule, PreVelocityListener {
     private final ModuleSettings horizontalScale =
-            new ModuleSettings("Horizontal Scale", "X/Z velocity scale", 0.8, 0.0, 1.0, 0.05);
+            new ModuleSettings("Horizontal Scale", "X/Z velocity scale", 0.6, 0.0, 5.0, 0.05);
     private final ModuleSettings verticalScale =
-            new ModuleSettings("Vertical Scale", "Y velocity scale", 0.8, 0.0, 1.0, 0.05);
-    private final ModuleSettings contextualReduction =
-            new ModuleSettings("Contextual", "Modify reduction based on sneaking or being grounded", true);
-    private final ModuleSettings randomization =
-            new ModuleSettings("Randomization", "Apply randomness to avoid detection", true);
+            new ModuleSettings("Vertical Scale", "Y velocity scale", 0.4, 0.0, 5.0, 0.05);
+    private final ModuleSettings cancelAir =
+            new ModuleSettings("Cancel Air", "Cancel velocity when in air", false);
+    private final ModuleSettings chance =
+            new ModuleSettings("Chance", "Chance to apply velocity reduction", 100.0, 0.0, 100.0, 5.0);
 
     private final List<ModuleSettings> settings = new ArrayList<>();
-
-    private Vec3d lastVelocity = Vec3d.ZERO;
-    private final double[] recentReductions = new double[5];
-    private int reductionIndex = 0;
-
+    private final MinecraftClient client = MinecraftClient.getInstance();
     private static Velocity instance;
 
     public Velocity() {
-        super("Velocity", "Reduces knockback", "Combat");
+        super("Velocity", "Reduces knockback with anti-rollback", "Combat");
         settings.add(horizontalScale);
         settings.add(verticalScale);
-        settings.add(contextualReduction);
-        settings.add(randomization);
+        settings.add(cancelAir);
+        settings.add(chance);
         instance = this;
     }
 
@@ -45,88 +40,41 @@ public class Velocity extends Module implements ConfigurableModule {
     }
 
     @Override
-    public void onDisable() {
-        lastVelocity = Vec3d.ZERO;
-        reductionIndex = 0;
-        Arrays.fill(recentReductions, 1.0);
+    public void onEnable() {
+        super.onEnable();
+        EventManager.getInstance().add(PreVelocityListener.class, this);
     }
 
     @Override
-    public void onTick() {
-        if (!isEnabled()) return;
-
-        PlayerEntity player = MinecraftClient.getInstance().player;
-        if (player == null) return;
-
-        Vec3d currentVelocity = player.getVelocity();
-
-        if (isSignificantKnockback(currentVelocity)) {
-            Vec3d reducedVelocity = calculateReducedVelocity(player, currentVelocity);
-            player.setVelocity(reducedVelocity);
-        }
-
-        lastVelocity = currentVelocity;
+    public void onDisable() {
+        super.onDisable();
+        EventManager.getInstance().remove(PreVelocityListener.class, this);
     }
 
-    public boolean isSignificantKnockback(Vec3d velocity) {
-        PlayerEntity player = MinecraftClient.getInstance().player;
-        if (player == null) return false;
-
-        boolean wasHitRecently = player.hurtTime > 0;
-        if (!wasHitRecently) return false;
-
-        boolean hasHorizontal = velocity.horizontalLength() > 0.15;
-        boolean hasVertical = velocity.y > 0.1;
-        boolean velocityChanged = velocity.lengthSquared() > lastVelocity.lengthSquared() * 1.3;
-
-        return (hasHorizontal || hasVertical) && velocityChanged;
-    }
-
-    public boolean isSignificantKnockback(Vec3d velocity, Vec3d previousVelocity) {
-        PlayerEntity player = MinecraftClient.getInstance().player;
-        if (player == null) return false;
-
-        boolean wasHitRecently = player.hurtTime > 0;
-        if (!wasHitRecently) return false;
-
-        boolean hasHorizontal = velocity.horizontalLength() > 0.15;
-        boolean hasVertical = velocity.y > 0.1;
-        boolean velocityChanged = velocity.lengthSquared() > previousVelocity.lengthSquared() * 1.3;
-
-        return (hasHorizontal || hasVertical) && velocityChanged;
-    }
-
-    public Vec3d calculateReducedVelocity(PlayerEntity player, Vec3d originalVelocity) {
-        double horizontal = horizontalScale.getDoubleValue();
-        double vertical = verticalScale.getDoubleValue();
-
-        // Apply contextual modifiers
-        if (contextualReduction.getBooleanValue()) {
-            if (player.isSneaking()) horizontal *= 1.5;
-            if (player.isOnGround()) horizontal *= 1.1;
-
-            float healthRatio = player.getHealth() / player.getMaxHealth();
-            horizontal *= (0.8 + healthRatio * 0.2);
+    @Override
+    public void onPreVelocity(@NotNull PreVelocityEvent event) {
+        assert client.player != null;
+        if (cancelAir.getBooleanValue() && !client.player.isOnGround()) {
+            event.setCanceled(true);
+            return;
         }
 
-        // Add randomness
-        if (randomization.getBooleanValue()) {
-            double factor = 0.95 + Math.random() * 0.1;
-            horizontal *= factor;
-            vertical *= factor;
+        // Get packet velocity (already scaled to blocks per tick in VelocityMixin)
+        double motionX = event.getMotionX();
+        double motionY = event.getMotionY();
+        double motionZ = event.getMotionZ();
 
-            recentReductions[reductionIndex] = factor;
-            reductionIndex = (reductionIndex + 1) % recentReductions.length;
+        // Apply velocity reduction based on chance
+        if (chance.getDoubleValue() == 100.0 || Math.random() * 100 <= chance.getDoubleValue()) {
+            motionX *= horizontalScale.getDoubleValue();
+            motionY *= verticalScale.getDoubleValue();
+            motionZ *= horizontalScale.getDoubleValue();
         }
 
-        horizontal = MathHelper.clamp(horizontal, 0.0, 1.0);
-        vertical = MathHelper.clamp(vertical, 0.0, 1.0);
-
-        return new Vec3d(
-                originalVelocity.x * horizontal,
-                originalVelocity.y * vertical,
-                originalVelocity.z * horizontal
-        );
+        // Update the event with modified velocity
+        event.setMotionX(motionX);
+        event.setMotionY(motionY);
+        event.setMotionZ(motionZ);
     }
 
     @Override
