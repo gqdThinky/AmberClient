@@ -14,10 +14,14 @@ import java.util.List;
 
 public class Velocity extends Module implements ConfigurableModule {
 
-    private final ModuleSettings horizontalScale = new ModuleSettings("Horizontal Scale", "X/Z velocity scale", 0.8, 0.0, 1.0, 0.05);
-    private final ModuleSettings verticalScale = new ModuleSettings("Vertical Scale", "Y velocity scale", 0.8, 0.0, 1.0, 0.05);
-    private final ModuleSettings contextualReduction = new ModuleSettings("Contextual", "Reduce based on player's position (sneaking, standing, ...)", true);
-    private final ModuleSettings randomization = new ModuleSettings("Randomization", "Add slight randomness to avoid patterns", true);
+    private final ModuleSettings horizontalScale =
+            new ModuleSettings("Horizontal Scale", "X/Z velocity scale", 0.8, 0.0, 1.0, 0.05);
+    private final ModuleSettings verticalScale =
+            new ModuleSettings("Vertical Scale", "Y velocity scale", 0.8, 0.0, 1.0, 0.05);
+    private final ModuleSettings contextualReduction =
+            new ModuleSettings("Contextual", "Modify reduction based on sneaking or being grounded", true);
+    private final ModuleSettings randomization =
+            new ModuleSettings("Randomization", "Apply randomness to avoid detection", true);
 
     private final List<ModuleSettings> settings = new ArrayList<>();
 
@@ -25,12 +29,19 @@ public class Velocity extends Module implements ConfigurableModule {
     private final double[] recentReductions = new double[5];
     private int reductionIndex = 0;
 
+    private static Velocity instance;
+
     public Velocity() {
-        super("Velocity", "Natural knockback reduction", "Combat");
+        super("Velocity", "Reduces knockback", "Combat");
         settings.add(horizontalScale);
         settings.add(verticalScale);
         settings.add(contextualReduction);
         settings.add(randomization);
+        instance = this;
+    }
+
+    public static Velocity getInstance() {
+        return instance;
     }
 
     @Override
@@ -51,63 +62,70 @@ public class Velocity extends Module implements ConfigurableModule {
 
         if (isSignificantKnockback(currentVelocity)) {
             Vec3d reducedVelocity = calculateReducedVelocity(player, currentVelocity);
-
             player.setVelocity(reducedVelocity);
         }
 
         lastVelocity = currentVelocity;
     }
 
-    private boolean isSignificantKnockback(Vec3d velocity) {
+    public boolean isSignificantKnockback(Vec3d velocity) {
         PlayerEntity player = MinecraftClient.getInstance().player;
         if (player == null) return false;
 
-        boolean isBeingDamaged = player.hurtTime > 0;
-        if (!isBeingDamaged) return false;
+        boolean wasHitRecently = player.hurtTime > 0;
+        if (!wasHitRecently) return false;
 
-        double horizontalThreshold = 0.15;
-        double verticalThreshold = 0.1;
+        boolean hasHorizontal = velocity.horizontalLength() > 0.15;
+        boolean hasVertical = velocity.y > 0.1;
+        boolean velocityChanged = velocity.lengthSquared() > lastVelocity.lengthSquared() * 1.3;
 
-        boolean hasHorizontalKnockback = velocity.horizontalLength() > horizontalThreshold;
-        boolean hasVerticalKnockback = velocity.y > verticalThreshold;
-        boolean significantChange = velocity.lengthSquared() > lastVelocity.lengthSquared() * 1.3;
-
-        return (hasHorizontalKnockback || hasVerticalKnockback) && significantChange;
+        return (hasHorizontal || hasVertical) && velocityChanged;
     }
 
-    private Vec3d calculateReducedVelocity(PlayerEntity player, Vec3d originalVelocity) {
-        double horizontalReduction = horizontalScale.getDoubleValue();
-        double verticalReduction = verticalScale.getDoubleValue();
+    public boolean isSignificantKnockback(Vec3d velocity, Vec3d previousVelocity) {
+        PlayerEntity player = MinecraftClient.getInstance().player;
+        if (player == null) return false;
 
+        boolean wasHitRecently = player.hurtTime > 0;
+        if (!wasHitRecently) return false;
+
+        boolean hasHorizontal = velocity.horizontalLength() > 0.15;
+        boolean hasVertical = velocity.y > 0.1;
+        boolean velocityChanged = velocity.lengthSquared() > previousVelocity.lengthSquared() * 1.3;
+
+        return (hasHorizontal || hasVertical) && velocityChanged;
+    }
+
+    public Vec3d calculateReducedVelocity(PlayerEntity player, Vec3d originalVelocity) {
+        double horizontal = horizontalScale.getDoubleValue();
+        double vertical = verticalScale.getDoubleValue();
+
+        // Apply contextual modifiers
         if (contextualReduction.getBooleanValue()) {
-            if (player.isSneaking()) {
-                horizontalReduction *= 1.5;
-            }
+            if (player.isSneaking()) horizontal *= 1.5;
+            if (player.isOnGround()) horizontal *= 1.1;
 
-            if (player.isOnGround()) {
-                horizontalReduction *= 1.1;
-            }
-
-            float healthFactor = player.getHealth() / player.getMaxHealth();
-            horizontalReduction *= (0.8 + healthFactor * 0.2);
+            float healthRatio = player.getHealth() / player.getMaxHealth();
+            horizontal *= (0.8 + healthRatio * 0.2);
         }
 
+        // Add randomness
         if (randomization.getBooleanValue()) {
-            double randomFactor = 0.95 + (Math.random() * 0.1);
-            horizontalReduction *= randomFactor;
-            verticalReduction *= randomFactor;
+            double factor = 0.95 + Math.random() * 0.1;
+            horizontal *= factor;
+            vertical *= factor;
 
-            recentReductions[reductionIndex] = randomFactor;
+            recentReductions[reductionIndex] = factor;
             reductionIndex = (reductionIndex + 1) % recentReductions.length;
         }
 
-        horizontalReduction = MathHelper.clamp(horizontalReduction, 0.0, 1.0);
-        verticalReduction = MathHelper.clamp(verticalReduction, 0.0, 1.0);
+        horizontal = MathHelper.clamp(horizontal, 0.0, 1.0);
+        vertical = MathHelper.clamp(vertical, 0.0, 1.0);
 
         return new Vec3d(
-                originalVelocity.x * horizontalReduction,
-                originalVelocity.y * verticalReduction,
-                originalVelocity.z * horizontalReduction
+                originalVelocity.x * horizontal,
+                originalVelocity.y * vertical,
+                originalVelocity.z * horizontal
         );
     }
 

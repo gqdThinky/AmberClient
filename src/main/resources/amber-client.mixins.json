@@ -4,6 +4,7 @@
   "package": "com.amberclient.mixins",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "amberclient.VelocityMixin",
     "client.DoubleSliderCallbacksMixin",
     "client.EntityHitboxMixin",
     "client.EntityMixin",
