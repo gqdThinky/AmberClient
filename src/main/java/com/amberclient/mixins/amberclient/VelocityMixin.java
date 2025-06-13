@@ -16,8 +16,12 @@ public class VelocityMixin {
 
     @Inject(method = "onEntityVelocityUpdate", at = @At("HEAD"), cancellable = true)
     public void onPreEntityVelocityUpdate(EntityVelocityUpdateS2CPacket packet, CallbackInfo ci) {
-        assert MinecraftClient.getInstance().player != null;
-        if (packet.getEntityId() == MinecraftClient.getInstance().player.getId()) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) {
+            return;
+        }
+
+        if (packet.getEntityId() == client.player.getId()) {
             PreVelocityEvent event = new PreVelocityEvent();
             event.setMotionX(packet.getVelocityX());
             event.setMotionY(packet.getVelocityY());
@@ -30,14 +34,12 @@ public class VelocityMixin {
                 return;
             }
 
-            ci.cancel();
-
-            MinecraftClient client = MinecraftClient.getInstance();
             double motionX = event.getMotionX();
             double motionY = event.getMotionY();
             double motionZ = event.getMotionZ();
 
             client.player.setVelocity(motionX, motionY, motionZ);
+            ci.cancel();
         }
     }
 
