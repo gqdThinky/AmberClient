@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "amber-client",
-	"version": "0.5.2",
+	"version": "0.5.3",
 	"name": "Amber Client",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [

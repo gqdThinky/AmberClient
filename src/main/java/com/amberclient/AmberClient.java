@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class AmberClient implements ModInitializer {
 	public static final String MOD_ID = "amberclient";
-	public static final String MOD_VERSION = "v0.5.2";
+	public static final String MOD_VERSION = "v0.5.3";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	private static boolean hudLayerRegistered = false;
