@@ -10,7 +10,6 @@ import net.minecraft.text.Text;
 public class BindCmd {
     public static int execute(CommandContext<ServerCommandSource> context) {
         try {
-            // Check if the command source is a player
             ServerCommandSource source = context.getSource();
             if (!source.isExecutedByPlayer()) {
                 source.sendError(Text.literal("This command can only be executed by a player."));
@@ -21,8 +20,6 @@ public class BindCmd {
             String moduleName = context.getArgument("module", String.class);
             String keyName = context.getArgument("key", String.class).toUpperCase();
 
-            // Note: This approach has limitations because ModuleManager is client-side
-            // You might need to send a packet to the client to handle this
             ModuleManager moduleManager = ModuleManager.getInstance();
 
             Module module = moduleManager.getModules()
@@ -39,7 +36,7 @@ public class BindCmd {
             moduleManager.bindKeyToModule(module, keyName);
 
             source.sendFeedback(
-                    () -> Text.literal("Key '" + keyName + "' bound to module '" + moduleName + "'."),
+                    () -> Text.literal("§4[§cAmberClient§4] §cKey §4'" + keyName + "' §cbound to module §4'" + moduleName + "'."),
                     false
             );
             return 1;

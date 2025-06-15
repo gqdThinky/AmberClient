@@ -124,7 +124,6 @@ key_key.hotbar.7:key.keyboard.7
 key_key.hotbar.8:key.keyboard.8
 key_key.hotbar.9:key.keyboard.9
 key_key.amberclient.open_click_gui:key.keyboard.right.shift
-key_key.amberclient.auto_clutch_key:key.keyboard.r
 soundCategory_master:0.20916679501001081
 soundCategory_music:0.0
 soundCategory_record:0.1991876842450048

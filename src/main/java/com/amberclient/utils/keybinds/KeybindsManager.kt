@@ -17,14 +17,6 @@ object KeybindsManager {
         "Open Click GUI"
     )
 
-    val autoClutchKey: KeyBinding = registerKeyBinding(
-        "key.amberclient.auto_clutch_key",
-        InputUtil.Type.KEYSYM,
-        GLFW.GLFW_KEY_R,
-        "category.amberclient.modules",
-        "Toggle Auto Clutch Key"
-    )
-
     private fun registerKeyBinding(
         translationKey: String,
         type: InputUtil.Type,
@@ -81,7 +73,6 @@ object KeybindsManager {
         }
     }
 
-    // Add this method that was missing
     fun getKeyBindings(): Map<String, KeyBinding> {
         return keyBindings.toMap()
     }

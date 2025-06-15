@@ -81,29 +81,6 @@ public class AutoClutch extends Module implements ConfigurableModule {
         LOGGER.info("{} module disabled", getName());
     }
 
-    @Override
-    public void handleKeyInput() {
-        boolean isKeyPressed = KeybindsManager.INSTANCE.getAutoClutchKey().isPressed();
-
-        if (isKeyPressed) {
-            if (!holdMode.getBooleanValue()) {
-                if (!wasKeyPressed) toggle();
-            } else {
-                if (!isEnabled()) {
-                    this.enabled = true;
-                    onEnable();
-                }
-            }
-        } else if (wasKeyPressed) {
-            if (holdMode.getBooleanValue() && isEnabled()) {
-                this.enabled = false;
-                onDisable();
-            }
-        }
-
-        wasKeyPressed = isKeyPressed;
-    }
-
     public void onTick() {
         handleKeyInput();
 
