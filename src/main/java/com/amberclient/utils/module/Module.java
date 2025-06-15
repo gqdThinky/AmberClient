@@ -1,6 +1,8 @@
 package com.amberclient.utils.module;
 
+import com.amberclient.utils.keybinds.CustomKeybindManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.text.Text;
 
 public abstract class Module {
@@ -9,6 +11,10 @@ public abstract class Module {
     private final String category;
     protected boolean enabled;
     protected MinecraftClient client = MinecraftClient.getInstance();
+
+    private KeyBinding keyBinding;
+
+    private int customKeyCode = -1;
 
     public Module(String name, String description, String category) {
         this.name = name;
@@ -61,6 +67,36 @@ public abstract class Module {
         }
 
         onDisable();
+    }
+
+    public void setKeyBinding(KeyBinding keyBinding) {
+        this.keyBinding = keyBinding;
+    }
+
+    public KeyBinding getKeyBinding() {
+        return keyBinding;
+    }
+
+    public void setCustomKeyCode(int keyCode) {
+        this.customKeyCode = keyCode;
+    }
+
+    public int getCustomKeyCode() {
+        return customKeyCode;
+    }
+
+    public boolean hasCustomKeybind() {
+        return customKeyCode != -1;
+    }
+
+    public String getKeybindInfo() {
+        if (hasCustomKeybind()) {
+            return CustomKeybindManager.INSTANCE.getKeyName(customKeyCode);
+        } else if (keyBinding != null) {
+            return keyBinding.getBoundKeyLocalizedText().getString();
+        } else {
+            return "Not bound";
+        }
     }
 
     // Called when the module is enabled

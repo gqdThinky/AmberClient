@@ -1,6 +1,6 @@
 package com.amberclient.modules.movement;
 
-import com.amberclient.utils.KeybindsManager;
+import com.amberclient.utils.keybinds.KeybindsManager;
 import com.amberclient.utils.module.ConfigurableModule;
 import com.amberclient.utils.module.Module;
 import com.amberclient.utils.module.ModuleSettings;

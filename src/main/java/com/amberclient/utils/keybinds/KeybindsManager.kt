@@ -1,4 +1,4 @@
-package com.amberclient.utils
+package com.amberclient.utils.keybinds
 
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.minecraft.client.option.KeyBinding
@@ -53,6 +53,36 @@ object KeybindsManager {
         category: String = "category.amberclient",
         displayName: String
     ): KeyBinding {
-        return registerKeyBinding(translationKey, type, code, category, displayName)
+        val keyBinding = registerKeyBinding(translationKey, type, code, category, displayName)
+        KeyBindingHelper.registerKeyBinding(keyBinding)
+        return keyBinding
+    }
+
+    fun getKeyCodeFromName(keyName: String): Int {
+        return try {
+            val glfwKeyName = "GLFW_KEY_" + keyName.uppercase()
+            val field = GLFW::class.java.getField(glfwKeyName)
+            field.getInt(null)
+        } catch (e: Exception) {
+            GLFW.GLFW_KEY_UNKNOWN
+        }
+    }
+
+    fun findKeyBindingByKeyCode(keyCode: Int): KeyBinding? {
+        return keyBindings.values.find { keyBinding ->
+            try {
+                val boundKeyField = KeyBinding::class.java.getDeclaredField("boundKey")
+                boundKeyField.isAccessible = true
+                val boundKey = boundKeyField.get(keyBinding) as InputUtil.Key
+                boundKey.code == keyCode
+            } catch (e: Exception) {
+                false
+            }
+        }
+    }
+
+    // Add this method that was missing
+    fun getKeyBindings(): Map<String, KeyBinding> {
+        return keyBindings.toMap()
     }
 }

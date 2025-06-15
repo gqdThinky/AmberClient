@@ -1,12 +1,3 @@
-/gamemode creative
-/kill @e[type=minecraft:zombie}
-/kill @e[type=minecraft:zombie]
-/weather clear
-/amber dummy
-/time set day
-/kill @e[type=minecraft:zombie]
-/amber dummy
-/kill @e[type=minecraft:zombie]
 /amber dummy
 /time set day
 /amber dummy
@@ -48,3 +39,12 @@
 /gamemode survival
 /gamemode creative
 /time set day
+/amber bind
+/amber bind AutoClicker G
+/amber bind Velocity A
+/amber bind Velocity G
+/amber bind Velocity g
+/amber bind SafeWalk v
+/amber bind Velocity H
+/amber bind Velocity G
+/amber bind SafeWalk G

@@ -23,15 +23,22 @@
     },
     "done": true
   },
-  "minecraft:adventure/adventuring_time": {
-    "criteria": {
-      "minecraft:forest": "2025-05-24 23:29:49 +0200"
-    },
-    "done": false
-  },
   "minecraft:recipes/misc/diamond_from_blasting_deepslate_diamond_ore": {
     "criteria": {
       "has_deepslate_diamond_ore": "2025-05-24 23:29:48 +0200"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:forest": "2025-05-24 23:29:49 +0200",
+      "minecraft:plains": "2025-06-15 17:20:43 +0200"
+    },
+    "done": false
+  },
+  "minecraft:recipes/misc/mojang_banner_pattern": {
+    "criteria": {
+      "has_enchanted_golden_apple": "2025-06-15 17:20:41 +0200"
     },
     "done": true
   },
