@@ -4,10 +4,14 @@ import com.amberclient.utils.module.Module;
 import com.amberclient.utils.module.ModuleManager;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class UnbindCmd {
+    public static final String MOD_ID = "amberclient-unbindcmd";
+    private static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+
     public static int execute(CommandContext<ServerCommandSource> ctx) {
         try {
             ServerCommandSource source = ctx.getSource();
@@ -16,7 +20,7 @@ public class UnbindCmd {
                 return 0;
             }
 
-            ServerPlayerEntity player = source.getPlayerOrThrow();
+            source.getPlayerOrThrow();
             String moduleName = ctx.getArgument("module", String.class);
 
             ModuleManager moduleManager = ModuleManager.getInstance();
@@ -43,9 +47,7 @@ public class UnbindCmd {
             return 1;
 
         } catch (Exception e) {
-            System.err.println("Error in UnbindCmd: " + e.getMessage());
-            e.printStackTrace();
-
+            LOGGER.error("Error unbinding module: {}", e.getMessage(), e);
             ctx.getSource().sendError(Text.literal("Error unbinding module: " + e.getMessage()));
             return 0;
         }

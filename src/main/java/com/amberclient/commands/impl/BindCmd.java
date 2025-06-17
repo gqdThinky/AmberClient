@@ -4,10 +4,14 @@ import com.amberclient.utils.module.Module;
 import com.amberclient.utils.module.ModuleManager;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class BindCmd {
+    public static final String MOD_ID = "amberclient-bindcmd";
+    private static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+
     public static int execute(CommandContext<ServerCommandSource> ctx) {
         try {
             ServerCommandSource source = ctx.getSource();
@@ -16,7 +20,6 @@ public class BindCmd {
                 return 0;
             }
 
-            ServerPlayerEntity player = source.getPlayerOrThrow();
             String moduleName = ctx.getArgument("module", String.class);
             String keyName = ctx.getArgument("key", String.class).toUpperCase();
 
@@ -42,10 +45,8 @@ public class BindCmd {
             return 1;
 
         } catch (Exception e) {
-            System.err.println("Error in BindCmd: " + e.getMessage());
-            e.printStackTrace();
-
-            ctx.getSource().sendError(Text.literal("Error binding key: " + e.getMessage()));
+            LOGGER.error("Error binding module: {}", e.getMessage(), e);
+            ctx.getSource().sendError(Text.literal("Error binding module: " + e.getMessage()));
             return 0;
         }
     }

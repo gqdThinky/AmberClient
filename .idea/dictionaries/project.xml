@@ -2,10 +2,13 @@
   <dictionary name="project">
     <words>
       <w>amberclient</w>
+      <w>bindcmd</w>
       <w>cactivated</w>
+      <w>cbound</w>
       <w>cdeactivated</w>
       <w>cdisabled</w>
       <w>cenabled</w>
+      <w>cfrom</w>
       <w>desync</w>
       <w>fullbright</w>
       <w>hypixel</w>
@@ -14,6 +17,7 @@
       <w>murderfinder</w>
       <w>nbttooltip</w>
       <w>safewalk</w>
+      <w>unbindcmd</w>
     </words>
   </dictionary>
 </component>

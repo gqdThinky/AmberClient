@@ -44,9 +44,8 @@ public class AutoClicker extends Module implements ConfigurableModule {
 
         ItemStack heldItem = client.player.getMainHandStack();
         if (heldItem.isEmpty()) {
-            // No weapon = bare-handed attack, player's basic attack speed
             double baseAttackSpeed = client.player.getAttributeValue(EntityAttributes.ATTACK_SPEED);
-            return 1000.0 / baseAttackSpeed; // Convert in ms
+            return 1000.0 / baseAttackSpeed;
         }
 
         double attackSpeed = client.player.getAttributeValue(EntityAttributes.ATTACK_SPEED);
@@ -65,7 +64,6 @@ public class AutoClicker extends Module implements ConfigurableModule {
             Entity target = entityHitResult.getEntity();
             long currentTime = System.currentTimeMillis();
 
-            // Determining the time frame to be used
             double delayToUse;
             if (useWeaponSpeed.getBooleanValue()) {
                 delayToUse = getWeaponAttackDelay();
