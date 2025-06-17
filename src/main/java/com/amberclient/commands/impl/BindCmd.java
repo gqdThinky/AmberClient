@@ -8,17 +8,17 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 public class BindCmd {
-    public static int execute(CommandContext<ServerCommandSource> context) {
+    public static int execute(CommandContext<ServerCommandSource> ctx) {
         try {
-            ServerCommandSource source = context.getSource();
+            ServerCommandSource source = ctx.getSource();
             if (!source.isExecutedByPlayer()) {
                 source.sendError(Text.literal("This command can only be executed by a player."));
                 return 0;
             }
 
             ServerPlayerEntity player = source.getPlayerOrThrow();
-            String moduleName = context.getArgument("module", String.class);
-            String keyName = context.getArgument("key", String.class).toUpperCase();
+            String moduleName = ctx.getArgument("module", String.class);
+            String keyName = ctx.getArgument("key", String.class).toUpperCase();
 
             ModuleManager moduleManager = ModuleManager.getInstance();
 
@@ -45,7 +45,7 @@ public class BindCmd {
             System.err.println("Error in BindCmd: " + e.getMessage());
             e.printStackTrace();
 
-            context.getSource().sendError(Text.literal("Error binding key: " + e.getMessage()));
+            ctx.getSource().sendError(Text.literal("Error binding key: " + e.getMessage()));
             return 0;
         }
     }

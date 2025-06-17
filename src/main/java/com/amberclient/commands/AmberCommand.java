@@ -3,6 +3,7 @@ package com.amberclient.commands;
 import com.amberclient.commands.impl.DummyCmd;
 import com.amberclient.commands.impl.TopCmd;
 import com.amberclient.commands.impl.BindCmd;
+import com.amberclient.commands.impl.UnbindCmd;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -32,6 +33,10 @@ public class AmberCommand {
                                             )
                                     )
                             )
+                            .then(CommandManager.literal("unbind")
+                                    .then(CommandManager.argument("module", StringArgumentType.string()).executes(UnbindCmd::execute)
+                                            )
+                                    )
             );
         });
     }
