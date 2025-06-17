@@ -11,6 +11,7 @@
 5. Run Minecraft!
 
 *Press R-SHIFT to open the Click GUI.*
+*Right click on a module to open their settings or click on the gear icon* 
 
 ---
 
