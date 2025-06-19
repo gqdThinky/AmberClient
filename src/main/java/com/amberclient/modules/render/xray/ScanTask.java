@@ -22,13 +22,11 @@ public class ScanTask implements Runnable {
     private final boolean fullScan;
     private final ChunkPos singleChunk;
 
-    // Constructor for full scan
     public ScanTask() {
         this.fullScan = true;
         this.singleChunk = null;
     }
 
-    // Constructor for single chunk scan
     public ScanTask(ChunkPos chunkPos) {
         this.fullScan = false;
         this.singleChunk = chunkPos;
@@ -55,7 +53,7 @@ public class ScanTask implements Runnable {
         }
 
         if (!client.world.isChunkLoaded(chunkPos.x, chunkPos.z)) {
-            return; // Do not scan if chunk is not loaded
+            return;
         }
 
         client.execute(new ScanTask(chunkPos));
@@ -66,7 +64,7 @@ public class ScanTask implements Runnable {
         ClientPlayerEntity clientPlayer = (ClientPlayerEntity) player;
         if (!SettingsStore.getInstance().get().isActive()) return;
         if (renderQueue.stream().anyMatch(e -> e.pos().equals(blockPos))) {
-            runTask(true); // Full scan if a block is broken
+            runTask(true);
         }
     }
 
@@ -110,11 +108,12 @@ public class ScanTask implements Runnable {
         int cX = player.getChunkPos().x;
         int cZ = player.getChunkPos().z;
         int range = SettingsStore.getInstance().get().getHalfRange();
+        boolean exposedOnly = SettingsStore.getInstance().get().isExposedOnly();
 
         for (int i = cX - range; i <= cX + range; i++) {
             for (int j = cZ - range; j <= cZ + range; j++) {
                 if (!world.isChunkLoaded(i, j)) {
-                    continue; // Skip unloaded chunks
+                    continue;
                 }
                 int chunkStartX = i << 4;
                 int chunkStartZ = j << 4;
@@ -125,7 +124,9 @@ public class ScanTask implements Runnable {
                             BlockPos pos = new BlockPos(k, m, l);
                             BasicColor color = isValidBlock(pos, world, blocks);
                             if (color != null) {
-                                renderQueue.add(new BlockPosWithColor(pos, color));
+                                if (!exposedOnly || isBlockExposedAndNearSurface(pos, world)) {
+                                    renderQueue.add(new BlockPosWithColor(pos, color));
+                                }
                             }
                         }
                     }
@@ -153,6 +154,7 @@ public class ScanTask implements Runnable {
         final Set<BlockPosWithColor> renderQueue = new HashSet<>();
         int chunkStartX = singleChunk.x << 4;
         int chunkStartZ = singleChunk.z << 4;
+        boolean exposedOnly = SettingsStore.getInstance().get().isExposedOnly();
 
         for (int k = chunkStartX; k < chunkStartX + 16; k++) {
             for (int l = chunkStartZ; l < chunkStartZ + 16; l++) {
@@ -161,7 +163,9 @@ public class ScanTask implements Runnable {
                     BlockPos pos = new BlockPos(k, m, l);
                     BasicColor color = isValidBlock(pos, world, blocks);
                     if (color != null) {
-                        renderQueue.add(new BlockPosWithColor(pos, color));
+                        if (!exposedOnly || isBlockExposedAndNearSurface(pos, world)) {
+                            renderQueue.add(new BlockPosWithColor(pos, color));
+                        }
                     }
                 }
             }
@@ -184,29 +188,10 @@ public class ScanTask implements Runnable {
                 .map(BlockSearchEntry::color)
                 .orElse(null);
 
-        // If no matching block type found, return null
-        if (color == null) {
-            return null;
-        }
-
-        // If exposed only mode is enabled, check if the block is exposed to air
-        if (SettingsStore.getInstance().get().isExposedOnly()) {
-            if (!isBlockExposed(pos, world)) {
-                return null;
-            }
-        }
-
         return color;
     }
 
-    /**
-     * Checks if a block is exposed to air (has at least one air block adjacent to it)
-     * @param pos The position of the block to check
-     * @param world The world instance
-     * @return true if the block is exposed to air, false otherwise
-     */
     private boolean isBlockExposed(BlockPos pos, World world) {
-        // Check all 6 directions (up, down, north, south, east, west)
         BlockPos[] adjacentPositions = {
                 pos.up(),    // Y+1
                 pos.down(),  // Y-1
@@ -218,12 +203,53 @@ public class ScanTask implements Runnable {
 
         for (BlockPos adjacentPos : adjacentPositions) {
             BlockState adjacentState = world.getBlockState(adjacentPos);
-            // Check if adjacent block is air or any transparent block
             if (adjacentState.isAir() || !adjacentState.isOpaque()) {
-                return true; // Block is exposed
+                return true;
             }
         }
 
-        return false; // Block is completely surrounded by solid blocks
+        return false;
+    }
+
+    private boolean isBlockNearSurface(BlockPos pos, World world) {
+        int surfaceY = world.getTopY(Heightmap.Type.WORLD_SURFACE, pos.getX(), pos.getZ());
+        int maxDepth = 10;
+
+        return pos.getY() >= (surfaceY - maxDepth);
+    }
+
+    private boolean isBlockExposedAndNearSurface(BlockPos pos, World world) {
+        if (!isBlockExposed(pos, world)) {
+            return false;
+        }
+
+        int surfaceY = world.getTopY(Heightmap.Type.WORLD_SURFACE, pos.getX(), pos.getZ());
+        int maxDepthFromSurface = 15;
+
+        return pos.getY() >= (surfaceY - maxDepthFromSurface);
+    }
+
+    private boolean isBlockInLargeAirPocket(BlockPos pos, World world) {
+        int airBlockCount = 0;
+        int totalBlocksChecked = 0;
+        int radius = 2;
+
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    if (x == 0 && y == 0 && z == 0) continue;
+
+                    BlockPos checkPos = pos.add(x, y, z);
+                    BlockState state = world.getBlockState(checkPos);
+
+                    if (state.isAir()) {
+                        airBlockCount++;
+                    }
+                    totalBlocksChecked++;
+                }
+            }
+        }
+
+        return (airBlockCount / (double) totalBlocksChecked) > 0.3;
     }
 }
