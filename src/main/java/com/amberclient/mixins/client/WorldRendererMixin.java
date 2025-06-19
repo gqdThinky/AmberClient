@@ -65,11 +65,9 @@ public class WorldRendererMixin {
         MinecraftClient client = MinecraftClient.getInstance();
         Box originalBox = entity.getBoundingBox();
 
-        // Calculate distance to entity
         double distance = client.player.getPos().distanceTo(entity.getPos());
-        if (distance > 4.0) return originalBox; // Avoid expansion at long distances
+        if (distance > 4.0) return originalBox;
 
-        // Calculate angle between player's look direction and entity
         Vec3d playerPos = client.player.getEyePos();
         Vec3d entityPos = entity.getPos().add(0, entity.getHeight() / 2, 0);
         Vec3d lookVec = client.player.getRotationVector();
@@ -82,13 +80,11 @@ public class WorldRendererMixin {
         double baseExpandYUp = Hitbox.getInstance().getExpandYUp();
         double baseExpandZ = Hitbox.getInstance().getExpandZ();
 
-        // Dynamic adjustment based on angle
         double angleFactor = Math.min(1.0, angle / 45.0);
         double expandX = baseExpandX * (0.5 + angleFactor * 0.5);
         double expandYUp = baseExpandYUp * (0.5 + angleFactor * 0.5);
         double expandZ = baseExpandZ * (0.5 + angleFactor * 0.5);
 
-        // Randomization to avoid consistent patterns
         double randomX = (RANDOM.nextDouble() - 0.5) * 0.1;
         double randomY = (RANDOM.nextDouble() - 0.5) * 0.1;
         double randomZ = (RANDOM.nextDouble() - 0.5) * 0.1;
@@ -96,7 +92,6 @@ public class WorldRendererMixin {
         expandYUp += randomY;
         expandZ += randomZ;
 
-        // Ensure values stay within reasonable bounds
         expandX = MathHelper.clamp(expandX, 0.0, 2.0);
         expandYUp = MathHelper.clamp(expandYUp, 0.0, 2.0);
         expandZ = MathHelper.clamp(expandZ, 0.0, 2.0);
@@ -119,7 +114,6 @@ public class WorldRendererMixin {
         float minX = (float) box.minX, minY = (float) box.minY, minZ = (float) box.minZ;
         float maxX = (float) box.maxX, maxY = (float) box.maxY, maxZ = (float) box.maxZ;
 
-        // 12 edges with normals
         vertexConsumer.vertex(entry.getPositionMatrix(), minX, minY, minZ).color(red, green, blue, alpha).normal(0, 1, 0);
         vertexConsumer.vertex(entry.getPositionMatrix(), maxX, minY, minZ).color(red, green, blue, alpha).normal(0, 1, 0);
         vertexConsumer.vertex(entry.getPositionMatrix(), maxX, minY, minZ).color(red, green, blue, alpha).normal(0, 1, 0);

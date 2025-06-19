@@ -177,11 +177,53 @@ public class ScanTask implements Runnable {
         }
 
         BlockState defaultState = state.getBlock().getDefaultState();
-        return blocks.stream()
+        BasicColor color = blocks.stream()
                 .filter(localState -> localState.isDefault() && defaultState == localState.state() ||
                         !localState.isDefault() && state == localState.state())
                 .findFirst()
                 .map(BlockSearchEntry::color)
                 .orElse(null);
+
+        // If no matching block type found, return null
+        if (color == null) {
+            return null;
+        }
+
+        // If exposed only mode is enabled, check if the block is exposed to air
+        if (SettingsStore.getInstance().get().isExposedOnly()) {
+            if (!isBlockExposed(pos, world)) {
+                return null;
+            }
+        }
+
+        return color;
+    }
+
+    /**
+     * Checks if a block is exposed to air (has at least one air block adjacent to it)
+     * @param pos The position of the block to check
+     * @param world The world instance
+     * @return true if the block is exposed to air, false otherwise
+     */
+    private boolean isBlockExposed(BlockPos pos, World world) {
+        // Check all 6 directions (up, down, north, south, east, west)
+        BlockPos[] adjacentPositions = {
+                pos.up(),    // Y+1
+                pos.down(),  // Y-1
+                pos.north(), // Z-1
+                pos.south(), // Z+1
+                pos.east(),  // X+1
+                pos.west()   // X-1
+        };
+
+        for (BlockPos adjacentPos : adjacentPositions) {
+            BlockState adjacentState = world.getBlockState(adjacentPos);
+            // Check if adjacent block is air or any transparent block
+            if (adjacentState.isAir() || !adjacentState.isOpaque()) {
+                return true; // Block is exposed
+            }
+        }
+
+        return false; // Block is completely surrounded by solid blocks
     }
 }

@@ -1,8 +1,3 @@
-/amber dummy
-/time set day
-/amber dummy
-/time set day
-/tellraw @a {"text":"Bonjour !","font":"mymod:custom_font"}
 /tellraw @a {"text":"Bonjour !","font":"amberclient:custom_font"}
 /amber dummy
 /time set day
@@ -48,3 +43,8 @@
 /amber bind SafeWalk G
 /amber unbind SafeWalk
 /gamemode survival
+/amber bind Xray X
+/amber bind XRay X
+/amber bind X-Ray X
+/amber bind X-ray X
+/amber bind X-Ray X

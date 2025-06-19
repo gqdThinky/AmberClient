@@ -1,0 +1,27 @@
+{
+  "minecraft:recipes/misc/diamond_from_smelting_diamond_ore": {
+    "criteria": {
+      "has_diamond_ore": "2025-06-19 13:09:49 +0200"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2025-06-19 13:09:13 +0200"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/diamond_from_blasting_diamond_ore": {
+    "criteria": {
+      "has_diamond_ore": "2025-06-19 13:09:49 +0200"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:plains": "2025-06-19 13:09:14 +0200"
+    },
+    "done": false
+  },
+  "DataVersion": 4189
+}
