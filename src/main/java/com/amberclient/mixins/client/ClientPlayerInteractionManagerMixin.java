@@ -1,7 +1,7 @@
 package com.amberclient.mixins.client;
 
 import com.amberclient.modules.player.FastBreak;
-import com.amberclient.utils.general.BlockUtils; // Ensure this import points to the Kotlin object
+import com.amberclient.utils.general.BlockUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -28,27 +28,24 @@ public class ClientPlayerInteractionManagerMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
-        if (!FastBreak.isFastBreakEnabled) return;
 
+        if (!FastBreak.isFastBreakEnabled()) return;
         FastBreak fastBreak = FastBreak.getInstance();
+
+        if (fastBreak == null) return;
         MinecraftClient client = MinecraftClient.getInstance();
 
-        // Reset block breaking cooldown
         this.blockBreakingCooldown = 0;
 
-        // Skip if in legit mode or block is fully broken
         if (fastBreak.isLegitMode() || this.currentBreakingProgress >= 1.0F) return;
 
-        // Update block tracking for activation chance
         if (!this.currentBreakingPos.equals(lastBlockPos)) {
             lastBlockPos = this.currentBreakingPos;
             fastBreakBlock = random.nextDouble() <= fastBreak.getActivationChance();
         }
 
-        // Skip if block is unbreakable or not selected for fast breaking
         if (BlockUtils.INSTANCE.isUnbreakable(this.currentBreakingPos) || !fastBreakBlock) return;
 
-        // Send block breaking packet to speed up breaking
         Direction direction = client.player.getHorizontalFacing();
         PlayerActionC2SPacket packet = new PlayerActionC2SPacket(
                 PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK,
@@ -57,4 +54,5 @@ public class ClientPlayerInteractionManagerMixin {
         );
         client.getNetworkHandler().sendPacket(packet);
     }
+
 }

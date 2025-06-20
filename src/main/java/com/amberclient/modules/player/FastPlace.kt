@@ -1,8 +1,6 @@
 package com.amberclient.modules.player
 
 import com.amberclient.utils.module.Module
-import net.minecraft.client.MinecraftClient
-import net.minecraft.text.Text
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import kotlin.random.Random
