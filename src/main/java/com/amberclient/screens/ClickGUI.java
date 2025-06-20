@@ -57,13 +57,11 @@ public class ClickGUI extends Screen {
         Map<String, List<Module>> catMap = new HashMap<>();
         ModuleManager.getInstance().getModules().forEach(m -> catMap.computeIfAbsent(m.getCategory(), k -> new ArrayList<>()).add(m));
 
-        // Add non-HUD categories, sorted
         catMap.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals("HUD"))
                 .sorted(Map.Entry.comparingByKey(String.CASE_INSENSITIVE_ORDER))
                 .forEach(entry -> categories.add(new Category(entry.getKey(), entry.getValue().stream().map(ModuleWrapper::new).toList())));
 
-        // Add HUD category at the end if it exists
         List<Module> hudModules = catMap.get("HUD");
         if (hudModules != null && !hudModules.isEmpty()) {
             List<ModuleWrapper> wrappedHudModules = hudModules.stream().map(ModuleWrapper::new).toList();
@@ -149,7 +147,15 @@ public class ClickGUI extends Screen {
         Category cat = categories.get(selectedCat);
         context.drawTextWithShadow(textRenderer, cat.name.toUpperCase(), x, y + 10, ACCENT);
 
+        // Add warning for COMBAT category
+        if (cat.name.equalsIgnoreCase("COMBAT")) {
+            context.drawTextWithShadow(textRenderer, "Use at your own risks", x, y + 25, new Color(255, 0, 0).getRGB());
+        }
+
         int top = y + 30, areaH = h - 40;
+        if (cat.name.equalsIgnoreCase("COMBAT")) {
+            top += 15; // Adjust position to avoid overlap with warning
+        }
         context.enableScissor(x, top, x + w, top + areaH);
 
         int modH = 30, sp = 5, contentH = cat.modules.size() * (modH + sp) - sp;
@@ -443,7 +449,6 @@ public class ClickGUI extends Screen {
         boolean isEnabled() { return module.isEnabled(); }
     }
 
-    // Prevents the Click GUI from being blurred
     @Override
     public void renderBackground(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
         renderInGameBackground(context);
