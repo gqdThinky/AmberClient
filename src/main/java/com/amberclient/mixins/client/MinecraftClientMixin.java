@@ -45,8 +45,13 @@ public class MinecraftClientMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
-        if (FastPlace.isFastPlaceEnabled && ((MinecraftClient) (Object) this).options.useKey.isPressed())
-            this.itemUseCooldown = 0;
+        if (FastPlace.isFastPlaceEnabled && ((MinecraftClient) (Object) this).options.useKey.isPressed()) {
+            int randomDelay = FastPlace.getRandomDelay();
+
+            if (this.itemUseCooldown > randomDelay) {
+                this.itemUseCooldown = randomDelay;
+            }
+        }
     }
 
     @Inject(method = "hasOutline", at = @At("HEAD"), cancellable = true)

@@ -1,0 +1,148 @@
+{
+  "mappings": {
+    "com/amberclient/mixins/amberclient/EntityESPMixin": {
+      "Lnet/minecraft/client/util/math/MatrixStack;pop()V": "Lnet/minecraft/class_4587;method_22909()V",
+      "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V",
+      "updateRenderState*": "Lnet/minecraft/class_922;method_62355(Lnet/minecraft/class_1309;Lnet/minecraft/class_10042;F)V"
+    },
+    "com/amberclient/mixins/amberclient/NoHurtCamMixin": {
+      "tiltViewWhenHurt(Lnet/minecraft/client/util/math/MatrixStack;F)V": "Lnet/minecraft/class_757;method_3198(Lnet/minecraft/class_4587;F)V"
+    },
+    "com/amberclient/mixins/amberclient/VelocityMixin": {
+      "onEntityVelocityUpdate": "Lnet/minecraft/class_634;method_11132(Lnet/minecraft/class_2743;)V"
+    },
+    "com/amberclient/mixins/client/ClientPlayNetworkHandlerMixin": {
+      "onEntityVelocityUpdate": "Lnet/minecraft/class_634;method_11132(Lnet/minecraft/class_2743;)V",
+      "onWorldTimeUpdate": "Lnet/minecraft/class_634;method_11079(Lnet/minecraft/class_2761;)V",
+      "tick": "Lnet/minecraft/class_634;method_18784()V"
+    },
+    "com/amberclient/mixins/client/ClientPlayerInteractionManagerMixin": {
+      "tick": "Lnet/minecraft/class_636;method_2927()V"
+    },
+    "com/amberclient/mixins/client/DoubleSliderCallbacksMixin": {
+      "validate(Ljava/lang/Double;)Ljava/util/Optional;": "Lnet/minecraft/class_7172$class_7177;method_41770(Ljava/lang/Double;)Ljava/util/Optional;"
+    },
+    "com/amberclient/mixins/client/EntityHitboxMixin": {
+      "getBoundingBox": "Lnet/minecraft/class_1297;method_5829()Lnet/minecraft/class_238;"
+    },
+    "com/amberclient/mixins/client/EntityMixin": {
+      "move(Lnet/minecraft/entity/MovementType;Lnet/minecraft/util/math/Vec3d;)V": "Lnet/minecraft/class_1297;method_5784(Lnet/minecraft/class_1313;Lnet/minecraft/class_243;)V"
+    },
+    "com/amberclient/mixins/client/GameRendererMixin": {
+      "updateCrosshairTarget": "Lnet/minecraft/class_757;method_3190(F)V"
+    },
+    "com/amberclient/mixins/client/MinecraftClientMixin": {
+      "doAttack": "Lnet/minecraft/class_310;method_1536()Z",
+      "hasOutline": "Lnet/minecraft/class_310;method_27022(Lnet/minecraft/class_1297;)Z",
+      "tick": "Lnet/minecraft/class_310;method_1574()V"
+    },
+    "com/amberclient/mixins/client/WorldRendererMixin": {
+      "render": "Lnet/minecraft/class_761;method_22710(Lnet/minecraft/class_9922;Lnet/minecraft/class_9779;ZLnet/minecraft/class_4184;Lnet/minecraft/class_757;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"
+    },
+    "com/amberclient/mixins/murdererfinder/ArmorStandEntityMixin": {
+      "setRightArmRotation": "Lnet/minecraft/class_1531;method_6925(Lnet/minecraft/class_2379;)V"
+    },
+    "com/amberclient/mixins/murdererfinder/ClientPlayNetworkHandlerMixin": {
+      "onPlayerAbilities": "Lnet/minecraft/class_634;method_11154(Lnet/minecraft/class_2696;)V"
+    },
+    "com/amberclient/mixins/murdererfinder/EntityMixin": {
+      "getTeamColorValue": "Lnet/minecraft/class_1297;method_22861()I"
+    },
+    "com/amberclient/mixins/murdererfinder/InGameHudMixin": {
+      "setTitle": "Lnet/minecraft/class_329;method_34004(Lnet/minecraft/class_2561;)V"
+    },
+    "com/amberclient/mixins/murdererfinder/LivingEntityRendererMixin": {
+      "hasLabel(Lnet/minecraft/entity/LivingEntity;D)Z": "Lnet/minecraft/class_922;method_4055(Lnet/minecraft/class_1309;D)Z"
+    },
+    "com/amberclient/mixins/murdererfinder/MinecraftClientMixin": {
+      "hasOutline": "Lnet/minecraft/class_310;method_27022(Lnet/minecraft/class_1297;)Z",
+      "joinWorld": "Lnet/minecraft/class_310;method_1481(Lnet/minecraft/class_638;Lnet/minecraft/class_434$class_9678;)V",
+      "setWorld": "Lnet/minecraft/class_310;method_18097(Lnet/minecraft/class_638;)V"
+    },
+    "com/amberclient/mixins/murdererfinder/PlayerEntityMixin": {
+      "<init>": "Lnet/minecraft/class_1657;<init>(Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;FLcom/mojang/authlib/GameProfile;)V",
+      "getEquippedStack": "Lnet/minecraft/class_1657;method_6118(Lnet/minecraft/class_1304;)Lnet/minecraft/class_1799;",
+      "tick": "Lnet/minecraft/class_1657;method_5773()V"
+    },
+    "com/amberclient/mixins/murdererfinder/PlayerInventoryMixin": {
+      "setStack": "Lnet/minecraft/class_1661;method_5447(ILnet/minecraft/class_1799;)V"
+    },
+    "com/amberclient/mixins/murdererfinder/ScoreboardMixin": {
+      "addObjective": "Lnet/minecraft/class_269;method_1168(Ljava/lang/String;Lnet/minecraft/class_274;Lnet/minecraft/class_2561;Lnet/minecraft/class_274$class_275;ZLnet/minecraft/class_9022;)Lnet/minecraft/class_266;"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "com/amberclient/mixins/amberclient/EntityESPMixin": {
+        "Lnet/minecraft/client/util/math/MatrixStack;pop()V": "Lnet/minecraft/class_4587;method_22909()V",
+        "render": "Lnet/minecraft/class_922;method_4054(Lnet/minecraft/class_10042;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;I)V",
+        "updateRenderState*": "Lnet/minecraft/class_922;method_62355(Lnet/minecraft/class_1309;Lnet/minecraft/class_10042;F)V"
+      },
+      "com/amberclient/mixins/amberclient/NoHurtCamMixin": {
+        "tiltViewWhenHurt(Lnet/minecraft/client/util/math/MatrixStack;F)V": "Lnet/minecraft/class_757;method_3198(Lnet/minecraft/class_4587;F)V"
+      },
+      "com/amberclient/mixins/amberclient/VelocityMixin": {
+        "onEntityVelocityUpdate": "Lnet/minecraft/class_634;method_11132(Lnet/minecraft/class_2743;)V"
+      },
+      "com/amberclient/mixins/client/ClientPlayNetworkHandlerMixin": {
+        "onEntityVelocityUpdate": "Lnet/minecraft/class_634;method_11132(Lnet/minecraft/class_2743;)V",
+        "onWorldTimeUpdate": "Lnet/minecraft/class_634;method_11079(Lnet/minecraft/class_2761;)V",
+        "tick": "Lnet/minecraft/class_634;method_18784()V"
+      },
+      "com/amberclient/mixins/client/ClientPlayerInteractionManagerMixin": {
+        "tick": "Lnet/minecraft/class_636;method_2927()V"
+      },
+      "com/amberclient/mixins/client/DoubleSliderCallbacksMixin": {
+        "validate(Ljava/lang/Double;)Ljava/util/Optional;": "Lnet/minecraft/class_7172$class_7177;method_41770(Ljava/lang/Double;)Ljava/util/Optional;"
+      },
+      "com/amberclient/mixins/client/EntityHitboxMixin": {
+        "getBoundingBox": "Lnet/minecraft/class_1297;method_5829()Lnet/minecraft/class_238;"
+      },
+      "com/amberclient/mixins/client/EntityMixin": {
+        "move(Lnet/minecraft/entity/MovementType;Lnet/minecraft/util/math/Vec3d;)V": "Lnet/minecraft/class_1297;method_5784(Lnet/minecraft/class_1313;Lnet/minecraft/class_243;)V"
+      },
+      "com/amberclient/mixins/client/GameRendererMixin": {
+        "updateCrosshairTarget": "Lnet/minecraft/class_757;method_3190(F)V"
+      },
+      "com/amberclient/mixins/client/MinecraftClientMixin": {
+        "doAttack": "Lnet/minecraft/class_310;method_1536()Z",
+        "hasOutline": "Lnet/minecraft/class_310;method_27022(Lnet/minecraft/class_1297;)Z",
+        "tick": "Lnet/minecraft/class_310;method_1574()V"
+      },
+      "com/amberclient/mixins/client/WorldRendererMixin": {
+        "render": "Lnet/minecraft/class_761;method_22710(Lnet/minecraft/class_9922;Lnet/minecraft/class_9779;ZLnet/minecraft/class_4184;Lnet/minecraft/class_757;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"
+      },
+      "com/amberclient/mixins/murdererfinder/ArmorStandEntityMixin": {
+        "setRightArmRotation": "Lnet/minecraft/class_1531;method_6925(Lnet/minecraft/class_2379;)V"
+      },
+      "com/amberclient/mixins/murdererfinder/ClientPlayNetworkHandlerMixin": {
+        "onPlayerAbilities": "Lnet/minecraft/class_634;method_11154(Lnet/minecraft/class_2696;)V"
+      },
+      "com/amberclient/mixins/murdererfinder/EntityMixin": {
+        "getTeamColorValue": "Lnet/minecraft/class_1297;method_22861()I"
+      },
+      "com/amberclient/mixins/murdererfinder/InGameHudMixin": {
+        "setTitle": "Lnet/minecraft/class_329;method_34004(Lnet/minecraft/class_2561;)V"
+      },
+      "com/amberclient/mixins/murdererfinder/LivingEntityRendererMixin": {
+        "hasLabel(Lnet/minecraft/entity/LivingEntity;D)Z": "Lnet/minecraft/class_922;method_4055(Lnet/minecraft/class_1309;D)Z"
+      },
+      "com/amberclient/mixins/murdererfinder/MinecraftClientMixin": {
+        "hasOutline": "Lnet/minecraft/class_310;method_27022(Lnet/minecraft/class_1297;)Z",
+        "joinWorld": "Lnet/minecraft/class_310;method_1481(Lnet/minecraft/class_638;Lnet/minecraft/class_434$class_9678;)V",
+        "setWorld": "Lnet/minecraft/class_310;method_18097(Lnet/minecraft/class_638;)V"
+      },
+      "com/amberclient/mixins/murdererfinder/PlayerEntityMixin": {
+        "<init>": "Lnet/minecraft/class_1657;<init>(Lnet/minecraft/class_1937;Lnet/minecraft/class_2338;FLcom/mojang/authlib/GameProfile;)V",
+        "getEquippedStack": "Lnet/minecraft/class_1657;method_6118(Lnet/minecraft/class_1304;)Lnet/minecraft/class_1799;",
+        "tick": "Lnet/minecraft/class_1657;method_5773()V"
+      },
+      "com/amberclient/mixins/murdererfinder/PlayerInventoryMixin": {
+        "setStack": "Lnet/minecraft/class_1661;method_5447(ILnet/minecraft/class_1799;)V"
+      },
+      "com/amberclient/mixins/murdererfinder/ScoreboardMixin": {
+        "addObjective": "Lnet/minecraft/class_269;method_1168(Ljava/lang/String;Lnet/minecraft/class_274;Lnet/minecraft/class_2561;Lnet/minecraft/class_274$class_275;ZLnet/minecraft/class_9022;)Lnet/minecraft/class_266;"
+      }
+    }
+  }
+}
