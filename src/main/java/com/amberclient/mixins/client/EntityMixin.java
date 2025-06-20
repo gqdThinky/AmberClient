@@ -36,13 +36,11 @@ public abstract class EntityMixin {
             argsOnly = true
     )
     private net.minecraft.util.math.Vec3d modifyMovementVector(net.minecraft.util.math.Vec3d movement) {
-        // Checks whether the entity is a player and whether SafeWalk is activated or the player is sneaking
         if ((Entity) (Object) this instanceof PlayerEntity player && (SafeWalk.safewalk || isSneaking()) && isOnGround()) {
             double x = movement.x;
             double z = movement.z;
             double step = 0.05D;
 
-            // Checks whether X-shift would cause a fall
             while (x != 0.0D && isSafeToMove(player, x, 0.0D)) {
                 if (x < step && x >= -step) {
                     x = 0.0D;
@@ -53,7 +51,6 @@ public abstract class EntityMixin {
                 }
             }
 
-            // Checks whether Z-shift would cause a fall
             while (z != 0.0D && isSafeToMove(player, 0.0D, z)) {
                 if (z < step && z >= -step) {
                     z = 0.0D;
@@ -64,7 +61,6 @@ public abstract class EntityMixin {
                 }
             }
 
-            // Checks whether X & Z shift would cause a fall
             while (x != 0.0D && z != 0.0D && isSafeToMove(player, x, z)) {
                 if (x < step && x >= -step) {
                     x = 0.0D;
@@ -87,12 +83,13 @@ public abstract class EntityMixin {
         return movement;
     }
 
+    @Unique
     private boolean isSafeToMove(PlayerEntity player, double x, double z) {
-        // Move the collision box down to check for a solid block
-        Box originalBox = getBoundingBox();
-        Box offsetBox = originalBox.offset(x, -1.0D, z);
+        double edgeDistance = SafeWalk.currentEdgeDistance;
 
-        // Check the four corners of the collision box at ground level
+        Box originalBox = getBoundingBox();
+        Box offsetBox = originalBox.offset(x, -edgeDistance, z);
+
         double[] xCorners = {offsetBox.minX, offsetBox.maxX};
         double[] zCorners = {offsetBox.minZ, offsetBox.maxZ};
 
@@ -121,23 +118,18 @@ public abstract class EntityMixin {
             return false;
         }
 
-        // Get the collision shape of the block
         VoxelShape shape = state.getCollisionShape(world, pos);
 
         if (shape.isEmpty()) {
             return false;
         }
 
-        // Check if the shape occupies the entire space of a block (from 0 to 1 on all three axes)
         Box boundingBox = shape.getBoundingBox();
 
-        // A full block must have a height of at least 0.9 (to handle small inaccuracies)
-        // and cover most of the horizontal surface
         boolean isFullHeight = boundingBox.getLengthY() >= 0.9;
         boolean isFullWidth = boundingBox.getLengthX() >= 0.9;
         boolean isFullDepth = boundingBox.getLengthZ() >= 0.9;
 
-        // The block must also start near the bottom (y close to 0) to be considered as support
         boolean startsAtBottom = boundingBox.minY <= 0.1;
 
         return isFullHeight && isFullWidth && isFullDepth && startsAtBottom;
