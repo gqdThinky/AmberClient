@@ -15,11 +15,11 @@
 	"icon": "assets/amber-client/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": [{
-			"adapter": "kotlin",
-			"value": "com.amberclient.AmberClient"
-		},
-			"com.amberclient.AmberClient"
+		"main": [
+			{
+				"adapter": "kotlin",
+				"value": "com.amberclient.AmberClient"
+			}
 		],
 		"fabric-datagen": [
 			"com.amberclient.AmberClientDataGenerator"
