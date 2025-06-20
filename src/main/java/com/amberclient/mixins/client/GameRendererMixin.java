@@ -21,4 +21,6 @@ public class GameRendererMixin {
     private void afterUpdateCrosshairTarget(float tickDelta, CallbackInfo ci) {
         Hitbox.setCalculatingTarget(false);
     }
+
+
 }

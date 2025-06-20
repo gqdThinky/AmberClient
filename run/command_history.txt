@@ -1,4 +1,3 @@
-/tellraw @a {"text":"Bonjour !","font":"amberclient:custom_font"}
 /amber dummy
 /time set day
 /gamemode survival
@@ -48,3 +47,4 @@
 /amber bind X-Ray X
 /amber bind X-ray X
 /amber bind X-Ray X
+/time set night

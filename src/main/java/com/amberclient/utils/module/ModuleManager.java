@@ -14,6 +14,7 @@ import com.amberclient.modules.player.FastBreak;
 import com.amberclient.modules.player.FastPlace;
 import com.amberclient.modules.render.EntityESP;
 import com.amberclient.modules.render.Fullbright;
+import com.amberclient.modules.render.NoHurtCam;
 import com.amberclient.modules.render.xray.Xray;
 import com.amberclient.utils.keybinds.CustomKeybindManager;
 import com.amberclient.utils.keybinds.KeybindsManager;
@@ -49,6 +50,7 @@ public class ModuleManager {
         registerModule(new MMFinder());
         registerModule(new AutoClutch());
         registerModule(new Velocity());
+        registerModule(new NoHurtCam());
     }
 
     public static ModuleManager getInstance() {

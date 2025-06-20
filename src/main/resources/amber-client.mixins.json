@@ -19,6 +19,7 @@
   ],
   "client": [
     "amberclient.EntityESPMixin",
+    "amberclient.NoHurtCamMixin",
     "client.ClientPlayerInteractionManagerMixin",
     "client.ClientPlayNetworkHandlerMixin",
     "murdererfinder.ClientPlayNetworkHandlerMixin",
