@@ -221,7 +221,10 @@ public class ClickGUI extends Screen {
                 context.fill(p.x + p.width - 100, setY + 10, p.x + p.width - 20, setY + 20, new Color(100, 100, 100).getRGB());
                 context.fill(p.x + p.width - 100, setY + 10, p.x + p.width - 100 + (int)(80 * (v - min) / (max - min)), setY + 20, ACCENT);
                 drawBorder(context, p.x + p.width - 100, setY + 10, 80, 10);
-                context.drawTextWithShadow(textRenderer, String.format("%.2f", v), p.x + p.width - 15, setY + 11, TEXT);
+                String valueText = String.format("%.2f", v);
+                int textWidth = textRenderer.getWidth(valueText);
+                int textX = Math.max(p.x + 10, p.x + p.width - 100 - textWidth - 5);
+                context.drawTextWithShadow(textRenderer, valueText, textX, setY + 11, TEXT);
             }
         }
 
